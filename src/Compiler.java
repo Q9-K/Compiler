@@ -1,5 +1,6 @@
+import q9k.buaa.INIT.Config;
 import q9k.buaa.INIT.Input;
-import q9k.buaa.Lexer.Lexer;
+import q9k.buaa.frontend.Lexer.LexerHandler;
 
 import java.io.IOException;
 
@@ -9,16 +10,8 @@ import java.io.IOException;
  */
 public class Compiler {
     public static void main(String[] args) throws IOException {
-        String file_path = "testfile.txt";
-        StringBuffer source_code;
-        Lexer lexer;
-        if(args.length>0){
-            file_path=args[0];
-        }
-        Input input = new Input(file_path);
-        source_code = input.transferToStream();
-        lexer = Lexer.getLexer(source_code);
-        lexer.run();
+        System.out.println("Welcome to use Q9K Compiler");
+        Config.init();
         System.exit(0);
     }
 }

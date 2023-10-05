@@ -1,4 +1,4 @@
-package q9k.buaa.Lexer;
+package q9k.buaa.frontend;
 
 import java.util.HashMap;
 
@@ -6,7 +6,7 @@ import java.util.HashMap;
  * @author Q9K
  * @date 2023/09/20
  */
-public enum LexType {
+public enum TokenType {
     //TK means token
     MAINTK("main"),
     CONSTTK("const"),
@@ -48,37 +48,37 @@ public enum LexType {
     STRCON;
 
 
-    private static final HashMap<String, LexType> reverseWords = new HashMap<>();
+    public static final HashMap<String, TokenType> reverse_words = new HashMap<>();
     private final String name;
 
     static {
-        for (LexType lextype : LexType.values()) {
-            if(lextype.name!=null){
-                reverseWords.put(lextype.name, lextype);
+        for (TokenType tokenType : TokenType.values()) {
+            if(tokenType.name!=null){
+                reverse_words.put(tokenType.name, tokenType);
             }
         }
     }
 
-    LexType() {
+    TokenType() {
         this.name = null;
     }
 
-    LexType(String name) {
+    TokenType(String name) {
         this.name = name;
     }
 
-    public static LexType getLextype(StringBuffer token) {
+    public static TokenType getTokenType(StringBuffer token) {
         String key = token.toString();
-        if (reverseWords.containsKey(key)) {
-            return reverseWords.get(key);
+        if (reverse_words.containsKey(key)) {
+            return reverse_words.get(key);
         } else {
             if (key.startsWith("\"")&&key.endsWith("\"")) {
-                return LexType.STRCON;
+                return TokenType.STRCON;
             } else if (isINTCON(key)) {
-                return LexType.INTCON;
+                return TokenType.INTCON;
             }
         }
-        return LexType.IDENFR;
+        return TokenType.IDENFR;
     }
 
     private static boolean isINTCON(String token) {

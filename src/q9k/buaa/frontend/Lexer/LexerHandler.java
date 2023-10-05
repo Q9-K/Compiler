@@ -1,36 +1,46 @@
-package q9k.buaa.Lexer;
+package q9k.buaa.frontend.Lexer;
 
+import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
-import q9k.buaa.INIT.LexerOutput;
+import q9k.buaa.Error.ErrorType;
+import q9k.buaa.INIT.Config;
+import q9k.buaa.INIT.Output;
+import q9k.buaa.frontend.Token;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Lexer {
+public class LexerHandler {
     private int line_number = 1;
     private int number_value = 0;
-    private StringBuffer token=new StringBuffer();
+    private final StringBuffer token_content =new StringBuffer();
     private final StringBuffer file_content;
-    private LexType lexType;
     private Character character = ' ';
-    private int curpos = 0;
+    private int cur_pos = 0;
 
-    private ErrorHandler errorHandler = ErrorHandler.getInstance();
-    private LexerOutput lexerOutput = LexerOutput.getInstance("output.txt");
-    private static Lexer lexer;
+    private List<Token> token_stream = new ArrayList<>();
+    private final ErrorHandler errorHandler = ErrorHandler.getInstance();
+    private static LexerHandler lexerHandler;
 
-    private Lexer(StringBuffer file_content) throws IOException {
+    private LexerHandler(StringBuffer file_content) throws IOException {
         file_content.append('\n');
         this.file_content = file_content;
     }
-
-    //单例模式创建
-    public static synchronized Lexer getLexer(StringBuffer file_content) throws IOException {
-        if (lexer == null) {
-            lexer = new Lexer(file_content);
+    public static synchronized LexerHandler getInstance() throws IOException {
+        if (lexerHandler == null) {
+            System.out.println("something wrong happened at lexer init!");
+            System.exit(-1);
         }
-        return lexer;
+        return lexerHandler;
+    }
+
+    public static synchronized LexerHandler getInstance(StringBuffer file_content) throws IOException {
+        if (lexerHandler == null) {
+            lexerHandler = new LexerHandler(file_content);
+        }
+        return lexerHandler;
     }
 
 
@@ -41,7 +51,7 @@ public class Lexer {
         System.out.println("lexer analyzer finished!");
     }
 
-    private int next() throws IOException {
+    private void next() throws IOException {
         clearToken();
         clearCharacter();
         while (isBlank(character)&&!isEND()) {
@@ -50,30 +60,22 @@ public class Lexer {
             }
             getchar();
         }
-        if(isEND()) return 0;
+        if(isEND()) return;
         //处理注释
         if (character.equals('/')) {
-            catToken();
             getchar();
             //多行注释
             if (character.equals('*')) {
-                int count = 0;
-                while(!token.toString().endsWith("*/")&&!isEND()){
-                    if(character.equals('*')) count++;
+                getchar();
+                do{
+                    catToken();
+                    getchar();
                     if(character.equals('\n')){
                         this.line_number++;
                     }
-                    catToken();
-                    getchar();
-                }
+                } while(!token_content.toString().endsWith("*/")&&!isEND());
                 retract();
-                if(count<2){
-                    errorHandler.handle(line_number);
-                    return -1;
-                }
-                else{
-                    return 0;
-                }
+                return;
             }
             //单行注释
             else if (character.equals('/')) {
@@ -81,12 +83,11 @@ public class Lexer {
                     getchar();
                 }
                 retract();
-                return 0;
+                return;
             }
             //div
             else{
                 retract();
-                getLexType();
             }
         }
         //<,=,>情况
@@ -102,18 +103,6 @@ public class Lexer {
                 getchar();
             }
             retract();
-            String token_string = token.toString();
-            if (token_string.equals("=") || token_string.equals("==") ||
-                    token_string.equals(">") || token_string.equals(">=") ||
-                    token_string.equals("<") || token_string.equals("<=") ||
-                    token_string.equals("!") || token_string.equals("!=") ||
-                    token_string.equals("||") || token_string.equals("&&")
-            ) {
-                getLexType();
-            } else {
-                errorHandler.handle(line_number);
-                return -1;
-            }
         }
         //数字
         else if (Character.isDigit(character)) {
@@ -122,7 +111,6 @@ public class Lexer {
                 getchar();
             }
             retract();
-            getLexType();
             getNumber_value();
         }
         //标识符
@@ -132,12 +120,10 @@ public class Lexer {
                 getchar();
             }
             retract();
-            getLexType();
         }
         //单字符
         else if (isSingleSymbol(character)) {
             catToken();
-            getLexType();
         }
         //字符串
         else if(character.equals('"')){
@@ -148,49 +134,43 @@ public class Lexer {
                 getchar();
             }
             catToken();
-            getLexType();
+            if(!token_content.toString().matches("\"(%d|[ -!]|[(-~]|\\n)*\"")){
+                errorHandler.addError(new Error(ErrorType.ILLEGALSYMBOL,line_number));
+            }
         }
-        lexerOutput.write(new StringBuffer(this.lexType.name()).append(' ').append(getToken()).append('\n'));
-        return 0;
+        Token token = new Token(token_content, line_number);
+        token_stream.add(token);
     }
 
-    private StringBuffer getToken() {
-        return this.token;
+    private Character getchar() {
+        if (!isEND()) {
+            this.character = this.file_content.charAt(this.cur_pos);
+            this.cur_pos++;
+        } else {
+            this.character = ' ';
+        }
+        return this.character;
     }
 
     private void clearCharacter(){
         this.character = ' ';
     }
     private void clearToken() {
-        this.token.delete(0, this.token.length());
+        this.token_content.delete(0, this.token_content.length());
     }
 
     private void retract() {
-        if (this.curpos > 0) {
-            this.curpos--;
+        if (this.cur_pos > 0) {
+            this.cur_pos--;
         }
     }
 
     public boolean isEND() {
-        return this.curpos == (this.file_content.length());
+        return this.cur_pos == (this.file_content.length());
     }
 
     private void catToken() {
-        this.token.append(character);
-    }
-
-    private void catToken(Character character) {
-        this.token.append(character);
-    }
-
-    private Character getchar() {
-        if (!isEND()) {
-            this.character = this.file_content.charAt(this.curpos);
-            this.curpos++;
-        } else {
-            this.character = ' ';
-        }
-        return this.character;
+        this.token_content.append(character);
     }
 
     private boolean isBlank(Character character) {
@@ -200,16 +180,9 @@ public class Lexer {
         return false;
     }
 
-    private LexType getLexType() {
-        if (!this.token.isEmpty()) {
-            this.lexType = LexType.getLextype(this.token);
-        }
-        return this.lexType;
-    }
-
     private int getNumber_value() {
-        if (!token.isEmpty() && token.toString().matches("\\d+")) {
-            this.number_value = Integer.parseInt(token.toString());
+        if (!token_content.isEmpty() && token_content.toString().matches("\\d+")) {
+            this.number_value = Integer.parseInt(token_content.toString());
         }
         return this.number_value;
     }
