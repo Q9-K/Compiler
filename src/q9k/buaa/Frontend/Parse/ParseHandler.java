@@ -568,11 +568,22 @@ public class ParseHandler {
     | 'printf''('FormatString{','Exp}')'';' // 1.有Exp 2.无Exp
      **/
     private Syntax parseStmt(){
-        int condition;
+        Syntax l_val;
+        Token assign_token;
+        Syntax exp;
+        Token simicn_token;
+        Syntax block;
+        Token if_token;
+        Token lparent_token;
+        Syntax cond;
+        Token rparent_token;
+        Syntax stmt;
+        Token else_token;
+        Syntax stmt2;
+        Token for_token;
 
 
         return new Stmt();
-
     }
     //一元表达式 UnaryExp → PrimaryExp | Ident '(' [FuncRParams] ')' | UnaryOp UnaryExp
     private Syntax parseUnaryExp(){

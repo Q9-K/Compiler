@@ -25,7 +25,7 @@ public class Compiler {
         //获取词法单元流
         List<Token> token_stream = LexerHandler.getInstance().getToken_stream();
         //语法分析
-//        ParseHandler.getInstance(token_stream).run();
+        ParseHandler.getInstance(token_stream).run();
         //错误处理
 //        ErrorHandler.getInstance().run();
         //语法树
