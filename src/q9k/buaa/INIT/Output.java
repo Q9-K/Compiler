@@ -6,9 +6,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 public class Output {
-    private final String file_path;
+    private String file_path;
     private static Output output;
-    private boolean writAble = true;
 
     private Output(String file_path) throws IOException {
         this.file_path = file_path;
@@ -32,13 +31,10 @@ public class Output {
     }
     public void write(StringBuffer log) throws IOException {
         //当文件不存在时创建，同时使用追加输出选项
-        if(writAble){
-            Files.write(Paths.get(this.file_path),log.toString().getBytes(), StandardOpenOption.APPEND);
-        }
+        Files.write(Paths.get(this.file_path),log.toString().getBytes(), StandardOpenOption.APPEND);
     }
 
-    public void setWritAble(boolean writAble){
-        this.writAble = writAble;
+    public void setFile_path(String file_path) {
+        this.file_path = file_path;
     }
-
 }

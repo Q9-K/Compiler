@@ -1,6 +1,5 @@
 package q9k.buaa.INIT;
-
-import q9k.buaa.frontend.Lexer.LexerHandler;
+import q9k.buaa.Error.ErrorHandler;
 
 import java.io.IOException;
 
@@ -10,6 +9,7 @@ public class Config {
     private static String error_path="error.txt";
     public static boolean lexer_output_open = false;
     public static boolean parser_output_open = false;
+    public static boolean error_output_open = false;
     public static String getInput_path() {
         return input_path;
     }
@@ -36,20 +36,15 @@ public class Config {
     public static void init() throws IOException {
         Input input = Input.getInstance(input_path);
         Output output = Output.getInstance(output_path);
-    }
-    public static void init(String input_path) throws IOException {
-        Input input = Input.getInstance(input_path);
-        Output output = Output.getInstance(output_path);
-    }
-    public static void init(String input_path,String output_path) throws IOException {
-        Input input = Input.getInstance(input_path);
-        Output output = Output.getInstance(output_path);
-        LexerHandler lexerHandler = LexerHandler.getInstance(input.transferToStream());
+        ErrorHandler errorHandler = ErrorHandler.getInstance();
     }
     public static void setLexer_output_open(boolean lexer_output_open) {
         Config.lexer_output_open = lexer_output_open;
     }
     public static void setParser_output_open(boolean parser_output_open) {
         Config.parser_output_open = parser_output_open;
+    }
+    public static void setError_output_open(boolean error_output_open){
+        Config.error_output_open = error_output_open;
     }
 }

@@ -5,7 +5,7 @@ import java.util.HashMap;
 public enum ErrorType {
     ILLEGALSYMBOL("a"),//符号非法
     MISSINGSEMICN("i"),
-    MISSINGRPARENT("k"),
+    MISSINGRPARENT("j"),
     MISSINGRBRACK("k"),
     REVERSERROR("reverse_error_code");
 

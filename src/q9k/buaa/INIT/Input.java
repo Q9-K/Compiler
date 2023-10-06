@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 
 public class Input {
     private String file_path;
-    private StringBuffer file_content;
+    private StringBuffer character_stream;
     private static Input input;
     public Input(String file_path)
     {
@@ -29,14 +29,17 @@ public class Input {
         return input;
     }
 
-    public StringBuffer transferToStream() {
+    public StringBuffer getCharacterStream() {
         try {
-            this.file_content = new StringBuffer(new String(Files.readAllBytes(Paths.get(this.file_path))));
+            this.character_stream = new StringBuffer(new String(Files.readAllBytes(Paths.get(this.file_path))));
         } catch (IOException e) {
             System.out.println("input_file not exists!");
         }
-        return this.file_content;
+        return this.character_stream;
     }
 
+    public void setFile_path(String file_path) {
+        this.file_path = file_path;
+    }
 }
 

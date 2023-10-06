@@ -23,4 +23,8 @@ public class ErrorHandler {
     public void addError(Error error){
         errors.add(error);
     }
+
+    public void run(){
+        System.out.println("reverse interface for error_handle");
+    }
 }
