@@ -29,9 +29,14 @@ public class Output {
         }
         return output;
     }
-    public void write(StringBuffer log) throws IOException {
+    public <T> void write(T log) throws IOException {
         //当文件不存在时创建，同时使用追加输出选项
-        Files.write(Paths.get(this.file_path),log.toString().getBytes(), StandardOpenOption.APPEND);
+        if(log.getClass().equals(StringBuffer.class)){
+            Files.write(Paths.get(this.file_path),log.toString().getBytes(), StandardOpenOption.APPEND);
+        }
+        else if(log.getClass().equals(String.class)){
+            Files.write(Paths.get(this.file_path),((String) log).getBytes(),StandardOpenOption.APPEND);
+        }
     }
 
     public void setFile_path(String file_path) {

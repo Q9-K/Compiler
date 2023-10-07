@@ -7,6 +7,7 @@ import q9k.buaa.Frontend.Token.Token;
 import q9k.buaa.Frontend.Token.TokenType;
 import q9k.buaa.Utils.Triple;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,14 +28,27 @@ public class FuncFParam implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        b_type.print();
+        ident.print();
+        if(lbrack!=null){
+            lbrack.print();
+            rbrack.print();
+        }
+        for(Triple<Token, Syntax, Token> item : list){
+            item.getFirst().print();
+            item.getSecond().print();
+            item.getThird().print();
+        }
+        print_ast_name(FuncFParam.class);
     }
 
     @Override
     public void handleError() {
-        if(!(lbrack.getTokenType().equals(TokenType.LBRACK)&&rbrack.getTokenType().equals(TokenType.RBRACK))){
-            ErrorHandler.getInstance().addError(new Error(ErrorType.MISSINGRBRACK, rbrack.getLine_number()));
+        if(lbrack!=null){
+            if(!(lbrack.getTokenType().equals(TokenType.LBRACK)&&rbrack.getTokenType().equals(TokenType.RBRACK))){
+                ErrorHandler.getInstance().addError(new Error(ErrorType.MISSINGRBRACK, rbrack.getLine_number()));
+            }
         }
     }
 }

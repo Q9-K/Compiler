@@ -1,5 +1,7 @@
 package q9k.buaa.Frontend.AST;
 
+import java.io.IOException;
+
 public class Exp implements Syntax{
     private Syntax add_exp;
 
@@ -10,8 +12,9 @@ public class Exp implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        add_exp.print();
+        print_ast_name(Exp.class);
     }
 
     @Override

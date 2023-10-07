@@ -1,6 +1,8 @@
 package q9k.buaa.Frontend.AST;
 
-public class BlockItem implements Syntax{
+import java.io.IOException;
+
+public class BlockItem implements Syntax {
     private Syntax decl;
     private Syntax stmt;
 
@@ -11,8 +13,12 @@ public class BlockItem implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        if (decl != null) {
+            decl.print();
+        } else {
+            stmt.print();
+        }
     }
 
     @Override

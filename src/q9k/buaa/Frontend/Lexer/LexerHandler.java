@@ -39,6 +39,10 @@ public class LexerHandler {
         return lexerHandler;
     }
 
+    public static void clearInstance(){
+        lexerHandler = null;
+    }
+
     public List<Token> getToken_stream(){
         return this.token_stream;
     }
@@ -48,9 +52,8 @@ public class LexerHandler {
             next();
         }
         if(Config.lexer_output_open){
-            Output output = Output.getInstance();
             for (Token token : token_stream) {
-                token.write();
+                token.print();
             }
         }
         System.out.println("lexer analyzer finished!");

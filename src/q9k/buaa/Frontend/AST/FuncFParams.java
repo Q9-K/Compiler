@@ -3,6 +3,7 @@ package q9k.buaa.Frontend.AST;
 import q9k.buaa.Frontend.Token.Token;
 import q9k.buaa.Utils.Tuple;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,8 +18,13 @@ public class FuncFParams implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        func_f_param.print();
+        for(Tuple<Token, Syntax> item : list){
+            item.getFirst().print();
+            item.getSecond().print();
+        }
+        print_ast_name(FuncFParams.class);
     }
 
     @Override

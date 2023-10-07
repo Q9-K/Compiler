@@ -6,14 +6,16 @@ import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.Token.Token;
 import q9k.buaa.Frontend.Token.TokenType;
 
+import java.io.IOException;
+
 public class BType implements Syntax {
     private Token int_token;
     public BType(Token int_token){
         this.int_token = int_token;
     }
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        int_token.print();
     }
 
     @Override

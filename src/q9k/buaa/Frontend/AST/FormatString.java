@@ -5,6 +5,8 @@ import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.Token.Token;
 
+import java.io.IOException;
+
 public class FormatString implements Syntax{
     private Token strcon_token;
 
@@ -14,8 +16,8 @@ public class FormatString implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        strcon_token.print();
     }
 
     @Override

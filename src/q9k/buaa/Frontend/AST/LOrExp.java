@@ -1,6 +1,9 @@
 package q9k.buaa.Frontend.AST;
 
 import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.INIT.Output;
+
+import java.io.IOException;
 
 public class LOrExp implements Syntax{
     private Syntax l_and_exp;
@@ -15,8 +18,16 @@ public class LOrExp implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        l_and_exp.print();
+        print_ast_name(LOrExp.class);
+        if(or_token != null){
+            or_token.print();
+            l_or_exp.print();
+        }
+   /*     else {
+            print_ast_name(LOrExp.class);
+        }*/
     }
 
     @Override

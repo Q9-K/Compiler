@@ -15,9 +15,12 @@ import java.util.List;
 public class Compiler {
     public static void main(String[] args) throws IOException {
         System.out.println("Welcome to use Q9K Compiler");
+        new Compiler().run();
+    }
+
+    public void run() throws IOException{
         //配置信息
-        Config.init();
-        Config.setLexer_output_open(true);
+        compilerInit();
         //获取字符流
         StringBuffer character_stream = Input.getInstance().getCharacterStream();
         //词法分析
@@ -30,5 +33,23 @@ public class Compiler {
 //        ErrorHandler.getInstance().run();
         //语法树
         System.exit(0);
+    }
+    private void compilerInit() throws IOException {
+        Config.init();
+//        Config.setLexer_output_open(true);
+        Config.setParser_output_open(true);
+    }
+    private void compilerInit(String input_path) throws IOException {
+        Config.setInput_path(input_path);
+        Config.init();
+//        Config.setLexer_output_open(true);
+        Config.setParser_output_open(true);
+    }
+    private void compilerInit(String input_path,String output_path) throws IOException {
+        Config.setInput_path(input_path);
+        Config.setOutput_path(output_path);
+        Config.init();
+//        Config.setLexer_output_open(true);
+        Config.setParser_output_open(true);
     }
 }

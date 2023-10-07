@@ -1,7 +1,6 @@
 package q9k.buaa.Frontend.AST;
 
-public class Stmt implements Syntax{
-
+public interface Stmt extends Syntax{
     /*
     语句 Stmt → LVal '=' Exp ';' // 每种类型的语句都要覆盖
     | [Exp] ';' //有无Exp两种情况
@@ -13,17 +12,4 @@ public class Stmt implements Syntax{
     | LVal '=' 'getint''('')'';'
     | 'printf''('FormatString{','Exp}')'';' // 1.有Exp 2.无Exp
      */
-
-    private int condition;
-
-
-    @Override
-    public void print() {
-
-    }
-
-    @Override
-    public void handleError() {
-
-    }
 }

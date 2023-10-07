@@ -2,6 +2,8 @@ package q9k.buaa.Frontend.AST;
 
 import q9k.buaa.Frontend.Token.Token;
 
+import java.io.IOException;
+
 public class PrimaryExp implements Syntax{
 
     private Token lparent;
@@ -20,7 +22,19 @@ public class PrimaryExp implements Syntax{
     }
 
     @Override
-    public void print() {
+    public void print() throws IOException {
+        if(exp != null){
+            lparent.print();
+            exp.print();
+            rparent.print();
+        }
+        else if(l_val != null){
+            l_val.print();
+        }
+        else if(number!=null){
+            number.print();
+        }
+        print_ast_name(PrimaryExp.class);
 
     }
 

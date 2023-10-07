@@ -2,6 +2,8 @@ package q9k.buaa.Frontend.AST;
 
 import q9k.buaa.Frontend.Token.Token;
 
+import java.io.IOException;
+
 public class MainFuncDef implements Syntax {
     private Token int_token;
     private Token main_token;
@@ -19,8 +21,13 @@ public class MainFuncDef implements Syntax {
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        int_token.print();
+        main_token.print();
+        lparent_token.print();
+        rparent_token.print();
+        block.print();
+        print_ast_name(MainFuncDef.class);
     }
 
     @Override

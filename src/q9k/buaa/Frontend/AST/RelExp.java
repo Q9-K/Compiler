@@ -1,6 +1,9 @@
 package q9k.buaa.Frontend.AST;
 
 import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.INIT.Output;
+
+import java.io.IOException;
 
 public class RelExp implements Syntax{
     private Syntax add_exp;
@@ -16,8 +19,16 @@ public class RelExp implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        add_exp.print();
+        print_ast_name(RelExp.class);
+        if(op_token != null){
+            op_token.print();
+            rel_exp.print();
+        }
+//        else {
+//            print_ast_name(RelExp.class);
+//        }
     }
 
     @Override

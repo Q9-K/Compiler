@@ -6,6 +6,8 @@ import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.Token.Token;
 import q9k.buaa.Frontend.Token.TokenType;
 
+import java.io.IOException;
+
 public class FuncType implements Syntax{
     private Token func_type;
 
@@ -15,8 +17,9 @@ public class FuncType implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        func_type.print();
+        print_ast_name(FuncType.class);
     }
 
     @Override

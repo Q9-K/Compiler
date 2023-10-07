@@ -1,5 +1,10 @@
 package q9k.buaa.Utils;
 
+import q9k.buaa.Frontend.AST.Syntax;
+import q9k.buaa.Frontend.Token.Token;
+
+import java.io.IOException;
+
 public class Tuple<A, B> {
     private final A first;
     private final B second;
@@ -15,5 +20,10 @@ public class Tuple<A, B> {
 
     public B getSecond() {
         return second;
+    }
+
+    public void print() throws IOException {
+        ((Token)first).print();
+        ((Syntax)second).print();
     }
 }

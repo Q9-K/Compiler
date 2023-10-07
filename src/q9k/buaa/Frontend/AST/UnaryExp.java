@@ -2,6 +2,8 @@ package q9k.buaa.Frontend.AST;
 
 import q9k.buaa.Frontend.Token.Token;
 
+import java.io.IOException;
+
 
 public class UnaryExp implements Syntax{
     private Syntax primary_exp;
@@ -24,8 +26,23 @@ public class UnaryExp implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        if(primary_exp != null){
+            primary_exp.print();
+        }
+        else if(ident!=null){
+            ident.print();
+            lparent.print();
+            if(func_r_params!=null){
+                func_r_params.print();
+            }
+            rparent.print();
+        }
+        else if(unary_op!=null){
+            unary_op.print();
+            unary_exp.print();
+        }
+        print_ast_name(UnaryExp.class);
     }
 
     @Override

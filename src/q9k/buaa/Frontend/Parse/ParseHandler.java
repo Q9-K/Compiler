@@ -1,13 +1,14 @@
 package q9k.buaa.Frontend.Parse;
 
-import q9k.buaa.Frontend.AST.*;
 import q9k.buaa.Frontend.AST.Number;
+import q9k.buaa.Frontend.AST.*;
 import q9k.buaa.Frontend.Token.Token;
 import q9k.buaa.Frontend.Token.TokenType;
 import q9k.buaa.INIT.Config;
 import q9k.buaa.Utils.Triple;
 import q9k.buaa.Utils.Tuple;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,49 +17,62 @@ public class ParseHandler {
     private Token cur_token;
     private final List<Token> token_stream;
     private Syntax ast;//语法树根节点
-    public Syntax getAst(){
+
+    public Syntax getAst() {
         return ast;
     }
+
     public static ParseHandler parseHandler;
 
-    private ParseHandler(List<Token> token_stream){
+    private ParseHandler(List<Token> token_stream) {
         this.token_stream = token_stream;
-        getToken();
     }
-    public static synchronized ParseHandler getInstance(List<Token> token_stream){
-        if(parseHandler == null){
+
+    public static synchronized ParseHandler getInstance(List<Token> token_stream) {
+        if (parseHandler == null) {
             parseHandler = new ParseHandler(token_stream);
         }
         return parseHandler;
     }
-    public static synchronized ParseHandler getInstance(){
-        if(parseHandler == null){
+
+    public static synchronized ParseHandler getInstance() {
+        if (parseHandler == null) {
             System.out.println("something wrong happened at parser init!");
             System.exit(-1);
         }
         return parseHandler;
     }
 
-    public void run(){
-        ast = parseCompUnit();
-        if(Config.parser_output_open){
-              ast.print();
-        }
-        System.out.println("parser analyzer finished!");
-    }
-    private Token getToken(){
-        if(!isEND()){
-            this.cur_token=token_stream.get(index++);
-            return cur_token;
-        }
-        throw new RuntimeException("parse end but missing important syntax!");
-    }
-    private boolean isEND(){
-        return index >= token_stream.size();
+    public static void clearInstance(){
+        parseHandler = null;
     }
 
-    private Token getTokenForward(int offset){
-        return token_stream.get(index+offset-1);
+    public void run() throws IOException {
+        getToken();
+        ast = parseCompUnit();
+        System.out.println("parser analyzer finished!");
+        if (Config.parser_output_open) {
+            ast.print();
+        }
+    }
+
+    private Token getToken() {
+        if (!isEND()) {
+            cur_token = token_stream.get(index++);
+            return cur_token;
+        }
+        if (index > token_stream.size()) {
+            throw new RuntimeException("xxx");
+        }
+        return null;
+    }
+
+    private boolean isEND() {
+        return index == token_stream.size();
+    }
+
+    private Token getTokenForward(int offset) {
+        return token_stream.get(index + offset - 1);
     }
 
 
@@ -70,51 +84,53 @@ public class ParseHandler {
 //    2. 若节点调用了其他节点，无需自行预读
 
 
-
     //加减表达式 AddExp → MulExp | AddExp ('+' | '−') MulExp
     //改为 AddExp → MulExp | MulExp ('+' | '−') AddExp
-    private Syntax parseAddExp(){
+    private Syntax parseAddExp() {
         Syntax mul_exp;
         Token op_token = null;
         Syntax add_exp = null;
 
         mul_exp = parseMulExp();
-        getToken();
-        if(cur_token.getTokenType().equals(TokenType.PLUS)||cur_token.getTokenType().equals(TokenType.MINU)){
+        if (cur_token.getTokenType().equals(TokenType.PLUS) || cur_token.getTokenType().equals(TokenType.MINU)) {
             op_token = cur_token;
-            add_exp = parseExp();
+            getToken();
+            add_exp = parseAddExp();
         }
         return new AddExp(mul_exp, op_token, add_exp);
     }
+
     //语句块 Block → '{' { BlockItem } '}'
-    private Syntax parseBlock(){
+    private Syntax parseBlock() {
         Token lbrace_token;
         List<Syntax> block_items = new ArrayList<>();
         Token rbrace_token;
 
         lbrace_token = cur_token;
         getToken();
-        while (!cur_token.getTokenType().equals(TokenType.RBRACE)){
-            Syntax block_item = parseBlockItem();
+        while (!cur_token.getTokenType().equals(TokenType.RBRACE)) {
+            Syntax block_item;
+            block_item = parseBlockItem();
             block_items.add(block_item);
         }
         rbrace_token = cur_token;
         getToken();
-        return new Block(lbrace_token,block_items,rbrace_token);
+        return new Block(lbrace_token, block_items, rbrace_token);
     }
+
     //语句块项 BlockItem → Decl | Stmt
-    private Syntax parseBlockItem(){
+    private Syntax parseBlockItem() {
         Syntax decl = null;
         Syntax stmt = null;
 
-        if(cur_token.getTokenType().equals(TokenType.CONSTTK)||cur_token.getTokenType().equals(TokenType.INTTK)){
-            decl = parseStmt();
-        }
-        else{
+        if (cur_token.getTokenType().equals(TokenType.CONSTTK) || cur_token.getTokenType().equals(TokenType.INTTK)) {
+            decl = parseDecl();
+        } else {
             stmt = parseStmt();
         }
         return new BlockItem(decl, stmt);
     }
+
     //基本类型 BType → 'int'
     private Syntax parseBType() {
         Token int_token;
@@ -125,40 +141,47 @@ public class ParseHandler {
     }
 
     //编译单元 CompUnit → {Decl} {FuncDef} MainFuncDef
-    private Syntax parseCompUnit(){
+    private Syntax parseCompUnit() {
         List<Syntax> decls = new ArrayList<>();
         List<Syntax> func_defs = new ArrayList<>();
         Syntax main_func_def;
-
         while (!getTokenForward(1).getTokenType().equals(TokenType.MAINTK) && !getTokenForward(2).getTokenType().equals(TokenType.LPARENT)) {
-            decls.add(parseDecl());
+            Syntax decl;
+            decl = parseDecl();
+            decls.add(decl);
         }
+
+
         while (!getTokenForward(1).getTokenType().equals(TokenType.MAINTK)) {
-            func_defs.add(parseFuncDef());
+            Syntax func_def;
+            func_def = parseFuncDef();
+            func_defs.add(func_def);
         }
         main_func_def = parseMainFuncDef();
-        return new CompUnit(decls,func_defs,main_func_def);
+        return new CompUnit(decls, func_defs, main_func_def);
     }
+
     //条件表达式 Cond → LOrExp
-    private Syntax parseCond(){
+    private Syntax parseCond() {
         Syntax l_or_exp;
 
         l_or_exp = parseLOrExp();
         return new Cond(l_or_exp);
     }
+
     //常量声明 ConstDecl → 'const' BType ConstDef { ',' ConstDef } ';'
-    private Syntax parseConstDecl(){
+    private Syntax parseConstDecl() {
         Token const_token;
         Syntax b_type;
         Syntax const_def;
-        Token semicn_token;
         List<Tuple<Token, Syntax>> list = new ArrayList<>();
+        Token semicn_token;
 
         const_token = cur_token;
         getToken();
         b_type = parseBType();
         const_def = parseConstDef();
-        while (cur_token.getTokenType().equals(TokenType.COMMA)){
+        while (cur_token.getTokenType().equals(TokenType.COMMA)) {
             Token token_item = cur_token;
             getToken();
             Syntax const_def_item = parseConstDef();
@@ -166,103 +189,108 @@ public class ParseHandler {
         }
         semicn_token = cur_token;
         getToken();
-        return new ConstDecl(const_token, b_type, const_def,list,semicn_token);
+        return new ConstDecl(const_token, b_type, const_def, list, semicn_token);
     }
+
     //常数定义 ConstDef → Ident { '[' ConstExp ']' } '=' ConstInitVal
-    private Syntax parseConstDef(){
+    private Syntax parseConstDef() {
         Syntax ident;
-        List<Triple<Token,Syntax,Token>> list = new ArrayList<>();
+        List<Triple<Token, Syntax, Token>> list = new ArrayList<>();
         Token eq_token;
         Syntax const_init_val;
 
         ident = parseIdent();
-        while (cur_token.getTokenType().equals(TokenType.LBRACK)){
+        while (cur_token.getTokenType().equals(TokenType.LBRACK)) {
             Token lbrack_item = cur_token;
             getToken();
             Syntax const_exp_item = parseConstExp();
             Token rbrack_item = cur_token;
-            list.add(new Triple<>(lbrack_item,const_exp_item,rbrack_item));
+            getToken();
+            list.add(new Triple<>(lbrack_item, const_exp_item, rbrack_item));
         }
         eq_token = cur_token;
         getToken();
         const_init_val = parseConstInitVal();
         return new ConstDef(ident, list, eq_token, const_init_val);
     }
+
     //常量表达式 ConstExp → AddExp
-    private Syntax parseConstExp(){
+    private Syntax parseConstExp() {
         Syntax add_exp;
 
         add_exp = parseAddExp();
         return new ConstExp(add_exp);
     }
+
     //常量初值 ConstInitVal → ConstExp
     //| '{' [ ConstInitVal { ',' ConstInitVal } ] '}'
-    private Syntax parseConstInitVal(){
+    private Syntax parseConstInitVal() {
         Syntax const_exp = null;
         Token lbrace_token = null;
         Syntax const_init_val = null;
         List<Tuple<Token, Syntax>> list = new ArrayList<>();
         Token rbrace_token = null;
-
-        if(!cur_token.getTokenType().equals(TokenType.LBRACE)){
+        if (!cur_token.getTokenType().equals(TokenType.LBRACE)) {
             const_exp = parseConstExp();
-        }
-        else{
+        } else {
             lbrace_token = cur_token;
             getToken();
-            const_init_val = parseConstInitVal();
-            while(cur_token.getTokenType().equals(TokenType.COMMA)){
-                Token comma_item = cur_token;
-                getToken();
-                Syntax const_init_val_item = parseConstInitVal();
-                list.add(new Tuple<>(comma_item,const_init_val_item));
+            if (!cur_token.getTokenType().equals(TokenType.RBRACE)) {
+                const_init_val = parseConstInitVal();
+                while (cur_token.getTokenType().equals(TokenType.COMMA)) {
+                    Token comma_item = cur_token;
+                    getToken();
+                    Syntax const_init_val_item = parseConstInitVal();
+                    list.add(new Tuple<>(comma_item, const_init_val_item));
+                }
             }
             rbrace_token = cur_token;
             getToken();
         }
 
-        return new ConstInitVal(const_exp,lbrace_token,const_init_val,list,rbrace_token);
+        return new ConstInitVal(const_exp, lbrace_token, const_init_val, list, rbrace_token);
     }
 
 
-
     //声明 Decl → ConstDecl | VarDecl
-    private Syntax parseDecl(){
+    private Syntax parseDecl() {
         Syntax const_decl = null;
         Syntax var_decl = null;
 
-        if(cur_token.getTokenType().equals(TokenType.CONSTTK)){
+        if (cur_token.getTokenType().equals(TokenType.CONSTTK)) {
             const_decl = parseConstDecl();
-        }
-        else if(cur_token.getTokenType().equals(TokenType.INTTK)){
+        } else if (cur_token.getTokenType().equals(TokenType.INTTK)) {
             var_decl = parseVarDecl();
         }
         return new Decl(const_decl, var_decl);
     }
+
     //相等性表达式 EqExp → RelExp | EqExp ('==' | '!=') RelExp
     //改为 EqExp → RelExp | RelExp ('==' | '!=') EqExp
-    private Syntax parseEqExp(){
+    private Syntax parseEqExp() {
         Syntax rel_exp;
         Token op_token = null;
         Syntax eq_exp = null;
 
         rel_exp = parseRelExp();
-        if(cur_token.getTokenType().equals(TokenType.EQL)||cur_token.getTokenType().equals(TokenType.NEQ)){
+        if (cur_token.getTokenType().equals(TokenType.EQL) || cur_token.getTokenType().equals(TokenType.NEQ)) {
             op_token = cur_token;
             getToken();
-            eq_exp = parseExp();
+            eq_exp = parseEqExp();
         }
         return new EqExp(rel_exp, op_token, eq_exp);
     }
+
     //表达式 Exp → AddExp
-    private Syntax parseExp(){
+    private Syntax parseExp() {
         Syntax add_exp;
 
         add_exp = parseAddExp();
         return new Exp(add_exp);
     }
+
     //FormatString为格式字符串终结符
-    private Syntax parseFormatString(){
+    private Syntax parseFormatString() {
         Token strcon_token;
 
         strcon_token = cur_token;
@@ -271,7 +299,7 @@ public class ParseHandler {
     }
 
     //语句 ForStmt → LVal '=' Exp
-    private Syntax parseForStmt(){
+    private Syntax parseForStmt() {
         Syntax l_val;
         Token assign_token;
         Syntax exp;
@@ -284,7 +312,7 @@ public class ParseHandler {
     }
 
     //函数定义 FuncDef → FuncType Ident '(' [FuncFParams] ')' Block
-    private Syntax parseFuncDef(){
+    private Syntax parseFuncDef() {
         Syntax func_type;
         Syntax ident;
         Token lparent;
@@ -296,7 +324,7 @@ public class ParseHandler {
         ident = parseIdent();
         lparent = cur_token;
         getToken();
-        if(!cur_token.getTokenType().equals(TokenType.RPARENT)){
+        if (!cur_token.getTokenType().equals(TokenType.RPARENT)) {
             func_f_params = parseFuncFParms();
         }
         rparent = cur_token;
@@ -306,7 +334,7 @@ public class ParseHandler {
     }
 
     //函数形参 FuncFParam → BType Ident ['[' ']' { '[' ConstExp ']' }]
-    private Syntax parseFuncFParm(){
+    private Syntax parseFuncFParm() {
         Syntax b_type;
         Syntax ident;
         Token lbrack = null;
@@ -315,12 +343,13 @@ public class ParseHandler {
 
         b_type = parseBType();
         ident = parseIdent();
-        if(cur_token.getTokenType().equals(TokenType.LBRACK)){
+        Token temp_token = cur_token;
+        if (cur_token.getTokenType().equals(TokenType.LBRACK)) {
             lbrack = cur_token;
             getToken();
             rbrack = cur_token;
             getToken();
-            while (cur_token.getTokenType().equals(TokenType.LBRACK)){
+            while (cur_token.getTokenType().equals(TokenType.LBRACK)) {
                 Token lbrack_item = cur_token;
                 getToken();
                 Syntax const_exp_item = parseConstExp();
@@ -333,35 +362,37 @@ public class ParseHandler {
     }
 
     //函数形参表 FuncFParams → FuncFParam { ',' FuncFParam }
-    private Syntax parseFuncFParms(){
+    private Syntax parseFuncFParms() {
         Syntax func_f_param;
-        List<Tuple<Token,Syntax>> list = new ArrayList<>();
+        List<Tuple<Token, Syntax>> list = new ArrayList<>();
 
         func_f_param = parseFuncFParm();
-        while (cur_token.getTokenType().equals(TokenType.COMMA)){
+        while (cur_token.getTokenType().equals(TokenType.COMMA)) {
             Token comma_item = cur_token;
             getToken();
             Syntax func_f_param_item = parseFuncFParm();
-            list.add(new Tuple<>(comma_item,func_f_param_item));
+            list.add(new Tuple<>(comma_item, func_f_param_item));
         }
         return new FuncFParams(func_f_param, list);
     }
+
     //函数实参表 FuncRParams → Exp { ',' Exp }
-    private Syntax parseFuncRParms(){
+    private Syntax parseFuncRParms() {
         Syntax exp;
-        List<Tuple<Token,Syntax>> list = new ArrayList<>();
+        List<Tuple<Token, Syntax>> list = new ArrayList<>();
 
         exp = parseExp();
-        while (cur_token.getTokenType().equals(TokenType.COMMA)){
+        while (cur_token.getTokenType().equals(TokenType.COMMA)) {
             Token comma_item = cur_token;
             getToken();
-            Syntax exp_item =parseExp();
+            Syntax exp_item = parseExp();
             list.add(new Tuple<>(comma_item, exp_item));
         }
         return new FuncRParams(exp, list);
     }
+
     //函数类型 FuncType → 'void' | 'int'
-    private Syntax parseFuncType(){
+    private Syntax parseFuncType() {
         Token func_type;
 
         func_type = cur_token;
@@ -371,28 +402,27 @@ public class ParseHandler {
 
 
     //标识符Ident为终结符
-    private Syntax parseIdent(){
+    private Syntax parseIdent() {
         Token ident_token;
-
         ident_token = cur_token;
         getToken();
-
         return new Ident(ident_token);
     }
+
     //变量初值 InitVal → Exp | '{' [ InitVal { ',' InitVal } ] '}'
-    private Syntax parseInitVal(){
+    private Syntax parseInitVal() {
         Syntax exp = null;
         Token lbrace = null;
         Syntax init_val = null;
         List<Tuple<Token, Syntax>> list = new ArrayList<>();
         Token rbrace = null;
 
-        if(cur_token.getTokenType().equals(TokenType.LBRACE)){
+        if (cur_token.getTokenType().equals(TokenType.LBRACE)) {
             lbrace = cur_token;
             getToken();
-            if(!cur_token.getTokenType().equals(TokenType.RBRACE)){
+            if (!cur_token.getTokenType().equals(TokenType.RBRACE)) {
                 init_val = parseInitVal();
-                while (cur_token.getTokenType().equals(TokenType.COMMA)){
+                while (cur_token.getTokenType().equals(TokenType.COMMA)) {
                     Token comma_item = cur_token;
                     getToken();
                     Syntax init_val_item = parseInitVal();
@@ -401,14 +431,14 @@ public class ParseHandler {
             }
             rbrace = cur_token;
             getToken();
-        }
-        else{
+        } else {
             exp = parseExp();
         }
         return new InitVal(exp, lbrace, init_val, list, rbrace);
     }
+
     //标识符IntConst为数字常量终结符
-    private Syntax parseIntConst(){
+    private Syntax parseIntConst() {
         Token intcont_token;
 
         intcont_token = cur_token;
@@ -419,13 +449,13 @@ public class ParseHandler {
 
     //逻辑与表达式 LAndExp → EqExp | LAndExp '&&' EqExp
     //改为 LAndExp → EqExp | EqExp '&&' LAndExp
-    private Syntax parseLAndExp(){
+    private Syntax parseLAndExp() {
         Syntax eq_exp;
         Token and_token = null;
         Syntax l_and_exp = null;
 
         eq_exp = parseEqExp();
-        if(cur_token.getTokenType().equals(TokenType.AND)){
+        if (cur_token.getTokenType().equals(TokenType.AND)) {
             and_token = cur_token;
             getToken();
             l_and_exp = parseLAndExp();
@@ -435,26 +465,27 @@ public class ParseHandler {
 
     //逻辑或表达式 LOrExp → LAndExp | LOrExp '||' LAndExp
     //改为 LOrExp → LAndExp | LAndExp '||' LOrExp
-    private Syntax parseLOrExp(){
+    private Syntax parseLOrExp() {
         Syntax l_and_exp;
         Token or_token = null;
         Syntax l_or_exp = null;
 
         l_and_exp = parseLAndExp();
-        if(cur_token.getTokenType().equals(TokenType.OR)){
+        if (cur_token.getTokenType().equals(TokenType.OR)) {
             or_token = cur_token;
             getToken();
             l_or_exp = parseLOrExp();
         }
-        return new LOrExp(l_and_exp,or_token,l_or_exp);
+        return new LOrExp(l_and_exp, or_token, l_or_exp);
     }
+
     //左值表达式 LVal → Ident {'[' Exp ']'}
-    private Syntax parseLVal(){
+    private Syntax parseLVal() {
         Syntax ident;
         List<Triple<Token, Syntax, Token>> list = new ArrayList<>();
 
         ident = parseIdent();
-        while (cur_token.getTokenType().equals(TokenType.LBRACE)){
+        while (cur_token.getTokenType().equals(TokenType.LBRACK)) {
             Token lbrace_item = cur_token;
             getToken();
             Syntax exp_item = parseExp();
@@ -462,11 +493,11 @@ public class ParseHandler {
             getToken();
             list.add(new Triple<>(lbrace_item, exp_item, rbrace_item));
         }
-
         return new LVal(ident, list);
     }
+
     //主函数定义 MainFuncDef → 'int' 'main' '(' ')' Block
-    private Syntax parseMainFuncDef(){
+    private Syntax parseMainFuncDef() {
         Token int_token;
         Token main_token;
         Token lparent_token;
@@ -484,27 +515,28 @@ public class ParseHandler {
         block = parseBlock();
         return new MainFuncDef(int_token, main_token, lparent_token, rparent_token, block);
     }
+
     //乘除模表达式 MulExp → UnaryExp | MulExp ('*' | '/' | '%') UnaryExp
     //改为 MulExp → UnaryExp | UnaryExp ('*' | '/' | '%') MulExp
-    private Syntax parseMulExp(){
+    private Syntax parseMulExp() {
         Syntax unary_exp;
         Token op_token = null;
         Syntax mul_exp = null;
 
         unary_exp = parseUnaryExp();
-        if(cur_token.getTokenType().equals(TokenType.MULT)
-                ||cur_token.getTokenType().equals(TokenType.DIV)
-                ||cur_token.getTokenType().equals(TokenType.MOD)
-        ){
+        if (cur_token.getTokenType().equals(TokenType.MULT)
+                || cur_token.getTokenType().equals(TokenType.DIV)
+                || cur_token.getTokenType().equals(TokenType.MOD)
+        ) {
             op_token = cur_token;
             getToken();
             mul_exp = parseMulExp();
         }
-
         return new MulExp(unary_exp, op_token, mul_exp);
     }
+
     //数值 Number → IntConst
-    private Syntax parseNumber(){
+    private Syntax parseNumber() {
         Syntax int_const;
 
         int_const = parseIntConst();
@@ -513,24 +545,21 @@ public class ParseHandler {
 
 
     //基本表达式 PrimaryExp → '(' Exp ')' | LVal | Number
-    private Syntax parsePrimaryExp(){
+    private Syntax parsePrimaryExp() {
         Token lparent = null;
         Syntax exp = null;
         Token rparent = null;
         Syntax l_val = null;
         Syntax number = null;
-
-        if(cur_token.getTokenType().equals(TokenType.LPARENT)){
+        if (cur_token.getTokenType().equals(TokenType.LPARENT)) {
             lparent = cur_token;
             getToken();
             exp = parseExp();
             rparent = cur_token;
             getToken();
-        }
-        else if(cur_token.getTokenType().equals(TokenType.INTCON)){
+        } else if (cur_token.getTokenType().equals(TokenType.INTCON)) {
             number = parseNumber();
-        }
-        else{
+        } else {
             l_val = parseLVal();
         }
 
@@ -539,54 +568,218 @@ public class ParseHandler {
 
     //关系表达式 RelExp → AddExp | RelExp ('<' | '>' | '<=' | '>=') AddExp
     //改为 RelExp → AddExp | AddExp ('<' | '>' | '<=' | '>=') RelExp
-    private Syntax parseRelExp(){
+    private Syntax parseRelExp() {
         Syntax add_exp;
         Token op_token = null;
         Syntax rel_exp = null;
 
         add_exp = parseAddExp();
-        if(cur_token.getTokenType().equals(TokenType.LSS)
-                ||cur_token.getTokenType().equals(TokenType.GRE)
-                ||cur_token.getTokenType().equals(TokenType.LEQ)
-                ||cur_token.getTokenType().equals(TokenType.GEQ)
-        ){
+        if (cur_token.getTokenType().equals(TokenType.LSS)
+                || cur_token.getTokenType().equals(TokenType.GRE)
+                || cur_token.getTokenType().equals(TokenType.LEQ)
+                || cur_token.getTokenType().equals(TokenType.GEQ)
+        ) {
             op_token = cur_token;
             getToken();
             rel_exp = parseRelExp();
         }
         return new RelExp(add_exp, op_token, rel_exp);
     }
+
     /**
-     语句 Stmt → LVal '=' Exp ';' // 每种类型的语句都要覆盖
-    | [Exp] ';' //有无Exp两种情况
-    | Block
-    | 'if' '(' Cond ')' Stmt [ 'else' Stmt ] // 1.有else 2.无else
-    | 'for' '(' [ForStmt] ';' [Cond] ';' [ForStmt] ')' Stmt // 1. 无缺省 2. 缺省第一个ForStmt 3. 缺省Cond 4. 缺省第二个ForStmt
-    | 'break' ';' | 'continue' ';'
-    | 'return' [Exp] ';' // 1.有Exp 2.无Exp
-    | LVal '=' 'getint''('')'';'
-    | 'printf''('FormatString{','Exp}')'';' // 1.有Exp 2.无Exp
+     * 语句 Stmt → LVal '=' Exp ';' // 每种类型的语句都要覆盖
+     * | [Exp] ';' //有无Exp两种情况
+     * | Block
+     * | 'if' '(' Cond ')' Stmt [ 'else' Stmt ] // 1.有else 2.无else
+     * | 'for' '(' [ForStmt] ';' [Cond] ';' [ForStmt] ')' Stmt // 1. 无缺省 2. 缺省第一个ForStmt 3. 缺省Cond 4. 缺省第二个ForStmt
+     * | 'break' ';' | 'continue' ';'
+     * | 'return' [Exp] ';' // 1.有Exp 2.无Exp
+     * | LVal '=' 'getint''('')'';'
+     * | 'printf''('FormatString{','Exp}')'';' // 1.有Exp 2.无Exp
      **/
-    private Syntax parseStmt(){
-        Syntax l_val;
-        Token assign_token;
-        Syntax exp;
-        Token simicn_token;
-        Syntax block;
-        Token if_token;
-        Token lparent_token;
-        Syntax cond;
-        Token rparent_token;
-        Syntax stmt;
-        Token else_token;
-        Syntax stmt2;
-        Token for_token;
+    private Syntax parseStmt() {
+        //'if' '(' Cond ')' Stmt [ 'else' Stmt ]
+        if (cur_token.getTokenType().equals(TokenType.IFTK)) {
+            Token if_token;
+            Token lparent_token;
+            Syntax cond;
+            Token rparent_token;
+            Syntax stmt1;
+            Token else_token = null;
+            Syntax stmt2 = null;
 
+            if_token = cur_token;
+            getToken();
+            lparent_token = cur_token;
+            getToken();
+            cond = parseCond();
+            rparent_token = cur_token;
+            getToken();
+            stmt1 = parseStmt();
+            if (cur_token.getTokenType().equals(TokenType.ELSETK)) {
+                else_token = cur_token;
+                getToken();
+                stmt2 = parseStmt();
+            }
+            return new Stmt1(if_token, lparent_token, cond, rparent_token, stmt1, else_token, stmt2);
+        }
+        //'for' '(' [ForStmt] ';' [Cond] ';' [ForStmt] ')' Stmt
+        else if (cur_token.getTokenType().equals(TokenType.FORTK)) {
+            Token for_token;
+            Token lparent_token;
+            Syntax for_stmt1 = null;
+            Token semicn_token1;
+            Syntax cond = null;
+            Token semicn_token2;
+            Syntax for_stmt2 = null;
+            Token rparent_token;
+            Syntax stmt;
 
-        return new Stmt();
+            for_token = cur_token;
+            getToken();
+            lparent_token = cur_token;
+            getToken();
+            if (!cur_token.getTokenType().equals(TokenType.SEMICN)) {
+                for_stmt1 = parseForStmt();
+            }
+            semicn_token1 = cur_token;
+            getToken();
+            if (!cur_token.getTokenType().equals(TokenType.SEMICN)) {
+                cond = parseCond();
+            }
+            semicn_token2 = cur_token;
+            getToken();
+            if (!cur_token.getTokenType().equals(TokenType.RPARENT)) {
+                for_stmt2 = parseForStmt();
+            }
+            rparent_token = cur_token;
+            getToken();
+            stmt = parseStmt();
+
+            return new Stmt2(for_token, lparent_token, for_stmt1, semicn_token1, cond, semicn_token2, for_stmt2, rparent_token, stmt);
+        }
+        //'break' ';' | 'continue' ';'
+        else if (cur_token.getTokenType().equals(TokenType.BREAKTK) || cur_token.getTokenType().equals(TokenType.CONTINUETK)) {
+            Token action_token;
+            Token semicn_token;
+
+            action_token = cur_token;
+            getToken();
+            semicn_token = cur_token;
+            getToken();
+            return new Stmt3(action_token, semicn_token);
+        }
+        //'return' [Exp] ';'
+        else if (cur_token.getTokenType().equals(TokenType.RETURNTK)) {
+            Token return_token;
+            Syntax exp = null;
+            Token semicn_token;
+
+            return_token = cur_token;
+            getToken();
+            if (!cur_token.getTokenType().equals(TokenType.SEMICN)) {
+                exp = parseExp();
+            }
+            semicn_token = cur_token;
+            getToken();
+            return new Stmt4(return_token, exp, semicn_token);
+        }
+        //'printf''('FormatString{','Exp}')'';'
+        else if (cur_token.getTokenType().equals(TokenType.PRINTFTK)) {
+            Token printf_token;
+            Token lparent_token;
+            Syntax format_string;
+            List<Tuple<Token, Syntax>> list = new ArrayList<>();
+            Token rparent_token;
+            Token semicn_token;
+
+            printf_token = cur_token;
+            getToken();
+            lparent_token = cur_token;
+            getToken();
+            format_string = parseFormatString();
+            while (cur_token.getTokenType().equals(TokenType.COMMA)) {
+                Token comma_item = cur_token;
+                getToken();
+                Syntax exp_item = parseExp();
+                list.add(new Tuple<>(comma_item, exp_item));
+            }
+            rparent_token = cur_token;
+            getToken();
+            semicn_token = cur_token;
+            getToken();
+            return new Stmt5(printf_token, lparent_token, format_string, list, rparent_token, semicn_token);
+        }
+        //Block
+        else if (cur_token.getTokenType().equals(TokenType.LBRACE)) {
+            Syntax block;
+            block = parseBlock();
+            return new Stmt6(block);
+        }
+        // First为Ident
+        else if (cur_token.getTokenType().equals(TokenType.IDENFR)) {
+            Syntax l_val;
+            Token assign_token;
+            Syntax exp = null;
+            Token getint_token = null;
+            Token lparent_token = null;
+            Token rparent_token = null;
+            Token semicn_token;
+
+            int i = 0;
+            boolean is_l_val = false;
+            while (!getTokenForward(i).getTokenType().equals(TokenType.SEMICN)){
+                if(getTokenForward(i++).getTokenType().equals(TokenType.ASSIGN)){
+                    is_l_val = true;
+                    break;
+                }
+            }
+            if (is_l_val) {
+                l_val = parseLVal();
+                assign_token = cur_token;
+                getToken();
+                //LVal '=' Exp ';'
+                if (!cur_token.getTokenType().equals(TokenType.GETINTTK)) {
+                    exp = parseExp();
+                    semicn_token = cur_token;
+                    getToken();
+                }
+                //LVal '=' 'getint''('')'';'
+                else {
+                    getint_token = cur_token;
+                    getToken();
+                    lparent_token = cur_token;
+                    getToken();
+                    rparent_token = cur_token;
+                    getToken();
+                    semicn_token = cur_token;
+                    getToken();
+                }
+                return new Stmt7(l_val, assign_token, exp, getint_token, lparent_token, rparent_token, semicn_token);
+            } else {
+                //[Exp] ';'
+                exp = parseExp();
+                semicn_token = cur_token;
+                getToken();
+                return new Stmt8(exp, semicn_token);
+            }
+        }
+        //[Exp] ';'
+        else {
+            Syntax exp = null;
+            Token semicn_token;
+            if (!cur_token.getTokenType().equals(TokenType.SEMICN)) {
+                exp = parseExp();
+            }
+
+            semicn_token = cur_token;
+            getToken();
+            return new Stmt8(exp, semicn_token);
+        }
     }
+
     //一元表达式 UnaryExp → PrimaryExp | Ident '(' [FuncRParams] ')' | UnaryOp UnaryExp
-    private Syntax parseUnaryExp(){
+    private Syntax parseUnaryExp() {
         Syntax primary_exp = null;
         Syntax ident = null;
         Token lparent = null;
@@ -594,31 +787,35 @@ public class ParseHandler {
         Token rparent = null;
         Syntax unary_op = null;
         Syntax unary_exp = null;
-
-        if(cur_token.getTokenType().equals(TokenType.PLUS)
-                ||cur_token.getTokenType().equals(TokenType.MINU)
-                ||cur_token.getTokenType().equals(TokenType.NOT)
-        ){
+        if (cur_token.getTokenType().equals(TokenType.PLUS)
+                || cur_token.getTokenType().equals(TokenType.MINU)
+                || cur_token.getTokenType().equals(TokenType.NOT)
+        ) {
             unary_op = parseUnaryOp();
             unary_exp = parseUnaryExp();
-        }
-        else if(getTokenForward(1).getTokenType().equals(TokenType.LPARENT)){
-            ident = parseIdent();
-            lparent = cur_token;
-            getToken();
-            if(!cur_token.getTokenType().equals(TokenType.RPARENT)){
-                func_r_params = parseFuncRParms();
+        } else if(cur_token.getTokenType().equals(TokenType.IDENFR)){
+            if(getTokenForward(1).getTokenType().equals(TokenType.LPARENT)){
+                ident = parseIdent();
+                lparent = cur_token;
+                getToken();
+                if (!cur_token.getTokenType().equals(TokenType.RPARENT)) {
+                    func_r_params = parseFuncRParms();
+                }
+                rparent = cur_token;
+                getToken();
             }
-            rparent = cur_token;
-            getToken();
+            else {
+                primary_exp = parsePrimaryExp();
+            }
         }
-        else{
+        else {
             primary_exp = parsePrimaryExp();
         }
         return new UnaryExp(primary_exp, ident, lparent, func_r_params, rparent, unary_op, unary_exp);
     }
+
     //单目运算符 UnaryOp → '+' | '−' | '!'
-    private Syntax parseUnaryOp(){
+    private Syntax parseUnaryOp() {
         Token op_token;
 
         op_token = cur_token;
@@ -631,28 +828,30 @@ public class ParseHandler {
     private Syntax parseVarDecl() {
         Syntax b_type;
         Syntax var_def;
-        List<Tuple<Token,Syntax>> list = new ArrayList<>();
-        Token rbrace;
+        List<Tuple<Token, Syntax>> list = new ArrayList<>();
+        Token semicn_token;
 
         b_type = parseBType();
         var_def = parseVarDef();
-        while (cur_token.getTokenType().equals(TokenType.COMMA)){
+        while (cur_token.getTokenType().equals(TokenType.COMMA)) {
             Token comma_item = cur_token;
             getToken();
             Syntax var_def_item = parseVarDef();
+            list.add(new Tuple<>(comma_item,var_def_item));
         }
-        rbrace = cur_token;
+        semicn_token = cur_token;
         getToken();
-        return new VarDecl(b_type, var_def, list, rbrace);
+        return new VarDecl(b_type, var_def, list, semicn_token);
     }
 
     //变量定义 VarDef → Ident { '[' ConstExp ']' }
     private Syntax parseVarDef() {
         Syntax ident;
         List<Triple<Token, Syntax, Token>> list = new ArrayList<>();
-
+        Token assign_token = null;
+        Syntax init_val = null;
         ident = parseIdent();
-        while (cur_token.getTokenType().equals(TokenType.LBRACK)){
+        while (cur_token.getTokenType().equals(TokenType.LBRACK)) {
             Token lbrack_item = cur_token;
             getToken();
             Syntax const_exp_item = parseConstExp();
@@ -660,7 +859,12 @@ public class ParseHandler {
             getToken();
             list.add(new Triple<>(lbrack_item, const_exp_item, rbrack_item));
         }
-        return new VarDef(ident, list);
+        if (cur_token.getTokenType().equals(TokenType.ASSIGN)) {
+            assign_token = cur_token;
+            getToken();
+            init_val = parseInitVal();
+        }
+        return new VarDef(ident, list, assign_token, init_val);
     }
 
 }

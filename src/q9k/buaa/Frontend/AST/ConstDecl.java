@@ -5,9 +5,10 @@ import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.Token.Token;
 import q9k.buaa.Frontend.Token.TokenType;
+import q9k.buaa.INIT.Output;
 import q9k.buaa.Utils.Tuple;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 
 public class ConstDecl implements Syntax {
@@ -27,8 +28,16 @@ public class ConstDecl implements Syntax {
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        const_token.print();
+        b_type.print();
+        const_def.print();
+        for(Tuple<Token, Syntax> item : list){
+            item.getFirst().print();
+            item.getSecond().print();
+        }
+        semicn_token.print();
+        print_ast_name(ConstDecl.class);
     }
 
     @Override

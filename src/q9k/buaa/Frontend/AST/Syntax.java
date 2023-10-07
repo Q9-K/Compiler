@@ -1,6 +1,15 @@
 package q9k.buaa.Frontend.AST;
 
+import q9k.buaa.INIT.Output;
+
+import java.io.IOException;
+
 public interface Syntax {
-    public void print();//打印选项
-    public void handleError();//出错处理
+    void print() throws IOException;//打印选项
+    void handleError();//出错处理
+
+    default void print_ast_name(Class<?> objectClass) throws IOException{
+        Output.getInstance().write("<"+objectClass.getSimpleName()+">\n");
+    }
+
 }

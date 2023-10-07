@@ -1,5 +1,7 @@
 package q9k.buaa.Frontend.AST;
 
+import java.io.IOException;
+
 public class Decl implements Syntax {
     private Syntax const_decl;
     private Syntax var_decl;
@@ -11,8 +13,13 @@ public class Decl implements Syntax {
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        if(const_decl != null){
+            const_decl.print();
+        }
+        else{
+            var_decl.print();
+        }
     }
 
     @Override

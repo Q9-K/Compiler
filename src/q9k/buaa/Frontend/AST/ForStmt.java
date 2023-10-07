@@ -6,6 +6,8 @@ import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.Token.Token;
 import q9k.buaa.Frontend.Token.TokenType;
 
+import java.io.IOException;
+
 public class ForStmt implements Syntax{
     private Syntax l_val;
     private Token assign_token;
@@ -18,8 +20,11 @@ public class ForStmt implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        l_val.print();
+        assign_token.print();
+        exp.print();
+        print_ast_name(ForStmt.class);
     }
 
     @Override

@@ -6,6 +6,8 @@ import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.Token.Token;
 import q9k.buaa.Frontend.Token.TokenType;
 
+import java.io.IOException;
+
 public class FuncDef implements Syntax {
 
     private Syntax func_type;
@@ -26,8 +28,16 @@ public class FuncDef implements Syntax {
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        func_type.print();
+        ident.print();
+        lparent.print();
+        if(func_f_params != null){
+            func_f_params.print();
+        }
+        rparent.print();
+        block.print();
+        print_ast_name(FuncDef.class);
     }
 
     @Override

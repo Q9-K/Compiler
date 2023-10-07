@@ -2,6 +2,8 @@ package q9k.buaa.Frontend.AST;
 
 import q9k.buaa.Frontend.Token.Token;
 
+import java.io.IOException;
+
 public class Ident implements Syntax{
     private Token ident_token;
 
@@ -11,8 +13,8 @@ public class Ident implements Syntax{
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        ident_token.print();
     }
     //TODO:
     //identifier → identifier-nondigit

@@ -18,7 +18,8 @@ public class Token {
     }
 
 
-    public void write() throws IOException {
+
+    public void print() throws IOException {
         Output output = Output.getInstance();
         output.write(new StringBuffer(this.tokenType.name()).append(' ').append(this.content).append('\n'));
     }
@@ -31,5 +32,10 @@ public class Token {
     }
     public String getContent(){
         return content.toString();
+    }
+
+    @Override
+    public String toString() {
+        return getContent();
     }
 }

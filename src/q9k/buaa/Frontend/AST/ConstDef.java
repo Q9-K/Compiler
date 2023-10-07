@@ -5,8 +5,10 @@ import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.Token.Token;
 import q9k.buaa.Frontend.Token.TokenType;
+import q9k.buaa.INIT.Output;
 import q9k.buaa.Utils.Triple;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,8 +28,16 @@ public class ConstDef implements Syntax {
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        ident.print();
+        for(Triple<Token, Syntax, Token> item : list){
+            item.getFirst().print();
+            item.getSecond().print();
+            item.getThird().print();
+        }
+        assign_token.print();
+        const_init_val.print();
+        print_ast_name(ConstDef.class);
     }
 
     @Override

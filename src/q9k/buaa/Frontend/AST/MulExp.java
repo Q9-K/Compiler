@@ -1,6 +1,9 @@
 package q9k.buaa.Frontend.AST;
 
 import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.INIT.Output;
+
+import java.io.IOException;
 
 public class MulExp implements Syntax {
     private Syntax unary_exp;
@@ -15,8 +18,16 @@ public class MulExp implements Syntax {
     }
 
     @Override
-    public void print() {
-
+    public void print() throws IOException {
+        unary_exp.print();
+        print_ast_name(MulExp.class);
+        if(op_token != null){
+            op_token.print();
+            mul_exp.print();
+        }
+   /*     else {
+            print_ast_name(MulExp.class);
+        }*/
     }
 
     @Override
