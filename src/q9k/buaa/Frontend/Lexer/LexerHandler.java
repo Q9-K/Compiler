@@ -56,7 +56,7 @@ public class LexerHandler {
                 token.print();
             }
         }
-        System.out.println("lexer analyzer finished!");
+        System.out.println("lexer analyze finished!");
     }
 
     private void next() throws IOException {
@@ -148,6 +148,8 @@ public class LexerHandler {
             catToken();
         }
         Token token = new Token(token_content.toString(), line_number);
+
+
         token_stream.add(token);
     }
 

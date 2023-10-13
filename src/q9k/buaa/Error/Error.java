@@ -1,6 +1,6 @@
 package q9k.buaa.Error;
 
-public class Error {
+public class Error implements Comparable<Error>{
     private final int line_number;
     private final ErrorType errorType;
 
@@ -15,5 +15,15 @@ public class Error {
 
     public ErrorType getErrorType() {
         return errorType;
+    }
+
+    @Override
+    public int compareTo(Error o) {
+        return this.getLine_number() - o.getLine_number();
+    }
+
+    @Override
+    public String toString() {
+        return line_number + " " + errorType.getName() + '\n';
     }
 }

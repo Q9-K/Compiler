@@ -4,9 +4,18 @@ import java.util.HashMap;
 
 public enum ErrorType {
     ILLEGALSYMBOL("a"),//符号非法
-    MISSINGSEMICN("i"),
-    MISSINGRPARENT("j"),
-    MISSINGRBRACK("k"),
+    REPEAEDNAME("b"),//名字重定义
+    NOTDEFNAME("c"),//未定义的名字
+    NOTPARAMNUMFIT("d"),//函数参数个数不匹配
+    NOTPARAMTYPEFIT("e"),//函数参数类型不匹配
+    EXTRARETURNTYPE("f"),//无返回值的函数存在不匹配的return语句
+    LACKOFRETURN("g"),//有返回值的函数缺少return语句
+    CHANGECONST("h"),//不能改变常量的值
+    MISSINGSEMICN("i"),//缺少分号
+    MISSINGRPARENT("j"),//缺少右小括号’)’
+    MISSINGRBRACK("k"),//缺少右中括号’]’
+    NOTPRINTFIT("l"),//printf中格式字符与表达式个数不匹配
+    USINGCYCLEBC("m"),//在非循环块中使用break和continue语句
     REVERSERROR("reverse_error_code");
 
     public static final HashMap<String, ErrorType> error_table = new HashMap<>();

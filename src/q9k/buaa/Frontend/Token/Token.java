@@ -27,7 +27,7 @@ public class Token {
     public TokenType getTokenType(){
         return tokenType;
     }
-    public int getLine_number(){
+    public int getLineNumber(){
         return line_number;
     }
     public String getContent(){

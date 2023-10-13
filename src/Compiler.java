@@ -1,4 +1,6 @@
+import q9k.buaa.AST.Syntax;
 import q9k.buaa.Error.ErrorHandler;
+import q9k.buaa.Frontend.Visitor.Visitor;
 import q9k.buaa.INIT.Config;
 import q9k.buaa.INIT.Input;
 import q9k.buaa.Frontend.Lexer.LexerHandler;
@@ -29,27 +31,44 @@ public class Compiler {
         List<Token> token_stream = LexerHandler.getInstance().getToken_stream();
         //语法分析
         ParseHandler.getInstance(token_stream).run();
-        //错误处理
-//        ErrorHandler.getInstance().run();
         //语法树
+        Syntax root = ParseHandler.getInstance().getAst();
+        //语义分析
+        Visitor.getInstance(root).run();
         System.exit(0);
     }
     private void compilerInit() throws IOException {
         Config.init();
+        Config.setError_output_open(true);
 //        Config.setLexer_output_open(true);
-        Config.setParser_output_open(true);
+
+//        Config.setParser_output_open(true);
+
     }
     private void compilerInit(String input_path) throws IOException {
         Config.setInput_path(input_path);
         Config.init();
+        Config.setError_output_open(true);
 //        Config.setLexer_output_open(true);
-        Config.setParser_output_open(true);
+//        Config.setParser_output_open(true);
     }
     private void compilerInit(String input_path,String output_path) throws IOException {
         Config.setInput_path(input_path);
         Config.setOutput_path(output_path);
         Config.init();
+        Config.setError_output_open(true);
 //        Config.setLexer_output_open(true);
-        Config.setParser_output_open(true);
+//        Config.setParser_output_open(true);
+    }
+
+    private void compilerInit(String input_path,String output_path,String error_path) throws IOException {
+        Config.setInput_path(input_path);
+        Config.setOutput_path(output_path);
+        Config.setError_path(error_path);
+        Config.init();
+        Config.setError_output_open(true);
+
+//        Config.setLexer_output_open(true);
+//        Config.setParser_output_open(true);
     }
 }

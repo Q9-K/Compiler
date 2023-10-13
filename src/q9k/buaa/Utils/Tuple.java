@@ -1,6 +1,6 @@
 package q9k.buaa.Utils;
 
-import q9k.buaa.Frontend.AST.Syntax;
+import q9k.buaa.AST.Syntax;
 import q9k.buaa.Frontend.Token.Token;
 
 import java.io.IOException;

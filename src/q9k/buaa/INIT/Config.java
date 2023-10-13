@@ -1,5 +1,7 @@
 package q9k.buaa.INIT;
 import q9k.buaa.Error.ErrorHandler;
+import q9k.buaa.Symbol.Symbol;
+import q9k.buaa.Symbol.SymbolTable;
 
 import java.io.IOException;
 
@@ -10,6 +12,8 @@ public class Config {
     public static boolean lexer_output_open = false;
     public static boolean parser_output_open = false;
     public static boolean error_output_open = false;
+    public static Symbol root;
+    public static System cur_symbol;
     public static String getInput_path() {
         return input_path;
     }
@@ -34,9 +38,10 @@ public class Config {
         Config.error_path = error_path;
     }
     public static void init() throws IOException {
-        Input input = Input.getInstance(input_path);
-        Output output = Output.getInstance(output_path);
-        ErrorHandler errorHandler = ErrorHandler.getInstance();
+        Input input = Input.getInstance(input_path);//input初始化
+        Output output = Output.getInstance(output_path);//output初始化
+        ErrorHandler errorHandler = ErrorHandler.getInstance(error_path);//错误处理初始化
+        SymbolTable.clearTable();
     }
     public static void setLexer_output_open(boolean lexer_output_open) {
         Config.lexer_output_open = lexer_output_open;
@@ -47,4 +52,5 @@ public class Config {
     public static void setError_output_open(boolean error_output_open){
         Config.error_output_open = error_output_open;
     }
+
 }
