@@ -5,6 +5,7 @@ out/
 !**/src/test/**/out/
 compile.iml
 20374319_蒋康.zip
+*.log
 *.txt
 
 ### Eclipse ###
