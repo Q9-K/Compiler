@@ -1,9 +1,6 @@
 package q9k.buaa.AST;
 
-import q9k.buaa.Error.Error;
-import q9k.buaa.Error.ErrorHandler;
-import q9k.buaa.Error.ErrorType;
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.ArraySymbol;
 import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
@@ -19,6 +16,7 @@ public class ConstDef implements Syntax {
     private List<Triple<Token, Syntax,Token>> list = new ArrayList<>();
     private Token assign_token;
     private Syntax const_init_val;
+    private SymbolTable symbolTable;
 
 
     public ConstDef(Syntax ident, List<Triple<Token, Syntax, Token>> list, Token assign_token, Syntax const_init_val) {
@@ -32,9 +30,9 @@ public class ConstDef implements Syntax {
     public void print() throws IOException {
         ident.print();
         for(Triple<Token, Syntax, Token> item : list){
-            item.getFirst().print();
-            item.getSecond().print();
-            item.getThird().print();
+            item.first().print();
+            item.second().print();
+            item.third().print();
         }
         assign_token.print();
         const_init_val.print();
@@ -43,23 +41,23 @@ public class ConstDef implements Syntax {
 
     @Override
     public void visit() {
-        Ident temp = (Ident) ident;
-        if(temp.visitDef()){
+        this.symbolTable = SymbolTable.getCurrent();
+        if(SymbolTable.checkDef(ident)){
             Symbol symbol;
             if(list.isEmpty()){
-                symbol = new VarSymbol(getContent());
+                symbol = new VarSymbol(ident.toString());
             }
             else if(list.size() == 1){
-                symbol = new ArraySymbol(getContent(),list.get(0).getSecond(),null);
+                symbol = new ArraySymbol(ident.toString(),list.get(0).second(),null);
             }
             else {
-                symbol = new ArraySymbol(getContent(),list.get(0).getSecond(),list.get(1).getSecond());
+                symbol = new ArraySymbol(ident.toString(),list.get(0).second(),list.get(1).second());
             }
             symbol.setConst(true);
-            SymbolTable.addSymbol(symbol);
+            SymbolTable.getCurrent().addSymbol(symbol);
         }
         for(Triple<Token, Syntax, Token> item : list){
-            item.getSecond().visit();
+            item.second().visit();
         }
         const_init_val.visit();
     }
@@ -70,7 +68,18 @@ public class ConstDef implements Syntax {
         return const_init_val.getLineNumber();
     }
 
-    private String getContent(){
-        return ((Ident)ident).getTokenContent();
+
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(ident.toString());
+        for(Triple<Token, Syntax, Token> item : list){
+            content.append(item.first().toString()).append(item.second().toString()).append(item.third().toString());
+        }
+        content.append(assign_token.toString()).append(const_init_val.toString());
+        return content.toString();
     }
+
+
+
 }

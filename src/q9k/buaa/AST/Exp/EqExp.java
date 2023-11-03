@@ -1,18 +1,17 @@
 package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
-import q9k.buaa.Error.Error;
-import q9k.buaa.Error.ErrorHandler;
-import q9k.buaa.Error.ErrorType;
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolType;
 
 import java.io.IOException;
 
-public class EqExp implements Syntax,Type {
+public class EqExp implements Syntax {
     private Syntax rel_exp;
     private Token op_token ;
     private Syntax eq_exp ;
+    private SymbolTable symbolTable;
 
     public EqExp(Syntax rel_exp, Token op_token, Syntax eq_exp) {
         this.rel_exp = rel_exp;
@@ -32,6 +31,7 @@ public class EqExp implements Syntax,Type {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         rel_exp.visit();
         if(eq_exp!=null){
             eq_exp.visit();
@@ -47,8 +47,14 @@ public class EqExp implements Syntax,Type {
         return eq_exp.getLineNumber();
     }
 
+
     @Override
-    public SymbolType getSymbolType() {
-        return ((RelExp)rel_exp).getSymbolType();
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(rel_exp.toString());
+        if(op_token != null){
+            content.append(op_token.toString()).append(eq_exp.toString());
+        }
+        return content.toString();
     }
 }

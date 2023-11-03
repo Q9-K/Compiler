@@ -1,15 +1,17 @@
 package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolType;
 
 import java.io.IOException;
 
-public class LOrExp implements Syntax,Type {
+public class LOrExp implements Syntax {
     private Syntax l_and_exp;
     private Token or_token;
     private Syntax l_or_exp;
+    private SymbolTable symbolTable;
 
     public LOrExp(Syntax l_and_exp, Token or_token, Syntax l_or_exp) {
         this.l_and_exp = l_and_exp;
@@ -25,13 +27,11 @@ public class LOrExp implements Syntax,Type {
             or_token.print();
             l_or_exp.print();
         }
-   /*     else {
-            print_ast_name(LOrExp.class);
-        }*/
     }
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         l_and_exp.visit();
         if(l_or_exp!=null){
             l_or_exp.visit();
@@ -47,7 +47,12 @@ public class LOrExp implements Syntax,Type {
     }
 
     @Override
-    public SymbolType getSymbolType() {
-        return null;
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(l_and_exp.toString());
+        if(or_token != null){
+            content.append(or_token.toString()).append(l_or_exp.toString());
+        }
+        return content.toString();
     }
 }

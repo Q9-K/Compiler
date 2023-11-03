@@ -1,15 +1,14 @@
 package q9k.buaa.AST;
 
 import q9k.buaa.Symbol.SymbolTable;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CompUnit implements Syntax {
-    private List<Syntax> decls = new ArrayList<>();
-    private List<Syntax> func_defs = new ArrayList<>();
+    private List<Syntax> decls;
+    private List<Syntax> func_defs;
     private Syntax main_func_def;
+    private SymbolTable symbolTable;
 
     public CompUnit(List<Syntax> decls, List<Syntax> func_defs, Syntax main_func_def) {
         this.decls = decls;
@@ -31,9 +30,7 @@ public class CompUnit implements Syntax {
 
     @Override
     public void visit() {
-        SymbolTable current = SymbolTable.getCurrent();
-        SymbolTable symbolTable = SymbolTable.getGlobal();
-        SymbolTable.changeToTable(symbolTable);
+        symbolTable = SymbolTable.getCurrent();
         for(Syntax item : decls){
             item.visit();
         }
@@ -41,12 +38,25 @@ public class CompUnit implements Syntax {
             item.visit();
         }
         main_func_def.visit();
-        SymbolTable.changeToTable(current);
     }
 
 
     @Override
     public int getLineNumber() {
-        return 0;
+        return 1;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        for(Syntax item : decls){
+            content.append(item.toString());
+        }
+        for(Syntax item : func_defs){
+            content.append(item.toString());
+        }
+        content.append(main_func_def.toString());
+        return content.toString();
+    }
+
 }

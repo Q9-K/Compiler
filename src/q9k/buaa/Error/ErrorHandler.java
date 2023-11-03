@@ -1,8 +1,10 @@
 package q9k.buaa.Error;
 
-import q9k.buaa.INIT.Output;
+import q9k.buaa.INIT.Config;
+import q9k.buaa.Utils.Output;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +34,12 @@ public class ErrorHandler {
             errorHandler = new ErrorHandler(error_path);
         }
         return errorHandler;
+    }
+
+    public void run() throws IOException{
+        if(Config.error_output_open){
+            print();
+        }
     }
     public static void clearInstance(){
         errorHandler = null;

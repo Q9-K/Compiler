@@ -1,16 +1,17 @@
 package q9k.buaa.AST.Stmt;
 
 import q9k.buaa.AST.Syntax;
-import q9k.buaa.Frontend.Token.Token;
-import q9k.buaa.Frontend.Token.TokenType;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 
 import java.io.IOException;
 
-public class Stmt8 implements Stmt{
+public class ExpStmt implements Stmt{
     private Syntax exp;
     private Token semicn_token;
+    private SymbolTable symbolTable;
 
-    public Stmt8(Syntax exp, Token semicn_token) {
+    public ExpStmt(Syntax exp, Token semicn_token) {
         this.exp = exp;
         this.semicn_token = semicn_token;
     }
@@ -26,6 +27,7 @@ public class Stmt8 implements Stmt{
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         if(exp!=null){
             exp.visit();
         }
@@ -36,5 +38,12 @@ public class Stmt8 implements Stmt{
         return exp.getLineNumber();
     }
 
+    @Override
+    public String toString() {
+        if(exp!=null){
+            return exp.toString()+semicn_token.toString();
+        }
+        return semicn_token.toString();
+    }
 
 }

@@ -2,12 +2,12 @@ package auto_test;
 
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.Error.ErrorHandler;
-import q9k.buaa.Frontend.Lexer.LexerHandler;
-import q9k.buaa.Frontend.Parse.ParseHandler;
-import q9k.buaa.Frontend.Token.Token;
-import q9k.buaa.Frontend.Visitor.Visitor;
+import q9k.buaa.Frontend.Lexer;
+import q9k.buaa.Frontend.Parser;
+import q9k.buaa.Token.Token;
+import q9k.buaa.Frontend.Visitor;
 import q9k.buaa.INIT.Config;
-import q9k.buaa.INIT.Input;
+import q9k.buaa.Utils.Input;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,8 +55,8 @@ public class TestCompiler {
                     Files.createFile(path);
                 }
                 try {
-                    LexerHandler.clearInstance();
-                    ParseHandler.clearInstance();
+                    Lexer.clearInstance();
+                    Parser.clearInstance();
                     ErrorHandler.clearInstance();
                     new TestCompiler().run(input_path, output_path, error_path);
                     List<String> list1 = Files.readAllLines(path);
@@ -93,6 +93,7 @@ public class TestCompiler {
 //                    }
                     if(!list1.isEmpty()){
                         System.out.println("WA!");
+                        System.exit(-1);
                     }
                     else{
                         System.out.println("AC!");
@@ -115,13 +116,13 @@ public class TestCompiler {
         //获取字符流
         StringBuffer character_stream = Input.getInstance().getCharacterStream();
         //词法分析
-        LexerHandler.getInstance(character_stream).run();
+        Lexer.getInstance(character_stream).run();
         //获取词法单元流
-        List<Token> token_stream = LexerHandler.getInstance().getToken_stream();
+        List<Token> token_stream = Lexer.getInstance().getToken_stream();
         //语法分析
-        ParseHandler.getInstance(token_stream).run();
+        Parser.getInstance(token_stream).run();
         //语法树
-        Syntax root = ParseHandler.getInstance().getAst();
+        Syntax root = Parser.getInstance().getAst();
         //语义分析
         Visitor.getInstance(root).run();
         //语法树

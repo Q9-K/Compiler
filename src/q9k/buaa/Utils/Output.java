@@ -1,4 +1,4 @@
-package q9k.buaa.INIT;
+package q9k.buaa.Utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,16 +15,13 @@ public class Output {
     }
     public static synchronized Output getInstance() throws IOException {
         if(output == null){
-            System.out.println("something wrong happened at output init!");
+            System.out.println("Something wrong happened at output init!");
             System.exit(-1);
         }
         return output;
     }
     public static synchronized Output getInstance(String file_path) throws IOException{
-        if(output == null){
-            output = new Output(file_path);
-        }
-        else if(!output.file_path.equals(file_path)){
+        if(output == null||!output.file_path.equals(file_path)){
             output = new Output(file_path);
         }
         return output;

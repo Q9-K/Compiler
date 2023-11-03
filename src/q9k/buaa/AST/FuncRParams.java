@@ -1,7 +1,7 @@
 package q9k.buaa.AST;
 
-import q9k.buaa.Frontend.Token.Token;
-import q9k.buaa.Symbol.SymbolType;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Tuple;
 
 import java.io.IOException;
@@ -11,6 +11,7 @@ import java.util.List;
 public class FuncRParams implements Syntax {
     private Syntax exp;
    private List<Tuple<Token, Syntax>> list;
+   private SymbolTable symbolTable;
 
     public FuncRParams(Syntax exp, List<Tuple<Token, Syntax>> list) {
         this.exp = exp;
@@ -21,15 +22,15 @@ public class FuncRParams implements Syntax {
     public void print() throws IOException {
         exp.print();
         for(Tuple<Token, Syntax> item : list){
-            item.getFirst().print();
-            item.getSecond().print();
+            item.first().print();
+            item.second().print();
         }
         printAstName(FuncRParams.class);
     }
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTable.getCurrent();
     }
 
     @Override
@@ -37,15 +38,22 @@ public class FuncRParams implements Syntax {
         return exp.getLineNumber();
     }
 
-    public Syntax getExp() {
-        return exp;
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(exp.toString());
+        for(Tuple<Token, Syntax> item : list){
+            content.append(item.first().toString()).append(item.second().toString());
+        }
+        return content.toString();
     }
+
 
     public List<Syntax> getSymbolTypeList() {
         List<Syntax> list1 = new ArrayList<>();
         list1.add(exp);
         for(Tuple<Token, Syntax> item : list){
-            list1.add(item.getSecond());
+            list1.add(item.second());
         }
         return list1;
     }

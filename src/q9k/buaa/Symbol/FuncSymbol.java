@@ -1,7 +1,5 @@
 package q9k.buaa.Symbol;
 
-import q9k.buaa.Frontend.Token.*;
-
 import java.util.ArrayList;
 import java.util.List;
 

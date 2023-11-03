@@ -1,6 +1,7 @@
 package q9k.buaa.AST;
 
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Tuple;
 
 import java.io.IOException;
@@ -11,6 +12,8 @@ public class VarDecl implements Syntax {
     private Syntax var_def;
     private List<Tuple<Token, Syntax>> list;
     private Token semicn_token;
+
+    private SymbolTable symbolTable;
 
     public VarDecl(Syntax b_type, Syntax var_def, List<Tuple<Token, Syntax>> list, Token semicn_token) {
         this.b_type = b_type;
@@ -24,8 +27,8 @@ public class VarDecl implements Syntax {
         b_type.print();
         var_def.print();
         for(Tuple<Token, Syntax> item : list){
-            item.getFirst().print();
-            item.getSecond().print();
+            item.first().print();
+            item.second().print();
         }
         semicn_token.print();
         printAstName(VarDecl.class);
@@ -33,9 +36,10 @@ public class VarDecl implements Syntax {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         var_def.visit();
         for(Tuple<Token, Syntax> item : list){
-            item.getSecond().visit();
+            item.second().visit();
         }
     }
 
@@ -46,7 +50,7 @@ public class VarDecl implements Syntax {
         }
         else{
             Tuple<Token, Syntax> item = list.get(list.size()-1);
-            return item.getSecond().getLineNumber();
+            return item.second().getLineNumber();
         }
     }
 

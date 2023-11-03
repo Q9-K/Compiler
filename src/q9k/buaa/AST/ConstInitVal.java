@@ -1,6 +1,7 @@
 package q9k.buaa.AST;
 
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Tuple;
 
 import java.io.IOException;
@@ -12,6 +13,8 @@ public class ConstInitVal implements Syntax {
     private Syntax const_init_val;
     private List<Tuple<Token, Syntax>> list;
     private Token rbrace_token;
+
+    private SymbolTable symbolTable;
 
     public ConstInitVal(Syntax const_exp, Token lbrace_token, Syntax const_init_val, List<Tuple<Token, Syntax>> list, Token rbrace_token) {
         this.const_exp = const_exp;
@@ -31,8 +34,8 @@ public class ConstInitVal implements Syntax {
             if(const_init_val != null){
                 const_init_val.print();
                 for(Tuple<Token, Syntax> item : list){
-                    item.getFirst().print();
-                    item.getSecond().print();
+                    item.first().print();
+                    item.second().print();
                 }
             }
             rbrace_token.print();
@@ -43,6 +46,7 @@ public class ConstInitVal implements Syntax {
     @Override
     public void visit()
     {
+        this.symbolTable = SymbolTable.getCurrent();
         if(const_exp != null){
             const_exp.visit();
         }
@@ -50,7 +54,7 @@ public class ConstInitVal implements Syntax {
             if(const_init_val != null){
                 const_init_val.visit();
                 for(Tuple<Token, Syntax> item : list){
-                    item.getSecond().visit();
+                    item.second().visit();
                 }
             }
         }
@@ -66,4 +70,16 @@ public class ConstInitVal implements Syntax {
             return const_init_val.getLineNumber();
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(const_exp.toString()).append(lbrace_token.toString()).append(const_init_val.toString());
+        for(Tuple<Token, Syntax> item : list){
+            content.append(item.first().toString()).append(item.second().toString());
+        }
+        content.append(rbrace_token.toString());
+        return content.toString();
+    }
+
 }

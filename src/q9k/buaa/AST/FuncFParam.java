@@ -1,13 +1,10 @@
 package q9k.buaa.AST;
 
-import q9k.buaa.Error.Error;
-import q9k.buaa.Error.ErrorHandler;
-import q9k.buaa.Error.ErrorType;
-import q9k.buaa.Frontend.Token.Token;
 import q9k.buaa.Symbol.ArraySymbol;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Symbol.SymbolType;
 import q9k.buaa.Symbol.VarSymbol;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Triple;
 
 import java.io.IOException;
@@ -19,6 +16,8 @@ public class FuncFParam implements Syntax {
     private Token lbrack = null;
     private Token rbrack = null;
     private List<Triple<Token, Syntax, Token>> list;
+
+    private SymbolTable symbolTable;
 
     public FuncFParam(Syntax b_type, Syntax ident, Token lbrack, Token rbrack, List<Triple<Token, Syntax, Token>> list) {
         this.b_type = b_type;
@@ -37,24 +36,23 @@ public class FuncFParam implements Syntax {
             rbrack.print();
         }
         for (Triple<Token, Syntax, Token> item : list) {
-            item.getFirst().print();
-            item.getSecond().print();
-            item.getThird().print();
+            item.first().print();
+            item.second().print();
+            item.third().print();
         }
         printAstName(FuncFParam.class);
     }
 
     @Override
     public void visit() {
-        if (SymbolTable.getSymbolInCurrent(((Ident) ident).getTokenContent()) != null) {
-            ErrorHandler.getInstance().addError(new Error(ErrorType.REPEAEDNAME, getLineNumber()));
-        } else {
+        this.symbolTable = SymbolTable.getCurrent();
+        if (SymbolTable.checkDef(ident)) {
             if (lbrack == null) {
-                SymbolTable.addSymbol(new VarSymbol(((Ident) ident).getTokenContent()));
+                SymbolTable.getCurrent().addSymbol(new VarSymbol(ident.toString()));
             } else if (list.isEmpty()) {
-                SymbolTable.addSymbol(new ArraySymbol(((Ident) ident).getTokenContent(), null, null));
+                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(), null, null));
             } else {
-                SymbolTable.addSymbol(new ArraySymbol(((Ident) ident).getTokenContent(), null, list.get(0).getSecond()));
+                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(), null, list.get(0).second()));
             }
         }
     }
@@ -62,6 +60,19 @@ public class FuncFParam implements Syntax {
     @Override
     public int getLineNumber() {
         return ident.getLineNumber();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(b_type.toString()).append(' ').append(ident.toString());
+        if (lbrack != null) {
+            content.append(lbrack.toString()).append(rbrack.toString());
+            for (Triple<Token, Syntax, Token> item : list) {
+                content.append(item.first().toString()).append(item.second().toString()).append(item.third().toString());
+            }
+        }
+        return content.toString();
     }
 
     public SymbolType getSymbolType() {

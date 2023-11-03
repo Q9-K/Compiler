@@ -1,7 +1,6 @@
-package q9k.buaa.Frontend.Token;
+package q9k.buaa.Token;
 
-import q9k.buaa.INIT.Output;
-
+import q9k.buaa.Utils.Output;
 import java.io.IOException;
 
 public class Token {
@@ -13,11 +12,9 @@ public class Token {
         this.content = content;
         this.line_number = line_number;
         if (!this.content.isEmpty()) {
-            this.tokenType = TokenType.getTokenType(content);
+            this.tokenType = TokenType.getTokenType(this);
         }
     }
-
-
 
     public void print() throws IOException {
         Output output = Output.getInstance();
@@ -30,12 +27,8 @@ public class Token {
     public int getLineNumber(){
         return line_number;
     }
-    public String getContent(){
-        return content.toString();
-    }
-
     @Override
-    public String toString() {
-        return getContent();
+    public String toString(){
+        return content;
     }
 }

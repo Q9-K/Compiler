@@ -1,9 +1,12 @@
 package q9k.buaa.AST;
 
+import q9k.buaa.Symbol.SymbolTable;
+
 import java.io.IOException;
 
 public class Cond implements Syntax {
     private Syntax l_or_exp;
+    private SymbolTable symbolTable;
 
     public Cond(Syntax l_or_exp) {
         this.l_or_exp = l_or_exp;
@@ -17,6 +20,7 @@ public class Cond implements Syntax {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         l_or_exp.visit();
     }
 
@@ -25,4 +29,11 @@ public class Cond implements Syntax {
     public int getLineNumber() {
         return l_or_exp.getLineNumber();
     }
+
+
+    @Override
+    public String toString() {
+        return l_or_exp.toString();
+    }
+
 }

@@ -13,10 +13,6 @@ public class Error implements Comparable<Error>{
         return line_number;
     }
 
-    public ErrorType getErrorType() {
-        return errorType;
-    }
-
     @Override
     public int compareTo(Error o) {
         return this.getLine_number() - o.getLine_number();
@@ -24,6 +20,6 @@ public class Error implements Comparable<Error>{
 
     @Override
     public String toString() {
-        return line_number + " " + errorType.getName() + '\n';
+        return String.valueOf(line_number) + ' ' + errorType.getName() + '\n';
     }
 }

@@ -5,10 +5,11 @@ import q9k.buaa.Symbol.SymbolTable;
 
 import java.io.IOException;
 
-public class Stmt6 implements Stmt{
+public class BlockStmt implements Stmt{
     private Syntax block;
+    private SymbolTable symbolTable;
 
-    public Stmt6(Syntax block) {
+    public BlockStmt(Syntax block) {
         this.block = block;
     }
 
@@ -21,16 +22,21 @@ public class Stmt6 implements Stmt{
 
     @Override
     public void visit() {
-        SymbolTable current = SymbolTable.getCurrent();
-        SymbolTable symbolTable = new SymbolTable();
-        SymbolTable.changeToTable(symbolTable);
+        this.symbolTable = SymbolTable.getCurrent();
+        SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
         block.visit();
-        SymbolTable.changeToTable(current);
+        SymbolTable.changeToFather();
     }
 
     @Override
     public int getLineNumber() {
         return 0;
     }
+
+    @Override
+    public String toString() {
+        return block.toString();
+    }
+
 
 }

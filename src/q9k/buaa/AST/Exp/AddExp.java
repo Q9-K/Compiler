@@ -1,15 +1,17 @@
 package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolType;
 
 import java.io.IOException;
 
-public class AddExp implements Syntax,Type {
+public class AddExp implements Syntax {
     private Syntax mul_exp;
     private Token op_token;
     private Syntax add_exp;
+    private SymbolTable symbolTable;
 
     public AddExp(Syntax mul_exp, Token op_token, Syntax add_exp) {
         this.mul_exp = mul_exp;
@@ -32,6 +34,7 @@ public class AddExp implements Syntax,Type {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         mul_exp.visit();
         if(op_token!=null){
             add_exp.visit();
@@ -47,7 +50,12 @@ public class AddExp implements Syntax,Type {
     }
 
     @Override
-    public SymbolType getSymbolType() {
-        return ((MulExp)mul_exp).getSymbolType();
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(mul_exp.toString());
+        if(op_token!=null){
+            content.append(op_token.toString()).append(add_exp.toString());
+        }
+        return content.toString();
     }
 }

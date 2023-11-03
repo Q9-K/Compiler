@@ -1,13 +1,14 @@
-package q9k.buaa.Frontend.Parse;
+package q9k.buaa.Frontend;
 
 import q9k.buaa.AST.*;
 import q9k.buaa.AST.Exp.*;
 import q9k.buaa.AST.Number;
 import q9k.buaa.AST.Stmt.*;
+import q9k.buaa.AST.Stmt.ForStmt;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
-import q9k.buaa.Frontend.Token.*;
+import q9k.buaa.Token.*;
 import q9k.buaa.INIT.Config;
 import q9k.buaa.Utils.Triple;
 import q9k.buaa.Utils.Tuple;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParseHandler {
+public class Parser {
     private int index = 0;
     private Token cur_token;
     private final List<Token> token_stream;
@@ -26,35 +27,35 @@ public class ParseHandler {
         return ast;
     }
 
-    public static ParseHandler parseHandler;
+    public static Parser parser;
 
-    private ParseHandler(List<Token> token_stream) {
+    private Parser(List<Token> token_stream) {
         this.token_stream = token_stream;
     }
 
-    public static synchronized ParseHandler getInstance(List<Token> token_stream) {
-        if (parseHandler == null) {
-            parseHandler = new ParseHandler(token_stream);
+    public static synchronized Parser getInstance(List<Token> token_stream) {
+        if (parser == null) {
+            parser = new Parser(token_stream);
         }
-        return parseHandler;
+        return parser;
     }
 
-    public static synchronized ParseHandler getInstance() {
-        if (parseHandler == null) {
-            System.out.println("something wrong happened at parser init!");
+    public static synchronized Parser getInstance() {
+        if (parser == null) {
+            System.out.println("Something wrong happened at parser init!");
             System.exit(-1);
         }
-        return parseHandler;
+        return parser;
     }
 
     public static void clearInstance(){
-        parseHandler = null;
+        parser = null;
     }
 
     public void run() throws IOException {
         getToken();
         ast = parseCompUnit();
-        System.out.println("parser analyze finished!");
+        System.out.println("Parser analyze finished!");
         if (Config.parser_output_open) {
             ast.print();
         }
@@ -199,7 +200,7 @@ public class ParseHandler {
         getToken();
         int line_number = const_def.getLineNumber();
         if(!list.isEmpty()){
-            line_number = list.get(list.size()-1).getSecond().getLineNumber();
+            line_number = list.get(list.size()-1).second().getLineNumber();
         }
         handleMissing(semicn_token, TokenType.SEMICN,line_number);
         return new ConstDecl(const_token, b_type, const_def, list, semicn_token);
@@ -321,7 +322,7 @@ public class ParseHandler {
         assign_token = cur_token;
         getToken();
         exp = parseExp();
-        return new ForStmt(l_val, assign_token, exp);
+        return new q9k.buaa.AST.ForStmt(l_val, assign_token, exp);
     }
 
     //函数定义 FuncDef → FuncType Ident '(' [FuncFParams] ')' Block
@@ -645,7 +646,7 @@ public class ParseHandler {
                 getToken();
                 stmt2 = parseStmt();
             }
-            return new Stmt1(if_token, lparent_token, cond, rparent_token, stmt1, else_token, stmt2);
+            return new IfStmt(if_token, lparent_token, cond, rparent_token, stmt1, else_token, stmt2);
         }
         //'for' '(' [ForStmt] ';' [Cond] ';' [ForStmt] ')' Stmt
         else if (cur_token.getTokenType().equals(TokenType.FORTK)) {
@@ -681,7 +682,7 @@ public class ParseHandler {
             handleMissing(rparent_token,TokenType.RPARENT,for_token.getLineNumber());
             stmt = parseStmt();
 
-            return new Stmt2(for_token, lparent_token, for_stmt1, semicn_token1, cond, semicn_token2, for_stmt2, rparent_token, stmt);
+            return new ForStmt(for_token, lparent_token, for_stmt1, semicn_token1, cond, semicn_token2, for_stmt2, rparent_token, stmt);
         }
         //'break' ';' | 'continue' ';'
         else if (cur_token.getTokenType().equals(TokenType.BREAKTK) || cur_token.getTokenType().equals(TokenType.CONTINUETK)) {
@@ -692,7 +693,7 @@ public class ParseHandler {
             semicn_token = cur_token;
             getToken();
             handleMissing(semicn_token, TokenType.SEMICN, action_token.getLineNumber());
-            return new Stmt3(action_token, semicn_token);
+            return new ActionStmt(action_token, semicn_token);
         }
         //'return' [Exp] ';'
         else if (cur_token.getTokenType().equals(TokenType.RETURNTK)) {
@@ -712,7 +713,7 @@ public class ParseHandler {
                 line_number = exp.getLineNumber();
             }
             handleMissing(semicn_token,TokenType.SEMICN, line_number);
-            return new Stmt4(return_token, exp, semicn_token);
+            return new ReturnStmt(return_token, exp, semicn_token);
         }
         //'printf''('FormatString{','Exp}')'';'
         else if (cur_token.getTokenType().equals(TokenType.PRINTFTK)) {
@@ -735,21 +736,25 @@ public class ParseHandler {
                 list.add(new Tuple<>(comma_item, exp_item));
             }
             rparent_token = cur_token;
+            int line_number = format_string.getLineNumber();
+            if(!list.isEmpty()){
+                line_number=list.get(list.size()-1).second().getLineNumber();
+            }
+            handleMissing(rparent_token, TokenType.RPARENT, line_number);
             getToken();
             semicn_token = cur_token;
             getToken();
-            int line_number = format_string.getLineNumber();
-            if(!list.isEmpty()){
-                line_number=list.get(list.size()-1).getSecond().getLineNumber();
+            if(rparent_token.getTokenType().equals(TokenType.RPARENT)){
+                line_number = rparent_token.getLineNumber();
             }
             handleMissing(semicn_token,TokenType.SEMICN, line_number);
-            return new Stmt5(printf_token, lparent_token, format_string, list, rparent_token, semicn_token);
+            return new PrintfStmt(printf_token, lparent_token, format_string, list, rparent_token, semicn_token);
         }
         //Block
         else if (cur_token.getTokenType().equals(TokenType.LBRACE)) {
             Syntax block;
             block = parseBlock();
-            return new Stmt6(block);
+            return new BlockStmt(block);
         }
         // First为Ident
         else if (cur_token.getTokenType().equals(TokenType.IDENFR)) {
@@ -792,7 +797,7 @@ public class ParseHandler {
                     getToken();
                     handleMissing(semicn_token, TokenType.SEMICN, getint_token.getLineNumber());
                 }
-                return new Stmt7(l_val, assign_token, exp, getint_token, lparent_token, rparent_token, semicn_token);
+                return new AssignStmt(l_val, assign_token, exp, getint_token, lparent_token, rparent_token, semicn_token);
             } else {
                 //[Exp] ';'
                 if(isExpFirst(cur_token)){
@@ -803,7 +808,7 @@ public class ParseHandler {
                 if(exp!=null){
                     handleMissing(semicn_token,TokenType.SEMICN, exp.getLineNumber());
                 }
-                return new Stmt8(exp, semicn_token);
+                return new ExpStmt(exp, semicn_token);
             }
         }
         //[Exp] ';'
@@ -818,7 +823,7 @@ public class ParseHandler {
             if(exp!=null){
                 handleMissing(semicn_token,TokenType.SEMICN, exp.getLineNumber());
             }
-            return new Stmt8(exp, semicn_token);
+            return new ExpStmt(exp, semicn_token);
         }
     }
 
@@ -896,7 +901,7 @@ public class ParseHandler {
         getToken();
         int line_number = var_def.getLineNumber();
         if(!list.isEmpty()){
-            line_number = list.get(list.size()-1).getSecond().getLineNumber();
+            line_number = list.get(list.size()-1).second().getLineNumber();
         }
         handleMissing(semicn_token, TokenType.SEMICN, line_number);
         return new VarDecl(b_type, var_def, list, semicn_token);

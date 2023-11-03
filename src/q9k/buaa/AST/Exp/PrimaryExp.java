@@ -2,18 +2,20 @@ package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.LVal;
 import q9k.buaa.AST.Syntax;
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolType;
 
 import java.io.IOException;
 
-public class PrimaryExp implements Syntax,Type {
+public class PrimaryExp implements Syntax {
 
     private Token lparent;
     private Syntax exp;
     private Token rparent;
     private Syntax l_val;
     private Syntax number;
+    private SymbolTable symbolTable;
 
     public PrimaryExp(Token lparent, Syntax exp, Token rparent, Syntax l_val, Syntax number) {
         this.lparent = lparent;
@@ -41,6 +43,7 @@ public class PrimaryExp implements Syntax,Type {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         if(exp != null){
             exp.visit();
         }
@@ -67,15 +70,15 @@ public class PrimaryExp implements Syntax,Type {
     }
 
     @Override
-    public SymbolType getSymbolType() {
+    public String toString() {
         if(exp != null){
-            return ((Exp)exp).getSymbolType();
+            return lparent.toString()+exp.toString()+rparent.toString();
         }
         else if(l_val != null){
-            return ((LVal)l_val).getSymbolType();
+            return l_val.toString();
         }
         else{
-            return SymbolType.VAR;
+            return number.toString();
         }
     }
 }

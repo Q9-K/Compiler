@@ -21,25 +21,11 @@ public abstract class Symbol {
     }
 
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getTable_id() {
-        return table_id;
-    }
-
-    public void setTable_id(int table_id) {
-        this.table_id = table_id;
-    }
-
-    public String getContent() {
+    @Override
+    public String toString() {
         return content;
     }
+
     public SymbolType getSymbolType() {
         return symbolType;
     }

@@ -5,12 +5,13 @@ import q9k.buaa.AST.Syntax;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
-import q9k.buaa.Frontend.Token.Token;
-import q9k.buaa.Frontend.Token.TokenType;
+import q9k.buaa.Symbol.Symbol;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 
 import java.io.IOException;
 
-public class Stmt7 implements Stmt{
+public class AssignStmt implements Stmt{
     private Syntax l_val;
     private Token assign_token;
     private Syntax exp;
@@ -18,8 +19,9 @@ public class Stmt7 implements Stmt{
     private Token lparent_token;
     private Token rparent_token;
     private Token semicn_token;
+    private SymbolTable symbolTable;
 
-    public Stmt7(Syntax l_val, Token assign_token, Syntax exp, Token getint_token, Token lparent_token, Token rparent_token, Token semicn_token) {
+    public AssignStmt(Syntax l_val, Token assign_token, Syntax exp, Token getint_token, Token lparent_token, Token rparent_token, Token semicn_token) {
         this.l_val = l_val;
         this.assign_token = assign_token;
         this.exp = exp;
@@ -48,10 +50,14 @@ public class Stmt7 implements Stmt{
 
     @Override
     public void visit() {
-        LVal temp = (LVal)l_val;
-        temp.visit();
-        temp.visitConst();
-
+        this.symbolTable = SymbolTable.getCurrent();
+        l_val.visit();
+        Symbol symbol = SymbolTable.getSymbol(l_val);
+        if(symbol!=null){
+            if(symbol.isConst()){
+                ErrorHandler.getInstance().addError(new Error(ErrorType.CHANGECONST, l_val.getLineNumber()));
+            }
+        }
     }
 
     @Override
@@ -62,6 +68,20 @@ public class Stmt7 implements Stmt{
         else{
             return rparent_token.getLineNumber();
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(l_val.toString()).append(assign_token.toString());
+        if(exp!=null){
+            content.append(exp.toString()).append(semicn_token.toString());
+        }
+        else{
+            content.append(getint_token.toString()).append(lparent_token.toString())
+                    .append(rparent_token.toString()).append(semicn_token.toString());
+        }
+        return content.toString();
     }
 
 }

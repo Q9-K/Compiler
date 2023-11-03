@@ -1,13 +1,12 @@
 package q9k.buaa.AST.Stmt;
 
 import q9k.buaa.AST.Syntax;
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolTable;
-import q9k.buaa.Symbol.SymbolType;
 
 import java.io.IOException;
 
-public class Stmt1 implements Stmt{
+public class IfStmt implements Stmt{
     private Token if_token;
     private Token lparent_token;
     private Syntax cond;
@@ -15,7 +14,8 @@ public class Stmt1 implements Stmt{
     private Syntax stmt1;
     private Token else_token;
     private Syntax stmt2;
-    public Stmt1(Token if_token, Token lparent_token, Syntax cond, Token rparent_token, Syntax stmt1, Token else_token, Syntax stmt2) {
+    private SymbolTable symbolTable;
+    public IfStmt(Token if_token, Token lparent_token, Syntax cond, Token rparent_token, Syntax stmt1, Token else_token, Syntax stmt2) {
         this.if_token = if_token;
         this.lparent_token = lparent_token;
         this.cond = cond;
@@ -41,23 +41,32 @@ public class Stmt1 implements Stmt{
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         cond.visit();
-        SymbolTable current = SymbolTable.getCurrent();
-        SymbolTable symbolTable = new SymbolTable();
-        SymbolTable.changeToTable(symbolTable);
+        SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
         stmt1.visit();
-        SymbolTable.changeToTable(current);
+        SymbolTable.changeToFather();
         if(else_token!=null){
-            symbolTable = new SymbolTable();
-            SymbolTable.changeToTable(symbolTable);
+            SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
             stmt2.visit();
-            SymbolTable.changeToTable(current);
+            SymbolTable.changeToFather();
         }
     }
 
     @Override
     public int getLineNumber() {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(if_token.toString()).append(lparent_token.toString())
+                .append(cond.toString()).append(rparent_token.toString()).append(stmt1.toString());
+        if(else_token!=null){
+            content.append(else_token.toString()).append(stmt2.toString());
+        }
+        return content.toString();
     }
 
 }

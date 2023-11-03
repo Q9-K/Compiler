@@ -1,15 +1,17 @@
 package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolType;
 
 import java.io.IOException;
 
-public class RelExp implements Syntax,Type {
+public class RelExp implements Syntax {
     private Syntax add_exp;
     private Token op_token;
     private Syntax rel_exp;
+    private SymbolTable symbolTable;
 
 
     public RelExp(Syntax add_exp, Token op_token, Syntax rel_exp) {
@@ -30,6 +32,7 @@ public class RelExp implements Syntax,Type {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         add_exp.visit();
         if(rel_exp!=null){
             rel_exp.visit();
@@ -42,7 +45,12 @@ public class RelExp implements Syntax,Type {
     }
 
     @Override
-    public SymbolType getSymbolType() {
-        return ((AddExp)add_exp).getSymbolType();
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(add_exp.toString());
+        if(op_token != null){
+            content.append(op_token.toString()).append(rel_exp.toString());
+        }
+        return content.toString();
     }
 }

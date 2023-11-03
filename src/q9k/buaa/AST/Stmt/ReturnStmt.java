@@ -4,18 +4,19 @@ import q9k.buaa.AST.Syntax;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolTable;
 
 import java.io.IOException;
 
-public class Stmt4 implements Stmt{
+public class ReturnStmt implements Stmt{
 
     Token return_token;
     Syntax exp;
     Token semicn_token;
+    SymbolTable symbolTable;
 
-    public Stmt4(Token return_token, Syntax exp, Token semicn_token) {
+    public ReturnStmt(Token return_token, Syntax exp, Token semicn_token) {
         this.return_token = return_token;
         this.exp = exp;
         this.semicn_token = semicn_token;
@@ -33,6 +34,7 @@ public class Stmt4 implements Stmt{
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         SymbolTable current = SymbolTable.getCurrent();
         if(current.isFunc_block() == 0){
             ErrorHandler.getInstance().addError(new Error(ErrorType.REVERSERROR, getLineNumber()));
@@ -52,6 +54,16 @@ public class Stmt4 implements Stmt{
     @Override
     public int getLineNumber() {
         return return_token.getLineNumber();
+    }
+
+    @Override
+    public String toString() {
+        if(exp!=null){
+            return return_token.toString()+' '+exp.toString()+semicn_token.toString();
+        }
+        else{
+            return return_token.toString()+semicn_token.toString();
+        }
     }
 
 }

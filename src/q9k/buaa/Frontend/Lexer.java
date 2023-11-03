@@ -1,15 +1,14 @@
-package q9k.buaa.Frontend.Lexer;
+package q9k.buaa.Frontend;
 
 import q9k.buaa.INIT.Config;
-import q9k.buaa.INIT.Output;
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Token.Token;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class LexerHandler {
+public class Lexer {
     private int line_number = 1;
     private int number_value = 0;
     private final StringBuffer token_content =new StringBuffer();
@@ -18,29 +17,29 @@ public class LexerHandler {
     private int cur_pos = 0;
 
     private List<Token> token_stream = new ArrayList<>();
-    private static LexerHandler lexerHandler;
+    private static Lexer lexer;
 
-    private LexerHandler(StringBuffer file_content) throws IOException {
+    private Lexer(StringBuffer file_content) throws IOException {
         file_content.append('\n');
         this.file_content = file_content;
     }
-    public static synchronized LexerHandler getInstance() throws IOException {
-        if (lexerHandler == null) {
-            System.out.println("something wrong happened at lexer init!");
+    public static synchronized Lexer getInstance() throws IOException {
+        if (lexer == null) {
+            System.out.println("Something wrong happened at lexer init!");
             System.exit(-1);
         }
-        return lexerHandler;
+        return lexer;
     }
 
-    public static synchronized LexerHandler getInstance(StringBuffer file_content) throws IOException {
-        if (lexerHandler == null) {
-            lexerHandler = new LexerHandler(file_content);
+    public static synchronized Lexer getInstance(StringBuffer file_content) throws IOException {
+        if (lexer == null) {
+            lexer = new Lexer(file_content);
         }
-        return lexerHandler;
+        return lexer;
     }
 
     public static void clearInstance(){
-        lexerHandler = null;
+        lexer = null;
     }
 
     public List<Token> getToken_stream(){
@@ -56,10 +55,10 @@ public class LexerHandler {
                 token.print();
             }
         }
-        System.out.println("lexer analyze finished!");
+        System.out.println("Lexer analyze finished!");
     }
 
-    private void next() throws IOException {
+    private void next() {
         clearToken();
         clearCharacter();
         while (isBlank(character)&&!isEND()) {

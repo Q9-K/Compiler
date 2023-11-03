@@ -16,7 +16,7 @@ public enum ErrorType {
     MISSINGRBRACK("k"),//缺少右中括号’]’
     NOTPRINTFIT("l"),//printf中格式字符与表达式个数不匹配
     USINGCYCLEBC("m"),//在非循环块中使用break和continue语句
-    REVERSERROR("reverse_error_code");
+    REVERSERROR("reverse_error_code");//保留错误
 
     public static final HashMap<String, ErrorType> error_table = new HashMap<>();
     private String name;

@@ -3,17 +3,17 @@ package q9k.buaa.AST.Stmt;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
-import q9k.buaa.Frontend.Token.Token;
-import q9k.buaa.Frontend.Token.TokenType;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolTable;
 
 import java.io.IOException;
 
-public class Stmt3 implements Stmt{
+public class ActionStmt implements Stmt{
     private Token action_token;
     private Token semicn_token;
+    private SymbolTable symbolTable;
 
-    public Stmt3(Token action_token, Token semicn_token) {
+    public ActionStmt(Token action_token, Token semicn_token) {
         this.action_token = action_token;
         this.semicn_token = semicn_token;
     }
@@ -27,6 +27,7 @@ public class Stmt3 implements Stmt{
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         SymbolTable current = SymbolTable.getCurrent();
         if(!current.isFor_block()){
             ErrorHandler.getInstance().addError(new Error(ErrorType.USINGCYCLEBC,getLineNumber()));
@@ -37,5 +38,11 @@ public class Stmt3 implements Stmt{
     public int getLineNumber() {
         return action_token.getLineNumber();
     }
+
+    @Override
+    public String toString() {
+        return action_token.toString()+semicn_token.toString();
+    }
+
 
 }

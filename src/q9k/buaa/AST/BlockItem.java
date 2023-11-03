@@ -1,10 +1,14 @@
 package q9k.buaa.AST;
 
+import q9k.buaa.Symbol.SymbolTable;
+
 import java.io.IOException;
 
 public class BlockItem implements Syntax {
     private Syntax decl;
     private Syntax stmt;
+
+    private SymbolTable symbolTable;
 
     public BlockItem(Syntax decl, Syntax stmt) {
         this.decl = decl;
@@ -22,10 +26,10 @@ public class BlockItem implements Syntax {
 
     @Override
     public void visit() {
-        if(decl != null){
+        this.symbolTable = SymbolTable.getCurrent();
+        if (decl != null) {
             decl.visit();
-        }
-        else{
+        } else {
             stmt.visit();
         }
     }
@@ -33,20 +37,19 @@ public class BlockItem implements Syntax {
 
     @Override
     public int getLineNumber() {
-        if(decl!=null){
+        if (decl != null) {
             return decl.getLineNumber();
         }
-        else{
-            return stmt.getLineNumber();
-        }
+        return stmt.getLineNumber();
     }
 
-    public Class<?> getStmtType(){
-        if(stmt!=null){
-            return stmt.getClass();
+
+    @Override
+    public String toString() {
+        if (decl != null) {
+            return decl.toString();
         }
-        else{
-            return decl.getClass();
-        }
+        return stmt.toString();
     }
+
 }

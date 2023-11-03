@@ -1,6 +1,7 @@
 package q9k.buaa.AST;
 
-import q9k.buaa.Frontend.Token.*;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.*;
 import q9k.buaa.Utils.Tuple;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ public class ConstDecl implements Syntax {
     private Syntax const_def;
     private List<Tuple<Token, Syntax>> list;
     private Token semicn_token;
+    private SymbolTable symbolTable;
 
     public ConstDecl(Token const_token, Syntax b_type, Syntax const_def, List<Tuple<Token, Syntax>> list, Token semicn_token) {
         this.const_token = const_token;
@@ -27,8 +29,8 @@ public class ConstDecl implements Syntax {
         b_type.print();
         const_def.print();
         for (Tuple<Token, Syntax> item : list) {
-            item.getFirst().print();
-            item.getSecond().print();
+            item.first().print();
+            item.second().print();
         }
         semicn_token.print();
         printAstName(ConstDecl.class);
@@ -36,10 +38,11 @@ public class ConstDecl implements Syntax {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTable.getCurrent();
         b_type.visit();
         const_def.visit();
         for (Tuple<Token, Syntax> item : list) {
-            item.getSecond().visit();
+            item.second().visit();
         }
     }
 
@@ -52,7 +55,20 @@ public class ConstDecl implements Syntax {
         }
         else{
             Tuple<Token, Syntax> item = list.get(list.size()-1);
-            return item.getSecond().getLineNumber();
+            return item.second().getLineNumber();
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(b_type.toString());
+        content.append(const_def.toString());
+        for (Tuple<Token, Syntax> item : list) {
+            content.append(item.first().toString()).append(item.second().toString());
+        }
+        content.append(semicn_token.toString());
+        return content.toString();
+    }
+
 }

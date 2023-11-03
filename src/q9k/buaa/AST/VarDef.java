@@ -1,20 +1,19 @@
 package q9k.buaa.AST;
 
-import q9k.buaa.Frontend.Token.Token;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.ArraySymbol;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Symbol.VarSymbol;
 import q9k.buaa.Utils.Triple;
-
 import java.io.IOException;
 import java.util.List;
 
 public class VarDef implements Syntax {
-
     private Syntax ident;
     private List<Triple<Token, Syntax, Token>> list;
     private Token assign_token;
     private Syntax init_val;
+    private SymbolTable symbolTable;
 
     public VarDef(Syntax ident, List<Triple<Token, Syntax, Token>> list, Token assign_token, Syntax init_val) {
         this.ident = ident;
@@ -27,9 +26,9 @@ public class VarDef implements Syntax {
     public void print() throws IOException {
         ident.print();
         for(Triple<Token, Syntax, Token> item : list){
-            item.getFirst().print();
-            item.getSecond().print();
-            item.getThird().print();
+            item.first().print();
+            item.second().print();
+            item.third().print();
         }
         if(assign_token!=null){
             assign_token.print();
@@ -40,20 +39,20 @@ public class VarDef implements Syntax {
 
     @Override
     public void visit() {
-        Ident temp = (Ident) ident;
-        if(temp.visitDef()){
+        this.symbolTable = SymbolTable.getCurrent();
+        if(SymbolTable.checkDef(ident)){
             if(list.isEmpty()){
-                SymbolTable.addSymbol(new VarSymbol(getContent()));
+                SymbolTable.getCurrent().addSymbol(new VarSymbol(ident.toString()));
             }
             else if(list.size() == 1){
-                SymbolTable.addSymbol(new ArraySymbol(getContent(),list.get(0).getSecond(),null));
+                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(),list.get(0).second(),null));
             }
             else {
-                SymbolTable.addSymbol(new ArraySymbol(getContent(),list.get(0).getSecond(),list.get(1).getSecond()));
+                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(),list.get(0).second(),list.get(1).second()));
             }
         }
         for(Triple<Token, Syntax, Token> item : list){
-            item.getSecond().visit();
+            item.second().visit();
         }
         if(init_val!=null){
             init_val.visit();
@@ -71,11 +70,23 @@ public class VarDef implements Syntax {
             }
             else{
                 Triple<Token, Syntax, Token> item = list.get(list.size()-1);
-                return item.getThird().getLineNumber();
+                return item.third().getLineNumber();
             }
         }
     }
-    private String getContent(){
-        return ((Ident)ident).getTokenContent();
+
+
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(ident.toString());
+        for(Triple<Token, Syntax, Token> item : list){
+            content.append(item.first().toString()).append(item.second().toString()).append(item.third().toString());
+        }
+        if(assign_token!=null){
+            content.append(assign_token.toString()).append(init_val.toString());
+        }
+        return content.toString();
     }
+
 }
