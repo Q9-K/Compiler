@@ -1,5 +1,7 @@
-package q9k.buaa.AST;
+package q9k.buaa.AST.Decl;
 
+import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.*;
 import q9k.buaa.Utils.Tuple;
@@ -13,7 +15,7 @@ public class ConstDecl implements Syntax {
     private Syntax const_def;
     private List<Tuple<Token, Syntax>> list;
     private Token semicn_token;
-    private SymbolTable symbolTable;
+    
 
     public ConstDecl(Token const_token, Syntax b_type, Syntax const_def, List<Tuple<Token, Syntax>> list, Token semicn_token) {
         this.const_token = const_token;
@@ -38,7 +40,7 @@ public class ConstDecl implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         b_type.visit();
         const_def.visit();
         for (Tuple<Token, Syntax> item : list) {
@@ -71,4 +73,12 @@ public class ConstDecl implements Syntax {
         return content.toString();
     }
 
+    @Override
+    public Value generateIR() {
+        const_def.generateIR();
+        for (Tuple<Token, Syntax> item : list) {
+            item.second().generateIR();
+        }
+        return null;
+    }
 }

@@ -3,6 +3,9 @@ package q9k.buaa.AST;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.BasicBlock;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Token.TokenType;
@@ -15,7 +18,7 @@ public class Block implements Syntax {
     private List<Syntax> block_items;
     private Token rbrace_token;
 
-    private SymbolTable symbolTable;
+    
 
 
     public Block(Token lbrace_token, List<Syntax> block_items, Token rbrace_token) {
@@ -36,7 +39,7 @@ public class Block implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         for (Syntax item : block_items) {
             item.visit();
         }
@@ -54,6 +57,20 @@ public class Block implements Syntax {
     public int getLineNumber() {
         return rbrace_token.getLineNumber();
     }
+    @Override
+    public Value generateIR() {
+        BasicBlock basicBlock = new BasicBlock(null, null);
+        if(IRGenerator.getCurFunction().getEntryBlock()!=null){
+
+        }
+        basicBlock.setParent(IRGenerator.getCurFunction());
+        IRGenerator.setCurBasicBlock(basicBlock);
+        IRGenerator.getCurFunction().addBasicBlock(basicBlock);
+        for (Syntax block_item : block_items) {
+            block_item.generateIR();
+        }
+        return basicBlock;
+    }
 
     @Override
     public String toString() {
@@ -65,5 +82,4 @@ public class Block implements Syntax {
         content.append(rbrace_token.toString());
         return content.toString();
     }
-
 }

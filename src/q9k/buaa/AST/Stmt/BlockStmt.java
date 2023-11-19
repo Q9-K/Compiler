@@ -1,13 +1,16 @@
 package q9k.buaa.AST.Stmt;
 
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.BasicBlock;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 
 import java.io.IOException;
 
 public class BlockStmt implements Stmt{
     private Syntax block;
-    private SymbolTable symbolTable;
+    
 
     public BlockStmt(Syntax block) {
         this.block = block;
@@ -22,7 +25,7 @@ public class BlockStmt implements Stmt{
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
         block.visit();
         SymbolTable.changeToFather();
@@ -31,6 +34,11 @@ public class BlockStmt implements Stmt{
     @Override
     public int getLineNumber() {
         return 0;
+    }
+
+    @Override
+    public Value generateIR() {
+        return block.generateIR();
     }
 
     @Override

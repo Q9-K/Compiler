@@ -1,6 +1,7 @@
 package q9k.buaa.AST.Stmt;
 
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolTable;
 
@@ -14,7 +15,7 @@ public class IfStmt implements Stmt{
     private Syntax stmt1;
     private Token else_token;
     private Syntax stmt2;
-    private SymbolTable symbolTable;
+    
     public IfStmt(Token if_token, Token lparent_token, Syntax cond, Token rparent_token, Syntax stmt1, Token else_token, Syntax stmt2) {
         this.if_token = if_token;
         this.lparent_token = lparent_token;
@@ -41,7 +42,7 @@ public class IfStmt implements Stmt{
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         cond.visit();
         SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
         stmt1.visit();
@@ -56,6 +57,11 @@ public class IfStmt implements Stmt{
     @Override
     public int getLineNumber() {
         return 0;
+    }
+
+    @Override
+    public Value generateIR() {
+        return null;
     }
 
     @Override

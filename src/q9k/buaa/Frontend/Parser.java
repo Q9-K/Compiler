@@ -1,7 +1,9 @@
 package q9k.buaa.Frontend;
 
 import q9k.buaa.AST.*;
+import q9k.buaa.AST.Decl.*;
 import q9k.buaa.AST.Exp.*;
+import q9k.buaa.AST.Function.*;
 import q9k.buaa.AST.Number;
 import q9k.buaa.AST.Stmt.*;
 import q9k.buaa.AST.Stmt.ForStmt;
@@ -54,7 +56,13 @@ public class Parser {
 
     public void run() throws IOException {
         getToken();
-        ast = parseCompUnit();
+        try{
+            ast = parseCompUnit();
+        }
+        catch (RuntimeException e){
+            System.out.println("There is illegal character in your code!");
+            System.exit(-1);
+        }
         System.out.println("Parser analyze finished!");
         if (Config.parser_output_open) {
             ast.print();
@@ -82,7 +90,10 @@ public class Parser {
     }
 
     private Token getTokenForward(int offset) {
-        return token_stream.get(index + offset - 1);
+        if(index+offset-1<token_stream.size()){
+            return token_stream.get(index + offset - 1);
+        }
+        return null;
     }
 
 
@@ -579,8 +590,8 @@ public class Parser {
             getToken();
             exp = parseExp();
             rparent = cur_token;
-            handleMissing(rparent, TokenType.RPARENT, exp.getLineNumber());
             getToken();
+            handleMissing(rparent, TokenType.RPARENT, exp.getLineNumber());
         } else if (cur_token.getTokenType().equals(TokenType.INTCON)) {
             number = parseNumber();
         } else {

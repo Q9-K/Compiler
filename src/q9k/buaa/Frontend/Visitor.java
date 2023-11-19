@@ -34,7 +34,4 @@ public class Visitor {
         ast.visit();
         System.out.println("Visitor analyze finished!");
     }
-    public void generateIR(){
-        System.out.println("reversed");
-    }
 }

@@ -1,7 +1,12 @@
-package q9k.buaa.AST;
+package q9k.buaa.AST.Decl;
 
+import q9k.buaa.AST.Syntax;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.Types.IntegerType;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
+import q9k.buaa.Token.TokenType;
 import q9k.buaa.Utils.Tuple;
 
 import java.io.IOException;
@@ -13,7 +18,7 @@ public class VarDecl implements Syntax {
     private List<Tuple<Token, Syntax>> list;
     private Token semicn_token;
 
-    private SymbolTable symbolTable;
+    
 
     public VarDecl(Syntax b_type, Syntax var_def, List<Tuple<Token, Syntax>> list, Token semicn_token) {
         this.b_type = b_type;
@@ -36,7 +41,7 @@ public class VarDecl implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         var_def.visit();
         for(Tuple<Token, Syntax> item : list){
             item.second().visit();
@@ -54,4 +59,26 @@ public class VarDecl implements Syntax {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder content = new StringBuilder();
+        content.append(b_type.toString()).append(' ').append(var_def.toString());
+        for(Tuple<Token, Syntax> item : list){
+            content.append(item.first().toString()).append(item.second().toString());
+        }
+        content.append(semicn_token.toString());
+        return content.toString();
+    }
+
+    @Override
+    public Value generateIR() {
+        if(TokenType.getTokenType(b_type.toString()).equals(TokenType.INTCON)){
+            IRGenerator.setCur_type(IntegerType.i32);
+        }
+        var_def.generateIR();
+        for(Tuple<Token, Syntax> item:list){
+            item.second().generateIR();
+        }
+        return null;
+    }
 }

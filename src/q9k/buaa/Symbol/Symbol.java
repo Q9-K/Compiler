@@ -1,5 +1,7 @@
 package q9k.buaa.Symbol;
 
+import q9k.buaa.IR.Value;
+
 public abstract class Symbol {
     public static int symbol_id = 1;
     private int id;
@@ -7,6 +9,8 @@ public abstract class Symbol {
     private String content;
     private SymbolType symbolType;
     private boolean is_const;
+    private Value value;
+
 
     public Symbol(int table_id, String content) {
         this.table_id = table_id;
@@ -38,5 +42,12 @@ public abstract class Symbol {
     }
     public void setConst(boolean is_const){
         this.is_const = is_const;
+    }
+
+    public void setIR(Value value) {
+        this.value = value;
+    }
+    public Value getIR() {
+        return value;
     }
 }

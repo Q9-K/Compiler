@@ -1,5 +1,7 @@
-package q9k.buaa.AST;
+package q9k.buaa.AST.Decl;
 
+import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Tuple;
@@ -13,7 +15,7 @@ public class InitVal implements Syntax {
     private Syntax init_val;
     private List<Tuple<Token, Syntax>> list;
     private Token rbrace;
-    private SymbolTable symbolTable;
+    
 
     public InitVal(Syntax exp, Token lbrace, Syntax init_val, List<Tuple<Token, Syntax>> list, Token rbrace) {
         this.exp = exp;
@@ -43,7 +45,7 @@ public class InitVal implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         if (exp != null) {
             exp.visit();
         } else {
@@ -62,6 +64,16 @@ public class InitVal implements Syntax {
             return exp.getLineNumber();
         }
         return rbrace.getLineNumber();
+    }
+
+    @Override
+    public Value generateIR() {
+        if(exp!=null){
+            return exp.generateIR();
+        }
+        else{
+            return null;
+        }
     }
 
     @Override

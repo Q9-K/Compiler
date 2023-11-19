@@ -38,24 +38,24 @@ public class Compiler {
         //语义分析
         Visitor.getInstance(ast).run();
         //错误
-        if(ErrorHandler.getInstance().hasError()){
-            ErrorHandler.getInstance().run();
-        }
-        else{
-            System.out.println("Raw content:");
-            System.out.println(ast.toString());
+        ErrorHandler.getInstance().run();
+        if(!ErrorHandler.getInstance().hasError()) {
             //生成中间代码llvm_ir
-//            IRGenerator irGenerator = IRGenerator.getInstance(ast);
-//            irGenerator.run();
+            IRGenerator irGenerator = IRGenerator.getInstance(ast);
+            irGenerator.run();
             //中端部分开始
 
             //后端部分开始
+        }
+        else{
+            System.out.println("There is something wrong in your code. View error.txt to look for more info.");
         }
         System.exit(0);
     }
     private void compilerInit() throws IOException {
         Config.init();
         Config.setError_output_open(true);
+        Config.setLlvm_ir_output_open(true);
         Config.printInfo();
     }
 }

@@ -1,5 +1,6 @@
 package q9k.buaa.AST;
 
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
 
@@ -7,7 +8,7 @@ import java.io.IOException;
 
 public class BType implements Syntax {
     private Token type_token;
-    private SymbolTable symbolTable;
+    
     public BType(Token type_token){
         this.type_token = type_token;
     }
@@ -18,7 +19,7 @@ public class BType implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
     }
 
 
@@ -33,4 +34,8 @@ public class BType implements Syntax {
         return type_token.toString();
     }
 
+    @Override
+    public Value generateIR() {
+        return null;
+    }
 }

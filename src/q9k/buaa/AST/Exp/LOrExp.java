@@ -1,9 +1,9 @@
 package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
-import q9k.buaa.Symbol.SymbolType;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ public class LOrExp implements Syntax {
     private Syntax l_and_exp;
     private Token or_token;
     private Syntax l_or_exp;
-    private SymbolTable symbolTable;
+    
 
     public LOrExp(Syntax l_and_exp, Token or_token, Syntax l_or_exp) {
         this.l_and_exp = l_and_exp;
@@ -31,7 +31,7 @@ public class LOrExp implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         l_and_exp.visit();
         if(l_or_exp!=null){
             l_or_exp.visit();
@@ -44,6 +44,16 @@ public class LOrExp implements Syntax {
             return l_and_exp.getLineNumber();
         }
         return l_or_exp.getLineNumber();
+    }
+
+    @Override
+    public Value generateIR() {
+        if(or_token==null){
+            return l_and_exp.generateIR();
+        }
+        else{
+            return null;
+        }
     }
 
     @Override

@@ -1,5 +1,7 @@
-package q9k.buaa.AST;
+package q9k.buaa.AST.Decl;
 
+import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 
 import java.io.IOException;
@@ -8,7 +10,7 @@ public class Decl implements Syntax {
     private Syntax const_decl;
     private Syntax var_decl;
 
-    private SymbolTable symbolTable;
+    
 
     public Decl(Syntax const_decl, Syntax var_decl) {
         this.const_decl = const_decl;
@@ -27,7 +29,7 @@ public class Decl implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         if(const_decl != null){
             const_decl.visit();
         }
@@ -53,6 +55,16 @@ public class Decl implements Syntax {
             return var_decl.toString();
         }
         return const_decl.toString();
+    }
+
+    @Override
+    public Value generateIR() {
+        if(var_decl!=null){
+            return var_decl.generateIR();
+        }
+        else{
+            return const_decl.generateIR();
+        }
     }
 
 }

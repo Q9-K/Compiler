@@ -130,7 +130,6 @@ public enum TokenType {
                 if (content.charAt(i + 1) != 'd') {
                     flag = false;
                 } else {
-                    flag = false;
                     i++;
                 }
             }

@@ -1,10 +1,17 @@
 package q9k.buaa.AST.Stmt;
 
-import q9k.buaa.AST.LVal;
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.Function;
+import q9k.buaa.IR.Instruction;
+import q9k.buaa.IR.Instructions.CallInst;
+import q9k.buaa.IR.Instructions.StoreInst;
+import q9k.buaa.IR.Types.FunctionType;
+import q9k.buaa.IR.Types.IntegerType;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
@@ -19,7 +26,8 @@ public class AssignStmt implements Stmt{
     private Token lparent_token;
     private Token rparent_token;
     private Token semicn_token;
-    private SymbolTable symbolTable;
+    
+    private Symbol symbol;
 
     public AssignStmt(Syntax l_val, Token assign_token, Syntax exp, Token getint_token, Token lparent_token, Token rparent_token, Token semicn_token) {
         this.l_val = l_val;
@@ -50,13 +58,15 @@ public class AssignStmt implements Stmt{
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
         l_val.visit();
-        Symbol symbol = SymbolTable.getSymbol(l_val);
+        this.symbol = SymbolTable.getCurrent().getSymbol(l_val);
         if(symbol!=null){
             if(symbol.isConst()){
                 ErrorHandler.getInstance().addError(new Error(ErrorType.CHANGECONST, l_val.getLineNumber()));
             }
+        }
+        if(exp!=null){
+            exp.visit();
         }
     }
 
@@ -68,6 +78,26 @@ public class AssignStmt implements Stmt{
         else{
             return rparent_token.getLineNumber();
         }
+    }
+
+    @Override
+    public Value generateIR() {
+        if(exp!=null){
+            Instruction instruction = new StoreInst(null, IntegerType.i32);
+            instruction.addOperand(this.symbol.getIR());
+            instruction.addOperand(exp.generateIR());
+            IRGenerator.getCurBasicBlock().addInstruction(instruction);
+        }
+        else{
+            Instruction instruction = new CallInst(null,   IntegerType.i32);
+            instruction.addOperand(new Function("@getint", FunctionType.functionType));
+            IRGenerator.getCurBasicBlock().addInstruction(instruction);
+            Instruction storeInst = new StoreInst(null, null);
+            storeInst.addOperand(this.symbol.getIR());
+            storeInst.addOperand(instruction);
+            IRGenerator.getCurBasicBlock().addInstruction(storeInst);
+        }
+        return null;
     }
 
     @Override

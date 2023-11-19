@@ -1,5 +1,13 @@
-package q9k.buaa.AST;
+package q9k.buaa.AST.Function;
 
+import q9k.buaa.AST.Block;
+import q9k.buaa.AST.Syntax;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.BasicBlock;
+import q9k.buaa.IR.Types.FunctionType;
+import q9k.buaa.IR.Value;
+import q9k.buaa.Utils.IRModule;
+import q9k.buaa.IR.Function;
 import q9k.buaa.Symbol.FuncSymbol;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Symbol.SymbolType;
@@ -16,7 +24,8 @@ public class FuncDef implements Syntax {
     private Syntax func_f_params;
     private Token rparent;
     private Syntax block;
-    private SymbolTable symbolTable;
+    private SymbolType returnType;
+    
 
     public FuncDef(Syntax func_type, Syntax ident, Token lparent, Syntax func_f_params, Token rparent, Syntax block) {
         this.func_type = func_type;
@@ -42,24 +51,23 @@ public class FuncDef implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         if (SymbolTable.checkDef(ident)) {
             TokenType tokenType = TokenType.getTokenType(func_type.toString());
-            SymbolType symbolType;
             if(tokenType.equals(TokenType.VOIDTK)){
-                symbolType = SymbolType.VOID;
+                this.returnType = SymbolType.VOID;
             }
             else{
-                symbolType = SymbolType.VAR;
+                this.returnType = SymbolType.VAR;
             }
-            FuncSymbol funcSymbol = new FuncSymbol(ident.toString(), symbolType);
+            FuncSymbol funcSymbol = new FuncSymbol(ident.toString(), this.returnType);
             SymbolTable.getCurrent().addSymbol(funcSymbol);
             SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
             if (func_f_params != null) {
                 funcSymbol.setParam_type_list(((FuncFParams) func_f_params).getSymbolTypeList());
                 func_f_params.visit();
             }
-            if (symbolType.equals(SymbolType.VOID)) {
+            if (this.returnType.equals(SymbolType.VOID)) {
                 SymbolTable.getCurrent().setFunc_block(1);
             } else {
                 SymbolTable.getCurrent().setFunc_block(2);
@@ -84,5 +92,23 @@ public class FuncDef implements Syntax {
         }
         content.append(rparent.toString()).append(block.toString());
         return content.toString();
+    }
+
+    @Override
+    public Value generateIR() {
+        Function function = new Function(ident.toString(), FunctionType.functionType);
+        IRModule.getInstance().addFunction(function);
+        IRGenerator.setCurFunction(function);
+        function.setReturnType(this.returnType);
+        BasicBlock basicBlock = new BasicBlock(null, null);
+        function.addBasicBlock(basicBlock);
+        basicBlock.setParent(function);
+        IRGenerator.setCurBasicBlock(basicBlock);
+        if(func_f_params!=null){
+            func_f_params.generateIR();
+        }
+        block.generateIR();
+
+        return function;
     }
 }

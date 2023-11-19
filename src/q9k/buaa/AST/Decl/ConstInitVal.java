@@ -1,5 +1,7 @@
-package q9k.buaa.AST;
+package q9k.buaa.AST.Decl;
 
+import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Tuple;
@@ -14,7 +16,7 @@ public class ConstInitVal implements Syntax {
     private List<Tuple<Token, Syntax>> list;
     private Token rbrace_token;
 
-    private SymbolTable symbolTable;
+    
 
     public ConstInitVal(Syntax const_exp, Token lbrace_token, Syntax const_init_val, List<Tuple<Token, Syntax>> list, Token rbrace_token) {
         this.const_exp = const_exp;
@@ -46,7 +48,7 @@ public class ConstInitVal implements Syntax {
     @Override
     public void visit()
     {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         if(const_exp != null){
             const_exp.visit();
         }
@@ -72,14 +74,27 @@ public class ConstInitVal implements Syntax {
     }
 
     @Override
+    public Value generateIR() {
+        return null;
+    }
+
+    @Override
     public String toString() {
-        StringBuilder content = new StringBuilder();
-        content.append(const_exp.toString()).append(lbrace_token.toString()).append(const_init_val.toString());
-        for(Tuple<Token, Syntax> item : list){
-            content.append(item.first().toString()).append(item.second().toString());
+        if(const_exp!=null){
+            return const_exp.toString();
         }
-        content.append(rbrace_token.toString());
-        return content.toString();
+        else{
+            StringBuilder content = new StringBuilder();
+            content.append(lbrace_token.toString());
+            if(const_init_val!=null) {
+                content.append(const_init_val.toString());
+            }
+            for(Tuple<Token, Syntax> item : list){
+                content.append(item.first().toString()).append(item.second().toString());
+            }
+            content.append(rbrace_token.toString());
+            return content.toString();
+        }
     }
 
 }

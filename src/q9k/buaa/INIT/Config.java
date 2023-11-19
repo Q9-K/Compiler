@@ -65,14 +65,20 @@ public class Config {
     public static void setError_output_open(boolean error_output_open){
         Config.error_output_open = error_output_open;
     }
+    public static void setLlvm_ir_output_open(boolean llvm_ir_output_open){
+        Config.llvm_ir_output_open = llvm_ir_output_open;
+    }
+    public static void setMips_output_open(boolean mips_output_open){
+        Config.mips_output_open = mips_output_open;
+    }
 
     public static void printInfo(){
         System.out.println("当前编译器配置:");
-        System.out.println("词法分析输出: "+(lexer_output_open?"开":"关")+" >> "+(lexer_output_open?getOutput_path():""));
-        System.out.println("语法分析输出: "+(parser_output_open?"开":"关")+" >> "+(parser_output_open?getOutput_path():""));
-        System.out.println("错误处理输出: "+(error_output_open?"开":"关")+" >> "+(error_output_open?getError_path():""));
-        System.out.println("llvm_ir输出: "+(llvm_ir_output_open?"开":"关")+" >> "+(llvm_ir_output_open?getLlvm_ir_path():""));
-        System.out.println("mips输出: "+(mips_output_open?"开":"关")+" >> "+(mips_output_open?getMips_path():""));
+        System.out.println("词法分析输出: "+(lexer_output_open?"开":"关")+(lexer_output_open?" >> "+getOutput_path():""));
+        System.out.println("语法分析输出: "+(parser_output_open?"开":"关")+(parser_output_open?" >> "+getOutput_path():""));
+        System.out.println("错误处理输出: "+(error_output_open?"开":"关")+(error_output_open?" >> "+getError_path():""));
+        System.out.println("llvm_ir输出: "+(llvm_ir_output_open?"开":"关")+(llvm_ir_output_open?" >> "+getLlvm_ir_path():""));
+        System.out.println("mips输出: "+(mips_output_open?"开":"关")+(mips_output_open?" >> "+getMips_path():""));
     }
 
 }

@@ -69,7 +69,19 @@ public class SymbolTable {
     }
 
 
-    public static Symbol getSymbol(Syntax syntax) {
+    public Symbol getSymbol(String content) {
+        SymbolTable symbolTable = SymbolTable.getCurrent();
+        while (symbolTable != null) {
+            Symbol symbol = symbolTable.symbolMap.get(content);
+            if (symbol != null) {
+                return symbol;
+            }
+            symbolTable = symbolTable.father;
+        }
+        return null;
+    }
+
+    public Symbol getSymbol(Syntax syntax) {
         String content = syntax.toString();
         int index = 0;
         while ((index < content.length()) && !(Character.isLetterOrDigit(content.charAt(index)) || content.charAt(index) == '_')) {
@@ -81,15 +93,7 @@ public class SymbolTable {
         }
         int end = index;
         content = content.substring(start, end);
-        SymbolTable symbolTable = SymbolTable.current;
-        while (symbolTable != null) {
-            Symbol symbol = symbolTable.symbolMap.get(content);
-            if (symbol != null) {
-                return symbol;
-            }
-            symbolTable = symbolTable.father;
-        }
-        return null;
+        return getSymbol(content);
     }
 
     public SymbolTable createSymbolTable() {
@@ -128,13 +132,13 @@ public class SymbolTable {
         return true;
     }
 
-    public static boolean checkVarInvoke(Syntax syntax) {
-        Symbol symbol = SymbolTable.getSymbol(syntax);
+    public Symbol checkVarInvoke(Syntax syntax) {
+        Symbol symbol = this.getSymbol(syntax);
         if (symbol == null || symbol.getSymbolType().equals(SymbolType.FUNCTION)) {
             ErrorHandler.getInstance().addError(new Error(ErrorType.NOTDEFNAME, syntax.getLineNumber()));
-            return false;
+            return null;
         }
-        return true;
+        return symbol;
     }
 
     public static boolean checkFuncInvoke(Syntax syntax) {

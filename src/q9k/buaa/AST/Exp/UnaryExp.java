@@ -1,10 +1,20 @@
 package q9k.buaa.AST.Exp;
 
-import q9k.buaa.AST.FuncRParams;
+import q9k.buaa.AST.Function.FuncRParams;
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.Function;
+import q9k.buaa.IR.Instruction;
+import q9k.buaa.IR.Instructions.BinaryOperator;
+import q9k.buaa.IR.Instructions.CallInst;
+import q9k.buaa.IR.Types.FunctionType;
+import q9k.buaa.IR.Types.IntegerType;
+import q9k.buaa.IR.Types.Type;
+import q9k.buaa.IR.Types.VoidType;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.FuncSymbol;
 import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
@@ -25,7 +35,8 @@ public class UnaryExp implements Syntax {
     private Token rparent;
     private Syntax unary_op;
     private Syntax unary_exp;
-    private SymbolTable symbolTable;
+    
+    private FuncSymbol funcSymbol;
 
     public UnaryExp(Syntax primary_exp, Syntax ident, Token lparent, Syntax func_r_params, Token rparent, Syntax unary_op, Syntax unary_exp) {
         this.primary_exp = primary_exp;
@@ -57,14 +68,15 @@ public class UnaryExp implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         if (primary_exp != null) {
             primary_exp.visit();
         } else if (ident != null) {
             if (SymbolTable.checkFuncInvoke(ident)) {
-                FuncSymbol funcSymbol = (FuncSymbol) SymbolTable.getSymbol(ident);
+                this.funcSymbol = (FuncSymbol) SymbolTable.getCurrent().getSymbol(ident);
                 List<Syntax> list = new ArrayList<>();
                 if (func_r_params != null) {
+                    func_r_params.visit();
                     list = ((FuncRParams) func_r_params).getSymbolTypeList();
                 }
                 if (funcSymbol != null) {
@@ -105,6 +117,47 @@ public class UnaryExp implements Syntax {
     }
 
     @Override
+    public Value generateIR() {
+        if (primary_exp != null) {
+            return primary_exp.generateIR();
+        } else if (ident != null) {
+            SymbolType symbolType = funcSymbol.getReturn_type();
+            Type type;
+            if(symbolType==SymbolType.VOID){
+                type = VoidType.voidType;
+            }
+            else{
+                type=IntegerType.i32;
+            }
+            CallInst callInst = new CallInst(null, type);
+            CallInst current = IRGenerator.getCurCallInst();
+            IRGenerator.setCurCallInst(callInst);
+            if (func_r_params != null) {
+                func_r_params.generateIR();
+            }
+            IRGenerator.setCurCallInst(current);
+            callInst.addOperand(new Function("@"+ident.toString(), FunctionType.functionType));
+            IRGenerator.getCurBasicBlock().addInstruction(callInst);
+            return callInst;
+        } else {
+            Instruction instruction = new BinaryOperator(null, IntegerType.i32);
+            Token op_token = ((UnaryOp) unary_op).getOp_token();
+            if (op_token.getTokenType().equals(TokenType.PLUS)) {
+                return unary_exp.generateIR();
+            }
+            instruction.setOpcode(op_token);
+            Value value_1 = new Value(null, IntegerType.i32);
+            value_1.setValue(0);
+            UnaryExp temp = (UnaryExp) unary_exp;
+            Value value_2 = temp.generateIR();
+            instruction.addOperand(value_1);
+            instruction.addOperand(value_2);
+            IRGenerator.getCurBasicBlock().addInstruction(instruction);
+            return instruction;
+        }
+    }
+
+    @Override
     public String toString() {
         if (primary_exp != null) {
             return primary_exp.toString();
@@ -141,7 +194,7 @@ public class UnaryExp implements Syntax {
         }
         content = content.substring(start, end);
         if (TokenType.getTokenType(content).equals(TokenType.IDENFR)) {
-            Symbol symbol = SymbolTable.getSymbol(exp);
+            Symbol symbol = SymbolTable.getCurrent().getSymbol(exp);
             if (symbol == null) {
                 return null;
             } else {
@@ -153,7 +206,9 @@ public class UnaryExp implements Syntax {
                         return SymbolType.VAR;
                     } else if (lbrack_count == 0) {
                         return SymbolType.ARRAY;
-                    } else return null;
+                    } else{
+                        return null;
+                    }
                 } else if (symbolType.equals(SymbolType.MULTIARRAY)) {
                     if (lbrack_count == 0) {
                         return SymbolType.MULTIARRAY;
@@ -161,11 +216,14 @@ public class UnaryExp implements Syntax {
                         return SymbolType.ARRAY;
                     } else if (lbrack_count == 2) {
                         return SymbolType.VAR;
-                    } else return null;
+                    } else{
+                        return null;
+                    }
+                }else{
+                    return symbolType;
                 }
             }
-        }
-        else if(TokenType.getTokenType(content).equals(TokenType.INTCON)){
+        } else if (TokenType.getTokenType(content).equals(TokenType.INTCON)) {
             return SymbolType.VAR;
         }
         return null;

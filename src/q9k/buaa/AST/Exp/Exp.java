@@ -1,14 +1,14 @@
 package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
-import q9k.buaa.Symbol.SymbolType;
 
 import java.io.IOException;
 
 public class Exp implements Syntax {
     private Syntax add_exp;
-    private SymbolTable symbolTable;
+    
 
 
     public Exp(Syntax add_exp) {
@@ -23,13 +23,19 @@ public class Exp implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         add_exp.visit();
     }
     @Override
     public int getLineNumber() {
         return add_exp.getLineNumber();
     }
+
+    @Override
+    public Value generateIR() {
+        return add_exp.generateIR();
+    }
+
     @Override
     public String toString() {
         return add_exp.toString();

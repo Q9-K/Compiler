@@ -1,8 +1,10 @@
-package q9k.buaa.AST;
+package q9k.buaa.AST.Function;
 
+import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
-import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolType;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Tuple;
 
 import java.io.IOException;
@@ -12,7 +14,7 @@ import java.util.List;
 public class FuncFParams implements Syntax {
     private Syntax func_f_param;
     private List<Tuple<Token, Syntax>> list;
-    private SymbolTable symbolTable;
+    
 
     public FuncFParams(Syntax func_f_param, List<Tuple<Token, Syntax>> list) {
         this.func_f_param = func_f_param;
@@ -22,7 +24,7 @@ public class FuncFParams implements Syntax {
     @Override
     public void print() throws IOException {
         func_f_param.print();
-        for(Tuple<Token, Syntax> item : list){
+        for (Tuple<Token, Syntax> item : list) {
             item.first().print();
             item.second().print();
         }
@@ -31,9 +33,9 @@ public class FuncFParams implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         func_f_param.visit();
-        for(Tuple<Token, Syntax> item : list){
+        for (Tuple<Token, Syntax> item : list) {
             item.second().visit();
         }
     }
@@ -44,20 +46,30 @@ public class FuncFParams implements Syntax {
     }
 
     @Override
+    public Value generateIR() {
+        func_f_param.generateIR();
+        for (Tuple<Token, Syntax> item : list) {
+            item.second().generateIR();
+        }
+        return null;
+    }
+
+
+    @Override
     public String toString() {
         StringBuilder content = new StringBuilder();
         content.append(func_f_param.toString());
-        for(Tuple<Token, Syntax> item : list){
+        for (Tuple<Token, Syntax> item : list) {
             content.append(item.first().toString()).append(item.second().toString());
         }
         return content.toString();
     }
 
 
-    public List<SymbolType> getSymbolTypeList(){
+    public List<SymbolType> getSymbolTypeList() {
         List<SymbolType> symbolTypeList = new ArrayList<>();
-        symbolTypeList.add(((FuncFParam)func_f_param).getSymbolType());
-        for(Tuple<Token, Syntax> item : list){
+        symbolTypeList.add(((FuncFParam) func_f_param).getSymbolType());
+        for (Tuple<Token, Syntax> item : list) {
             FuncFParam funcFParam = (FuncFParam) item.second();
             symbolTypeList.add(funcFParam.getSymbolType());
         }

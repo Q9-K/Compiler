@@ -1,10 +1,17 @@
-package q9k.buaa.AST;
+package q9k.buaa.AST.Decl;
 
+import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Constant;
+import q9k.buaa.IR.Types.IntegerType;
+import q9k.buaa.IR.Types.PointerType;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.ArraySymbol;
 import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Symbol.VarSymbol;
+import q9k.buaa.Utils.Calculator;
+import q9k.buaa.Utils.IRModule;
 import q9k.buaa.Utils.Triple;
 
 import java.io.IOException;
@@ -16,7 +23,8 @@ public class ConstDef implements Syntax {
     private List<Triple<Token, Syntax,Token>> list = new ArrayList<>();
     private Token assign_token;
     private Syntax const_init_val;
-    private SymbolTable symbolTable;
+    private Symbol symbol;
+    
 
 
     public ConstDef(Syntax ident, List<Triple<Token, Syntax, Token>> list, Token assign_token, Syntax const_init_val) {
@@ -41,9 +49,8 @@ public class ConstDef implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         if(SymbolTable.checkDef(ident)){
-            Symbol symbol;
             if(list.isEmpty()){
                 symbol = new VarSymbol(ident.toString());
             }
@@ -66,6 +73,15 @@ public class ConstDef implements Syntax {
     @Override
     public int getLineNumber() {
         return const_init_val.getLineNumber();
+    }
+
+    @Override
+    public Value generateIR() {
+        Constant constant = new Constant("@"+ident.toString(), new PointerType(IntegerType.i32));
+        constant.setInitializer(Calculator.getInstance().calculate(const_init_val));
+        this.symbol.setIR(constant);
+        IRModule.getInstance().addGlobalVar(constant);
+        return constant;
     }
 
 

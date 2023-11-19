@@ -1,10 +1,9 @@
 package q9k.buaa.AST.Exp;
 
-import q9k.buaa.AST.LVal;
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
-import q9k.buaa.Symbol.SymbolType;
 
 import java.io.IOException;
 
@@ -15,7 +14,7 @@ public class PrimaryExp implements Syntax {
     private Token rparent;
     private Syntax l_val;
     private Syntax number;
-    private SymbolTable symbolTable;
+    
 
     public PrimaryExp(Token lparent, Syntax exp, Token rparent, Syntax l_val, Syntax number) {
         this.lparent = lparent;
@@ -27,15 +26,13 @@ public class PrimaryExp implements Syntax {
 
     @Override
     public void print() throws IOException {
-        if(exp != null){
+        if (exp != null) {
             lparent.print();
             exp.print();
             rparent.print();
-        }
-        else if(l_val != null){
+        } else if (l_val != null) {
             l_val.print();
-        }
-        else if(number!=null){
+        } else if (number != null) {
             number.print();
         }
         printAstName(PrimaryExp.class);
@@ -43,14 +40,11 @@ public class PrimaryExp implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
-        if(exp != null){
+        if (exp != null) {
             exp.visit();
-        }
-        else if(l_val != null){
+        } else if (l_val != null) {
             l_val.visit();
-        }
-        else if(number!=null){
+        } else if (number != null) {
             number.visit();
         }
     }
@@ -58,26 +52,33 @@ public class PrimaryExp implements Syntax {
     @Override
     public int getLineNumber() {
 
-        if(exp != null){
+        if (exp != null) {
             return exp.getLineNumber();
-        }
-        else if(l_val != null){
+        } else if (l_val != null) {
             return l_val.getLineNumber();
-        }
-        else{
+        } else {
             return number.getLineNumber();
         }
     }
 
     @Override
+    public Value generateIR() {
+        if (exp != null) {
+            return exp.generateIR();
+        } else if (l_val != null) {
+            return l_val.generateIR();
+        } else {
+            return number.generateIR();
+        }
+    }
+
+    @Override
     public String toString() {
-        if(exp != null){
-            return lparent.toString()+exp.toString()+rparent.toString();
-        }
-        else if(l_val != null){
+        if (exp != null) {
+            return lparent.toString() + exp.toString() + rparent.toString();
+        } else if (l_val != null) {
             return l_val.toString();
-        }
-        else{
+        } else {
             return number.toString();
         }
     }

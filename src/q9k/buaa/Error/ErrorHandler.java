@@ -37,8 +37,12 @@ public class ErrorHandler {
     }
 
     public void run() throws IOException{
+        Output output = Output.getInstance(this.error_path);
         if(Config.error_output_open){
-            print();
+            Collections.sort(errors);
+            for (Error error : errors) {
+                output.write(error.toString());
+            }
         }
     }
     public static void clearInstance(){
@@ -54,11 +58,4 @@ public class ErrorHandler {
         errors.add(error);
     }
 
-    public void print() throws IOException {
-        Output output = Output.getInstance(error_path);
-        Collections.sort(errors);
-        for (Error error : errors) {
-            output.write(error.toString());
-        }
-    }
 }

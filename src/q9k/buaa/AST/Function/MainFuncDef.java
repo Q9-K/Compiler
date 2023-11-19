@@ -1,7 +1,16 @@
-package q9k.buaa.AST;
+package q9k.buaa.AST.Function;
 
+import q9k.buaa.AST.Block;
+import q9k.buaa.AST.Syntax;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.BasicBlock;
+import q9k.buaa.IR.Function;
+import q9k.buaa.IR.Types.FunctionType;
+import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolType;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Utils.IRModule;
 
 import java.io.IOException;
 
@@ -11,7 +20,7 @@ public class MainFuncDef implements Syntax {
     private Token lparent_token;
     private Token rparent_token;
     private Syntax block;
-    private SymbolTable symbolTable;
+    
 
     public MainFuncDef(Token int_token, Token main_token, Token lparent_token, Token rparent_token, Syntax block) {
         this.int_token = int_token;
@@ -33,7 +42,7 @@ public class MainFuncDef implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
         SymbolTable.getCurrent().setFunc_block(2);
         block.visit();
@@ -51,4 +60,13 @@ public class MainFuncDef implements Syntax {
         return int_token.toString()+' '+main_token.toString()+lparent_token.toString()+rparent_token.toString()+block.toString();
     }
 
+    @Override
+    public Value generateIR() {
+        Function function = new Function("main", FunctionType.functionType);
+        IRModule.getInstance().addFunction(function);
+        IRGenerator.setCurFunction(function);
+        block.generateIR();
+        function.setReturnType(SymbolType.VAR);
+        return function;
+    }
 }

@@ -1,5 +1,6 @@
 package q9k.buaa.AST;
 
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
 
@@ -9,7 +10,7 @@ public class ForStmt implements Syntax {
     private Syntax l_val;
     private Token assign_token;
     private Syntax exp;
-    private SymbolTable symbolTable;
+    
 
     public ForStmt(Syntax l_val, Token assign_token, Syntax exp) {
         this.l_val = l_val;
@@ -27,12 +28,17 @@ public class ForStmt implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
     }
 
     @Override
     public int getLineNumber() {
         return l_val.getLineNumber();
+    }
+
+    @Override
+    public Value generateIR() {
+        return null;
     }
 
 

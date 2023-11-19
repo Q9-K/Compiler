@@ -1,9 +1,9 @@
 package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
-import q9k.buaa.Symbol.SymbolType;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ public class EqExp implements Syntax {
     private Syntax rel_exp;
     private Token op_token ;
     private Syntax eq_exp ;
-    private SymbolTable symbolTable;
+    
 
     public EqExp(Syntax rel_exp, Token op_token, Syntax eq_exp) {
         this.rel_exp = rel_exp;
@@ -31,7 +31,7 @@ public class EqExp implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+        
         rel_exp.visit();
         if(eq_exp!=null){
             eq_exp.visit();
@@ -45,6 +45,16 @@ public class EqExp implements Syntax {
             return rel_exp.getLineNumber();
         }
         return eq_exp.getLineNumber();
+    }
+
+    @Override
+    public Value generateIR() {
+        if(op_token==null){
+            return rel_exp.generateIR();
+        }
+        else{
+            return null;
+        }
     }
 
 

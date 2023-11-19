@@ -1,9 +1,16 @@
-package q9k.buaa.AST;
+package q9k.buaa.AST.Function;
 
-import q9k.buaa.Symbol.ArraySymbol;
-import q9k.buaa.Symbol.SymbolTable;
-import q9k.buaa.Symbol.SymbolType;
-import q9k.buaa.Symbol.VarSymbol;
+import q9k.buaa.AST.Syntax;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.Argument;
+import q9k.buaa.IR.BasicBlock;
+import q9k.buaa.IR.Instruction;
+import q9k.buaa.IR.Instructions.AllocalInst;
+import q9k.buaa.IR.Instructions.StoreInst;
+import q9k.buaa.IR.Types.IntegerType;
+import q9k.buaa.IR.Types.PointerType;
+import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.*;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Triple;
 
@@ -13,11 +20,12 @@ import java.util.List;
 public class FuncFParam implements Syntax {
     private Syntax b_type;
     private Syntax ident;
-    private Token lbrack = null;
-    private Token rbrack = null;
+    private Token lbrack;
+    private Token rbrack;
     private List<Triple<Token, Syntax, Token>> list;
 
-    private SymbolTable symbolTable;
+    private Symbol symbol;
+    
 
     public FuncFParam(Syntax b_type, Syntax ident, Token lbrack, Token rbrack, List<Triple<Token, Syntax, Token>> list) {
         this.b_type = b_type;
@@ -45,21 +53,40 @@ public class FuncFParam implements Syntax {
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+
         if (SymbolTable.checkDef(ident)) {
             if (lbrack == null) {
-                SymbolTable.getCurrent().addSymbol(new VarSymbol(ident.toString()));
+                symbol = new VarSymbol(ident.toString());
+//                SymbolTable.getCurrent().addSymbol(new VarSymbol(ident.toString()));
             } else if (list.isEmpty()) {
-                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(), null, null));
+                symbol = new ArraySymbol(ident.toString(), null, null);
+//                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(), null, null));
             } else {
-                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(), null, list.get(0).second()));
+                symbol = new ArraySymbol(ident.toString(), null, list.get(0).second());
+//                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(), null, list.get(0).second()));
             }
+            SymbolTable.getCurrent().addSymbol(symbol);
         }
     }
 
     @Override
     public int getLineNumber() {
         return ident.getLineNumber();
+    }
+
+    @Override
+    public Value generateIR() {
+        Argument argument = new Argument(null, IntegerType.i32);
+        IRGenerator.getCurFunction().addArgument(argument);
+        BasicBlock basicBlock = IRGenerator.getCurBasicBlock();
+        Instruction instruction = new AllocalInst(null, new PointerType(IntegerType.i32));
+        this.symbol.setIR(instruction);
+        basicBlock.addInstruction(instruction);
+        Instruction storeInst = new StoreInst(null, null);
+        storeInst.addOperand(instruction);
+        storeInst.addOperand(argument);
+        basicBlock.addInstruction(storeInst);
+        return argument;
     }
 
     @Override

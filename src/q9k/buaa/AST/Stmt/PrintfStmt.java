@@ -1,25 +1,30 @@
 package q9k.buaa.AST.Stmt;
 
-import q9k.buaa.AST.FormatString;
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
-import q9k.buaa.Symbol.SymbolTable;
-import q9k.buaa.Token.*;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.Function;
+import q9k.buaa.IR.Instructions.CallInst;
+import q9k.buaa.IR.Types.FunctionType;
+import q9k.buaa.IR.Types.IntegerType;
+import q9k.buaa.IR.Types.VoidType;
+import q9k.buaa.IR.Value;
+import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Tuple;
 
 import java.io.IOException;
 import java.util.List;
 
-public class PrintfStmt implements Stmt{
+public class PrintfStmt implements Stmt {
     private Token printf_token;
     private Token lparent_token;
     private Syntax format_string;
     private List<Tuple<Token, Syntax>> list;
     private Token rparent_token;
     private Token semicn_token;
-    private SymbolTable symbolTable;
+
 
     public PrintfStmt(Token printf_token, Token lparent_token, Syntax format_string, List<Tuple<Token, Syntax>> list, Token rparent_token, Token semicn_token) {
         this.printf_token = printf_token;
@@ -35,7 +40,7 @@ public class PrintfStmt implements Stmt{
         printf_token.print();
         lparent_token.print();
         format_string.print();
-        for(Tuple<Token, Syntax> item : list){
+        for (Tuple<Token, Syntax> item : list) {
             item.first().print();
             item.second().print();
         }
@@ -46,13 +51,13 @@ public class PrintfStmt implements Stmt{
 
     @Override
     public void visit() {
-        this.symbolTable = SymbolTable.getCurrent();
+
         int count = getParamNum();
-        if(count!=list.size()){
+        if (count != list.size()) {
             ErrorHandler.getInstance().addError(new Error(ErrorType.NOTPRINTFIT, getLineNumber()));
         }
         format_string.visit();
-        for(Tuple<Token, Syntax> item : list){
+        for (Tuple<Token, Syntax> item : list) {
             item.second().visit();
         }
     }
@@ -63,10 +68,42 @@ public class PrintfStmt implements Stmt{
     }
 
     @Override
+    public Value generateIR() {
+        String content = format_string.toString();
+        int pos = 0;
+        for (int index = 1; index < content.length() - 1; ++index) {
+            CallInst callInst = new CallInst(null, VoidType.voidType);
+            Function function;
+            Value value;
+            char c = content.charAt(index);
+            if (c == '%' && content.charAt(index + 1) == 'd') {
+                index++;
+                function = new Function("@putint", FunctionType.functionType);
+                value = list.get(pos++).second().generateIR();
+            }
+            else if(c=='\\'&&content.charAt(index+1)=='n'){
+                index++;
+                function = new Function("@putch", FunctionType.functionType);
+                value = new Value(null, IntegerType.i32);
+                value.setValue((int)'\n');
+            }
+            else {
+                function = new Function("@putch", FunctionType.functionType);
+                value = new Value(null, IntegerType.i32);
+                value.setValue((int) c);
+            }
+            callInst.addParam(value);
+            callInst.addOperand(function);
+            IRGenerator.getCurBasicBlock().addInstruction(callInst);
+        }
+        return null;
+    }
+
+    @Override
     public String toString() {
         StringBuilder content = new StringBuilder();
         content.append(printf_token.toString()).append(lparent_token.toString()).append(format_string.toString());
-        for(Tuple<Token, Syntax> item : list){
+        for (Tuple<Token, Syntax> item : list) {
             content.append(item.first().toString()).append(item.second().toString());
         }
         content.append(rparent_token.toString()).append(semicn_token.toString());
