@@ -160,4 +160,8 @@ public class SymbolTable {
         }
         return true;
     }
+
+    public SymbolTable getFather() {
+        return father;
+    }
 }

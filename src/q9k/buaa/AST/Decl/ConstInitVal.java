@@ -75,7 +75,12 @@ public class ConstInitVal implements Syntax {
 
     @Override
     public Value generateIR() {
-        return null;
+        if(const_exp!=null){
+            return const_exp.generateIR();
+        }
+        else{
+            return null;
+        }
     }
 
     @Override

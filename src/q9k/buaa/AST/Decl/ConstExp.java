@@ -33,7 +33,7 @@ public class ConstExp implements Syntax {
 
     @Override
     public Value generateIR() {
-        return null;
+        return add_exp.generateIR();
     }
 
 

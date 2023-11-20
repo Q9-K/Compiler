@@ -65,13 +65,13 @@ public class VarDef implements Syntax {
                 symbol = new ArraySymbol(ident.toString(), list.get(0).second(), list.get(1).second());
 //                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(),list.get(0).second(),list.get(1).second()));
             }
+            for (Triple<Token, Syntax, Token> item : list) {
+                item.second().visit();
+            }
+            if (init_val != null) {
+                init_val.visit();
+            }
             SymbolTable.getCurrent().addSymbol(symbol);
-        }
-        for (Triple<Token, Syntax, Token> item : list) {
-            item.second().visit();
-        }
-        if (init_val != null) {
-            init_val.visit();
         }
     }
 

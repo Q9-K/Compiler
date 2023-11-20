@@ -1,7 +1,11 @@
 package q9k.buaa.AST.Decl;
 
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.Constant;
+import q9k.buaa.IR.Instruction;
+import q9k.buaa.IR.Instructions.AllocalInst;
+import q9k.buaa.IR.Instructions.StoreInst;
 import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Types.PointerType;
 import q9k.buaa.IR.Value;
@@ -61,12 +65,12 @@ public class ConstDef implements Syntax {
                 symbol = new ArraySymbol(ident.toString(),list.get(0).second(),list.get(1).second());
             }
             symbol.setConst(true);
+            for(Triple<Token, Syntax, Token> item : list){
+                item.second().visit();
+            }
+            const_init_val.visit();
             SymbolTable.getCurrent().addSymbol(symbol);
         }
-        for(Triple<Token, Syntax, Token> item : list){
-            item.second().visit();
-        }
-        const_init_val.visit();
     }
 
 
@@ -77,11 +81,23 @@ public class ConstDef implements Syntax {
 
     @Override
     public Value generateIR() {
-        Constant constant = new Constant("@"+ident.toString(), new PointerType(IntegerType.i32));
-        constant.setInitializer(Calculator.getInstance().calculate(const_init_val));
-        this.symbol.setIR(constant);
-        IRModule.getInstance().addGlobalVar(constant);
-        return constant;
+        if(IRGenerator.isGlobal()){
+            Constant constant = new Constant("@"+ident.toString(), new PointerType(IntegerType.i32));
+            constant.setInitializer(Calculator.getInstance().calculate(const_init_val));
+            this.symbol.setIR(constant);
+            IRModule.getInstance().addGlobalVar(constant);
+            return constant;
+        }
+        else{
+            Instruction instruction = new AllocalInst(null, new PointerType(IntegerType.i32));
+            this.symbol.setIR(instruction);
+            IRGenerator.getCurBasicBlock().addInstruction(instruction);
+            Instruction storeInst = new StoreInst(null, null);
+            storeInst.addOperand(instruction);
+            storeInst.addOperand(const_init_val.generateIR());
+            IRGenerator.getCurBasicBlock().addInstruction(storeInst);
+        }
+        return null;
     }
 
 
