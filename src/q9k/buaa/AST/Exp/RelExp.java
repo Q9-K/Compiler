@@ -1,8 +1,12 @@
 package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.Instructions.BranchInst;
+import q9k.buaa.IR.Instructions.IcmpInst;
+import q9k.buaa.IR.Instructions.ResizeInst;
+import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Value;
-import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -11,7 +15,7 @@ public class RelExp implements Syntax {
     private Syntax add_exp;
     private Token op_token;
     private Syntax rel_exp;
-    
+    private Value pre_value;
 
 
     public RelExp(Syntax add_exp, Token op_token, Syntax rel_exp) {
@@ -32,7 +36,7 @@ public class RelExp implements Syntax {
 
     @Override
     public void visit() {
-        
+
         add_exp.visit();
         if (rel_exp != null) {
             rel_exp.visit();
@@ -50,10 +54,46 @@ public class RelExp implements Syntax {
 
     @Override
     public Value generateIR() {
-        if (op_token == null) {
-            return add_exp.generateIR();
+        if (op_token != null) {
+            Value left;
+            if(this.pre_value == null){
+                left = add_exp.generateIR();
+            }
+            else{
+                left = pre_value;
+            }
+            if(left.getType().equals(IntegerType.i1)){
+                ResizeInst resizeInst = new ResizeInst(left, IntegerType.i32, "zext");
+                IRGenerator.getCurBasicBlock().addInstruction(resizeInst);
+                left = resizeInst;
+            }
+            RelExp temp = (RelExp) rel_exp;
+            if(temp.op_token == null){
+                Value right = temp.generateIR();
+                if(right.getType().equals(IntegerType.i1)){
+                    ResizeInst resizeInst = new ResizeInst(right, IntegerType.i32, "zext");
+                    IRGenerator.getCurBasicBlock().addInstruction(resizeInst);
+                    right = resizeInst;
+                }
+                IcmpInst icmpInst = new IcmpInst(left, right, op_token.getTokenType());
+                IRGenerator.getCurBasicBlock().addInstruction(icmpInst);
+                return icmpInst;
+            }
+            else{
+                Value right = temp.add_exp.generateIR();
+                if(right.getType().equals(IntegerType.i1)){
+                    ResizeInst resizeInst = new ResizeInst(right, IntegerType.i32, "zext");
+                    IRGenerator.getCurBasicBlock().addInstruction(resizeInst);
+                    right = resizeInst;
+                }
+                IcmpInst icmpInst = new IcmpInst(left, right, op_token.getTokenType());
+                temp.pre_value = icmpInst;
+                IRGenerator.getCurBasicBlock().addInstruction(icmpInst);
+                return temp.generateIR();
+            }
+
         } else {
-            return null;
+            return add_exp.generateIR();
         }
     }
 

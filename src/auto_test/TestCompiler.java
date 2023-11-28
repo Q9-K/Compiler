@@ -118,7 +118,7 @@ public class TestCompiler {
         //词法分析
         Lexer.getInstance(character_stream).run();
         //获取词法单元流
-        List<Token> token_stream = Lexer.getInstance().getToken_stream();
+        List<Token> token_stream = Lexer.getInstance().getTokenStream();
         //语法分析
         Parser.getInstance(token_stream).run();
         //语法树

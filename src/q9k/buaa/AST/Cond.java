@@ -21,7 +21,6 @@ public class Cond implements Syntax {
 
     @Override
     public void visit() {
-        
         l_or_exp.visit();
     }
 

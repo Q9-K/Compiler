@@ -36,7 +36,7 @@ public class Ident implements Syntax {
 
     @Override
     public Value generateIR() {
-        return new Value(this.toString(), IntegerType.i32);
+        return null;
     }
 
     @Override

@@ -5,6 +5,10 @@ import q9k.buaa.IR.Types.Type;
 
 public class Argument extends Value{
     private Function parent;
+
+    public Argument(Type type){
+        setType(type);
+    }
     public Argument(String name, Type type){
         super(name, type);
         setParent(IRGenerator.getCurFunction());

@@ -1,29 +1,33 @@
 package q9k.buaa.AST.Decl;
 
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Constant;
+import q9k.buaa.IR.ConstantArray;
+import q9k.buaa.IR.ConstantInt;
 import q9k.buaa.IR.Value;
-import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
+import q9k.buaa.Utils.Calculator;
 import q9k.buaa.Utils.Tuple;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ConstInitVal implements Syntax {
     private Syntax const_exp;
-    private Token lbrace_token;
+    private Token lbrace;
     private Syntax const_init_val;
     private List<Tuple<Token, Syntax>> list;
-    private Token rbrace_token;
+    private Token rbrace;
 
     
 
-    public ConstInitVal(Syntax const_exp, Token lbrace_token, Syntax const_init_val, List<Tuple<Token, Syntax>> list, Token rbrace_token) {
+    public ConstInitVal(Syntax const_exp, Token lbrace, Syntax const_init_val, List<Tuple<Token, Syntax>> list, Token rbrace) {
         this.const_exp = const_exp;
-        this.lbrace_token = lbrace_token;
+        this.lbrace = lbrace;
         this.const_init_val = const_init_val;
         this.list = list;
-        this.rbrace_token = rbrace_token;
+        this.rbrace = rbrace;
     }
 
     @Override
@@ -32,7 +36,7 @@ public class ConstInitVal implements Syntax {
             const_exp.print();
         }
         else{
-            lbrace_token.print();
+            lbrace.print();
             if(const_init_val != null){
                 const_init_val.print();
                 for(Tuple<Token, Syntax> item : list){
@@ -40,7 +44,7 @@ public class ConstInitVal implements Syntax {
                     item.second().print();
                 }
             }
-            rbrace_token.print();
+            rbrace.print();
         }
         printAstName(ConstInitVal.class);
     }
@@ -69,7 +73,7 @@ public class ConstInitVal implements Syntax {
             return const_exp.getLineNumber();
         }
         else{
-            return const_init_val.getLineNumber();
+            return rbrace.getLineNumber();
         }
     }
 
@@ -79,8 +83,15 @@ public class ConstInitVal implements Syntax {
             return const_exp.generateIR();
         }
         else{
-            return null;
+            if(const_init_val!=null){
+                const_init_val.generateIR();
+                for(Tuple<Token, Syntax> item : list){
+                    item.second().generateIR();
+                }
+            }
+
         }
+        return null;
     }
 
     @Override
@@ -90,16 +101,47 @@ public class ConstInitVal implements Syntax {
         }
         else{
             StringBuilder content = new StringBuilder();
-            content.append(lbrace_token.toString());
+            content.append(lbrace.toString());
             if(const_init_val!=null) {
                 content.append(const_init_val.toString());
             }
             for(Tuple<Token, Syntax> item : list){
                 content.append(item.first().toString()).append(item.second().toString());
             }
-            content.append(rbrace_token.toString());
+            content.append(rbrace.toString());
             return content.toString();
         }
     }
 
+    public Constant getInitializer(){
+
+        if(const_exp!=null){
+            return new ConstantInt(Calculator.getInstance().calculate(const_exp));
+        }
+        else if(const_init_val!=null){
+            List<Constant> constants = new ArrayList<>();
+            Constant constant = ((ConstInitVal)const_init_val).getInitializer();
+            constants.add(constant);
+
+            for(Tuple<Token, Syntax> item: list){
+                constant = ((ConstInitVal)item.second()).getInitializer();
+                constants.add(constant);
+            }
+            ConstantArray constantArray = new ConstantArray(constants);
+            return constantArray;
+        }
+        return null;
+    }
+
+
+    public List<Syntax> getConstInitValList(){
+        List<Syntax> constInitValList = new ArrayList<>();
+        if(const_init_val!=null){
+            constInitValList.add(const_init_val);
+            for(Tuple<Token, Syntax> item:list){
+                constInitValList.add(item.second());
+            }
+        }
+        return constInitValList;
+    }
 }

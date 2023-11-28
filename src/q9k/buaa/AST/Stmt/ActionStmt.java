@@ -3,9 +3,12 @@ package q9k.buaa.AST.Stmt;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.TokenType;
 
 import java.io.IOException;
 
@@ -42,6 +45,16 @@ public class ActionStmt implements Stmt{
 
     @Override
     public Value generateIR() {
+        if(action_token.getTokenType().equals(TokenType.CONTINUETK)){
+            BranchInst branchInst = new BranchInst();
+            branchInst.addTargetBlock(IRGenerator.getStepBasicBlock());
+            IRGenerator.getCurBasicBlock().addInstruction(branchInst);
+        }
+        else if(action_token.getTokenType().equals(TokenType.BREAKTK)){
+            BranchInst branchInst = new BranchInst();
+            branchInst.addTargetBlock(IRGenerator.getLoopFollowBlock());
+            IRGenerator.getCurBasicBlock().addInstruction(branchInst);
+        }
         return null;
     }
 

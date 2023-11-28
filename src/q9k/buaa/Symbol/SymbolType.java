@@ -14,6 +14,10 @@ public enum SymbolType {
         }
         else if(this.equals(VOID)){
             return "void";
+        }else if(this.equals(FUNCTION)){
+            return "function";
+        }else if(this.equals(MULTIARRAY)||this.equals(ARRAY)){
+            return "array";
         }
         return "reversed";
     }

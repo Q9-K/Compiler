@@ -8,8 +8,6 @@ import java.io.IOException;
 
 public class Exp implements Syntax {
     private Syntax add_exp;
-    
-
 
     public Exp(Syntax add_exp) {
         this.add_exp = add_exp;

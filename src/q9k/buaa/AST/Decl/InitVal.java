@@ -1,12 +1,16 @@
 package q9k.buaa.AST.Decl;
 
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.IR.Constant;
+import q9k.buaa.IR.ConstantArray;
+import q9k.buaa.IR.ConstantInt;
 import q9k.buaa.IR.Value;
-import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
+import q9k.buaa.Utils.Calculator;
 import q9k.buaa.Utils.Tuple;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class InitVal implements Syntax {
@@ -15,7 +19,7 @@ public class InitVal implements Syntax {
     private Syntax init_val;
     private List<Tuple<Token, Syntax>> list;
     private Token rbrace;
-    
+
 
     public InitVal(Syntax exp, Token lbrace, Syntax init_val, List<Tuple<Token, Syntax>> list, Token rbrace) {
         this.exp = exp;
@@ -45,7 +49,7 @@ public class InitVal implements Syntax {
 
     @Override
     public void visit() {
-        
+
         if (exp != null) {
             exp.visit();
         } else {
@@ -66,14 +70,16 @@ public class InitVal implements Syntax {
         return rbrace.getLineNumber();
     }
 
+    public static int dim = 0;
+    public static int pos1 = 0;
+    public static int pos2 = 0;
+
     @Override
     public Value generateIR() {
-        if(exp!=null){
+        if (exp != null) {
             return exp.generateIR();
         }
-        else{
-            return null;
-        }
+        return null;
     }
 
     @Override
@@ -92,5 +98,33 @@ public class InitVal implements Syntax {
             content.append(rbrace.toString());
             return content.toString();
         }
+    }
+
+    public Constant getInitializer() {
+        if (exp != null) {
+            return new ConstantInt(Calculator.getInstance().calculate(exp));
+        } else if (init_val != null) {
+            List<Constant> constants = new ArrayList<>();
+            Constant constant = ((InitVal) init_val).getInitializer();
+            constants.add(constant);
+            for (Tuple<Token, Syntax> item : list) {
+                constant = ((InitVal) item.second()).getInitializer();
+                constants.add(constant);
+            }
+            ConstantArray constantArray = new ConstantArray(constants);
+            return constantArray;
+        }
+        return null;
+    }
+
+    public List<Syntax> getInitValList() {
+        List<Syntax> initValList = new ArrayList<>();
+        if (init_val != null) {
+            initValList.add(init_val);
+            for (Tuple<Token, Syntax> item : list) {
+                initValList.add(item.second());
+            }
+        }
+        return initValList;
     }
 }

@@ -2,11 +2,13 @@ package q9k.buaa.IR.Instructions;
 
 import q9k.buaa.IR.Instruction;
 import q9k.buaa.IR.Types.Type;
+import q9k.buaa.IR.Types.VoidType;
 import q9k.buaa.IR.Value;
 
 public class StoreInst extends Instruction {
-    public StoreInst(String name, Type type){
-        super(name, type);
+
+    public StoreInst(){
+        super(VoidType.VoidType);
     }
 
     @Override

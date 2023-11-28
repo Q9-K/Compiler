@@ -24,8 +24,15 @@ public class IRGenerator {
 
     private static CallInst cur_callInst;
 
+    private static BasicBlock trueBasicBlock;
+    private static BasicBlock falseBasicBlock;
+
+    private static BasicBlock stepBasicBlock;
+    private static BasicBlock loopFollowBlock;
+
 
     private static boolean global;
+
 
 
 
@@ -85,21 +92,21 @@ public class IRGenerator {
 
     private void loadExternalFunction(){
         IRModule irModule = IRModule.getInstance();
-        Function function = new Function("getint", FunctionType.functionType, true);
+        Function function = new Function("getint", FunctionType.FunctionType, true);
         function.setReturnType(SymbolType.VAR);
         irModule.addFunction(function);
 
-        function = new Function("putint", FunctionType.functionType, true);
+        function = new Function("putint", FunctionType.FunctionType, true);
         function.setReturnType(SymbolType.VOID);
         function.addArgument(new Argument(null, IntegerType.i32));
         irModule.addFunction(function);
 
-        function = new Function("putch", FunctionType.functionType, true);
+        function = new Function("putch", FunctionType.FunctionType, true);
         function.setReturnType(SymbolType.VOID);
         function.addArgument(new Argument(null, IntegerType.i32));
         irModule.addFunction(function);
 
-        function = new Function("putstr",FunctionType.functionType, true);
+        function = new Function("putstr",FunctionType.FunctionType, true);
         function.setReturnType(SymbolType.VOID);
         function.addArgument(new Argument(null, new PointerType(IntegerType.i8)));
         irModule.addFunction(function);
@@ -119,4 +126,37 @@ public class IRGenerator {
     public static CallInst getCurCallInst(){
         return IRGenerator.cur_callInst;
     }
+
+    public static BasicBlock getTrueBasicBlock() {
+        return trueBasicBlock;
+    }
+
+    public static void setTrueBasicBlock(BasicBlock trueBasicBlock) {
+        IRGenerator.trueBasicBlock = trueBasicBlock;
+    }
+
+    public static BasicBlock getFalseBasicBlock() {
+        return falseBasicBlock;
+    }
+
+    public static void setFalseBasicBlock(BasicBlock falseBasicBlock) {
+        IRGenerator.falseBasicBlock = falseBasicBlock;
+    }
+
+    public static BasicBlock getStepBasicBlock() {
+        return stepBasicBlock;
+    }
+
+    public static void setStepBasicBlock(BasicBlock stepBasicBlock) {
+        IRGenerator.stepBasicBlock = stepBasicBlock;
+    }
+
+    public static BasicBlock getLoopFollowBlock() {
+        return loopFollowBlock;
+    }
+
+    public static void setLoopFollowBlock(BasicBlock loopFollowBlock) {
+        IRGenerator.loopFollowBlock = loopFollowBlock;
+    }
+
 }

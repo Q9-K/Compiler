@@ -2,10 +2,13 @@ package q9k.buaa.AST.Decl;
 
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.ConstantInt;
 import q9k.buaa.IR.GlobalVariable;
 import q9k.buaa.IR.Instruction;
 import q9k.buaa.IR.Instructions.AllocalInst;
+import q9k.buaa.IR.Instructions.GEPInst;
 import q9k.buaa.IR.Instructions.StoreInst;
+import q9k.buaa.IR.Types.ArrayType;
 import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Types.PointerType;
 import q9k.buaa.IR.Value;
@@ -53,7 +56,6 @@ public class VarDef implements Syntax {
 
     @Override
     public void visit() {
-
         if (SymbolTable.checkDef(ident)) {
             if (list.isEmpty()) {
                 symbol = new VarSymbol(ident.toString());
@@ -106,21 +108,107 @@ public class VarDef implements Syntax {
     @Override
     public Value generateIR() {
         if (IRGenerator.isGlobal()) {
-            GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType(IntegerType.i32));
-//            globalVariable.setInitializer();
-            globalVariable.setInitializer(Calculator.getInstance().calculate(init_val));
-            this.symbol.setIR(globalVariable);
-            IRModule.getInstance().addGlobalVar(globalVariable);
-            return globalVariable;
+            if (list.isEmpty()) {
+                //变量
+                GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType(IntegerType.i32));
+                if (init_val != null) {
+                    globalVariable.setInitializer(((InitVal) init_val).getInitializer());
+                }
+                this.symbol.setIR(globalVariable);
+                IRModule.getInstance().addGlobalVar(globalVariable);
+
+            } else if (list.size() == 1) {
+                //一维数组
+                int dim = Calculator.getInstance().calculate(list.get(0).second());
+                ArrayType arrayType = new ArrayType(IntegerType.i32, dim);
+                GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType((arrayType)));
+                if (init_val != null) {
+                    globalVariable.setInitializer(((InitVal) init_val).getInitializer());
+                }
+                this.symbol.setIR(globalVariable);
+                IRModule.getInstance().addGlobalVar(globalVariable);
+
+
+            } else if (list.size() == 2) {
+                //二维数组
+                int dim1 = Calculator.getInstance().calculate(list.get(0).second());
+                int dim2 = Calculator.getInstance().calculate(list.get(1).second());
+                ArrayType arrayType1 = new ArrayType(IntegerType.i32, dim2);
+                ArrayType arrayType2 = new ArrayType(arrayType1, dim1);
+                GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType(arrayType2));
+                if (init_val != null) {
+                    globalVariable.setInitializer(((InitVal) init_val).getInitializer());
+                }
+                this.symbol.setIR(globalVariable);
+                IRModule.getInstance().addGlobalVar(globalVariable);
+            }
         } else {
-            Instruction instruction = new AllocalInst(null, new PointerType(IntegerType.i32));
-            this.symbol.setIR(instruction);
-            IRGenerator.getCurBasicBlock().addInstruction(instruction);
-            if (init_val != null) {
-                Instruction storeInst = new StoreInst(null, null);
-                storeInst.addOperand(instruction);
-                storeInst.addOperand(init_val.generateIR());
-                IRGenerator.getCurBasicBlock().addInstruction(storeInst);
+            if (list.isEmpty()) {
+                //变量
+                Instruction instruction = new AllocalInst(IntegerType.i32);
+                this.symbol.setIR(instruction);
+                IRGenerator.getCurBasicBlock().addInstruction(instruction);
+                if (init_val != null) {
+                    Instruction storeInst = new StoreInst();
+                    storeInst.addOperand(instruction);
+                    storeInst.addOperand(init_val.generateIR());
+                    IRGenerator.getCurBasicBlock().addInstruction(storeInst);
+                }
+            } else if (list.size() == 1) {
+                //一维数组
+                int dim = Calculator.getInstance().calculate(list.get(0).second());
+                ArrayType arrayType = new ArrayType(IntegerType.i32, dim);
+                Instruction instruction = new AllocalInst(arrayType);
+                this.symbol.setIR(instruction);
+                IRGenerator.getCurBasicBlock().addInstruction(instruction);
+
+                if (init_val != null) {
+                    List<Syntax> initVals = ((InitVal) init_val).getInitValList();
+                    int index = 0;
+                    for (Syntax init_val : initVals) {
+                        GEPInst gepInst = new GEPInst(instruction);
+                        gepInst.setPos1(ConstantInt.ZERO);
+                        gepInst.setPos2(new ConstantInt(index));
+                        //TODO:设置gepInst的位置
+                        IRGenerator.getCurBasicBlock().addInstruction(gepInst);
+                        Instruction storeInst = new StoreInst();
+                        storeInst.addOperand(gepInst);
+                        storeInst.addOperand(init_val.generateIR());
+                        IRGenerator.getCurBasicBlock().addInstruction(storeInst);
+                        index++;
+                    }
+                }
+            } else if (list.size() == 2) {
+                //二维数组
+                int dim1 = Calculator.getInstance().calculate(list.get(0).second());
+                int dim2 = Calculator.getInstance().calculate(list.get(1).second());
+                ArrayType arrayType1 = new ArrayType(IntegerType.i32, dim2);
+                ArrayType arrayType2 = new ArrayType(arrayType1, dim1);
+                Instruction instruction = new AllocalInst(arrayType2);
+                this.symbol.setIR(instruction);
+                IRGenerator.getCurBasicBlock().addInstruction(instruction);
+                if (init_val != null) {
+                    List<Syntax> initVals1 = ((InitVal) init_val).getInitValList();
+                    int index1 = 0;
+                    for (Syntax item1 : initVals1) {
+                        int index2 = 0;
+                        List<Syntax> initVals2 = ((InitVal) item1).getInitValList();
+                        for (Syntax init_val : initVals2) {
+                            GEPInst gepInst = new GEPInst(instruction);
+                            gepInst.setPos1(ConstantInt.ZERO);
+                            gepInst.setPos2(new ConstantInt(index1));
+                            gepInst.setPos3(new ConstantInt(index2));
+                            //TODO:设置gepInst的位置
+                            IRGenerator.getCurBasicBlock().addInstruction(gepInst);
+                            Instruction storeInst = new StoreInst();
+                            storeInst.addOperand(gepInst);
+                            storeInst.addOperand(init_val.generateIR());
+                            IRGenerator.getCurBasicBlock().addInstruction(storeInst);
+                            index2++;
+                        }
+                        index1++;
+                    }
+                }
             }
         }
         return null;

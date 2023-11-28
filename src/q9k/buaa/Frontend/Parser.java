@@ -3,15 +3,16 @@ package q9k.buaa.Frontend;
 import q9k.buaa.AST.*;
 import q9k.buaa.AST.Decl.*;
 import q9k.buaa.AST.Exp.*;
-import q9k.buaa.AST.Function.*;
 import q9k.buaa.AST.Number;
+import q9k.buaa.AST.Function.*;
+import q9k.buaa.AST.Stmt.LoopStmt;
 import q9k.buaa.AST.Stmt.*;
-import q9k.buaa.AST.Stmt.ForStmt;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
-import q9k.buaa.Token.*;
 import q9k.buaa.INIT.Config;
+import q9k.buaa.Token.Token;
+import q9k.buaa.Token.TokenType;
 import q9k.buaa.Utils.Triple;
 import q9k.buaa.Utils.Tuple;
 
@@ -50,26 +51,20 @@ public class Parser {
         return parser;
     }
 
-    public static void clearInstance(){
+    public static void clearInstance() {
         parser = null;
     }
 
     public void run() throws IOException {
         getToken();
-        try{
-            ast = parseCompUnit();
-        }
-        catch (RuntimeException e){
-            System.out.println("There is illegal character in your code!");
-            System.exit(-1);
-        }
+        ast = parseCompUnit();
         System.out.println("Parser analyze finished!");
         if (Config.parser_output_open) {
             ast.print();
         }
     }
 
-    public void back(){
+    public void back() {
         cur_token = getTokenForward(-1);
         index--;
     }
@@ -77,8 +72,7 @@ public class Parser {
     private Token getToken() {
         if (!isEND()) {
             cur_token = token_stream.get(index);
-        }
-        else{
+        } else {
             cur_token = null;
         }
         index++;
@@ -90,7 +84,7 @@ public class Parser {
     }
 
     private Token getTokenForward(int offset) {
-        if(index+offset-1<token_stream.size()){
+        if (index + offset - 1 < token_stream.size()) {
             return token_stream.get(index + offset - 1);
         }
         return null;
@@ -210,10 +204,10 @@ public class Parser {
         semicn_token = cur_token;
         getToken();
         int line_number = const_def.getLineNumber();
-        if(!list.isEmpty()){
-            line_number = list.get(list.size()-1).second().getLineNumber();
+        if (!list.isEmpty()) {
+            line_number = list.get(list.size() - 1).second().getLineNumber();
         }
-        handleMissing(semicn_token, TokenType.SEMICN,line_number);
+        handleMissing(semicn_token, TokenType.SEMICN, line_number);
         return new ConstDecl(const_token, b_type, const_def, list, semicn_token);
     }
 
@@ -333,7 +327,7 @@ public class Parser {
         assign_token = cur_token;
         getToken();
         exp = parseExp();
-        return new q9k.buaa.AST.ForStmt(l_val, assign_token, exp);
+        return new ForStmt(l_val, assign_token, exp);
     }
 
     //函数定义 FuncDef → FuncType Ident '(' [FuncFParams] ')' Block
@@ -355,8 +349,8 @@ public class Parser {
         rparent = cur_token;
         getToken();
         int line_number = ident.getLineNumber();
-        if(func_f_params!=null){
-            line_number= func_f_params.getLineNumber();
+        if (func_f_params != null) {
+            line_number = func_f_params.getLineNumber();
         }
         handleMissing(rparent, TokenType.RPARENT, line_number);
         block = parseBlock();
@@ -523,7 +517,7 @@ public class Parser {
             Syntax exp_item = parseExp();
             Token rbrack_item = cur_token;
             getToken();
-            handleMissing(rbrack_item, TokenType.RBRACK ,exp_item.getLineNumber());
+            handleMissing(rbrack_item, TokenType.RBRACK, exp_item.getLineNumber());
             list.add(new Triple<>(lbrack_item, exp_item, rbrack_item));
         }
         return new LVal(ident, list);
@@ -690,10 +684,10 @@ public class Parser {
             }
             rparent_token = cur_token;
             getToken();
-            handleMissing(rparent_token,TokenType.RPARENT,for_token.getLineNumber());
+            handleMissing(rparent_token, TokenType.RPARENT, for_token.getLineNumber());
             stmt = parseStmt();
 
-            return new ForStmt(for_token, lparent_token, for_stmt1, semicn_token1, cond, semicn_token2, for_stmt2, rparent_token, stmt);
+            return new LoopStmt(for_token, lparent_token, for_stmt1, semicn_token1, cond, semicn_token2, for_stmt2, rparent_token, stmt);
         }
         //'break' ';' | 'continue' ';'
         else if (cur_token.getTokenType().equals(TokenType.BREAKTK) || cur_token.getTokenType().equals(TokenType.CONTINUETK)) {
@@ -720,10 +714,10 @@ public class Parser {
             semicn_token = cur_token;
             getToken();
             int line_number = return_token.getLineNumber();
-            if(exp!=null){
+            if (exp != null) {
                 line_number = exp.getLineNumber();
             }
-            handleMissing(semicn_token,TokenType.SEMICN, line_number);
+            handleMissing(semicn_token, TokenType.SEMICN, line_number);
             return new ReturnStmt(return_token, exp, semicn_token);
         }
         //'printf''('FormatString{','Exp}')'';'
@@ -748,17 +742,17 @@ public class Parser {
             }
             rparent_token = cur_token;
             int line_number = format_string.getLineNumber();
-            if(!list.isEmpty()){
-                line_number=list.get(list.size()-1).second().getLineNumber();
+            if (!list.isEmpty()) {
+                line_number = list.get(list.size() - 1).second().getLineNumber();
             }
             handleMissing(rparent_token, TokenType.RPARENT, line_number);
             getToken();
             semicn_token = cur_token;
             getToken();
-            if(rparent_token.getTokenType().equals(TokenType.RPARENT)){
+            if (rparent_token.getTokenType().equals(TokenType.RPARENT)) {
                 line_number = rparent_token.getLineNumber();
             }
-            handleMissing(semicn_token,TokenType.SEMICN, line_number);
+            handleMissing(semicn_token, TokenType.SEMICN, line_number);
             return new PrintfStmt(printf_token, lparent_token, format_string, list, rparent_token, semicn_token);
         }
         //Block
@@ -779,8 +773,8 @@ public class Parser {
 
             int i = 0;
             boolean is_l_val = false;
-            while (!getTokenForward(i).getTokenType().equals(TokenType.SEMICN)&&!getTokenForward(i).getTokenType().equals(TokenType.RBRACE)){
-                if(getTokenForward(i++).getTokenType().equals(TokenType.ASSIGN)){
+            while (!getTokenForward(i).getTokenType().equals(TokenType.SEMICN) && !getTokenForward(i).getTokenType().equals(TokenType.RBRACE)) {
+                if (getTokenForward(i++).getTokenType().equals(TokenType.ASSIGN)) {
                     is_l_val = true;
                     break;
                 }
@@ -811,13 +805,13 @@ public class Parser {
                 return new AssignStmt(l_val, assign_token, exp, getint_token, lparent_token, rparent_token, semicn_token);
             } else {
                 //[Exp] ';'
-                if(isExpFirst(cur_token)){
+                if (isExpFirst(cur_token)) {
                     exp = parseExp();
                 }
                 semicn_token = cur_token;
                 getToken();
-                if(exp!=null){
-                    handleMissing(semicn_token,TokenType.SEMICN, exp.getLineNumber());
+                if (exp != null) {
+                    handleMissing(semicn_token, TokenType.SEMICN, exp.getLineNumber());
                 }
                 return new ExpStmt(exp, semicn_token);
             }
@@ -831,8 +825,8 @@ public class Parser {
             }
             semicn_token = cur_token;
             getToken();
-            if(exp!=null){
-                handleMissing(semicn_token,TokenType.SEMICN, exp.getLineNumber());
+            if (exp != null) {
+                handleMissing(semicn_token, TokenType.SEMICN, exp.getLineNumber());
             }
             return new ExpStmt(exp, semicn_token);
         }
@@ -857,27 +851,25 @@ public class Parser {
         ) {
             unary_op = parseUnaryOp();
             unary_exp = parseUnaryExp();
-        } else if(cur_token.getTokenType().equals(TokenType.IDENFR)){
-            if(getTokenForward(1).getTokenType().equals(TokenType.LPARENT)){
+        } else if (cur_token.getTokenType().equals(TokenType.IDENFR)) {
+            if (getTokenForward(1).getTokenType().equals(TokenType.LPARENT)) {
                 ident = parseIdent();
                 lparent = cur_token;
                 getToken();
-                if (!cur_token.getTokenType().equals(TokenType.RPARENT)&&!cur_token.getTokenType().equals(TokenType.SEMICN)) {
+                if (!cur_token.getTokenType().equals(TokenType.RPARENT) && !cur_token.getTokenType().equals(TokenType.SEMICN)) {
                     func_r_params = parseFuncRParms();
                 }
                 rparent = cur_token;
                 int line_number = ident.getLineNumber();
-                if(func_r_params!=null){
+                if (func_r_params != null) {
                     line_number = func_r_params.getLineNumber();
                 }
                 handleMissing(rparent, TokenType.RPARENT, line_number);
                 getToken();
-            }
-            else {
+            } else {
                 primary_exp = parsePrimaryExp();
             }
-        }
-        else {
+        } else {
             primary_exp = parsePrimaryExp();
         }
         return new UnaryExp(primary_exp, ident, lparent, func_r_params, rparent, unary_op, unary_exp);
@@ -906,13 +898,13 @@ public class Parser {
             Token comma_item = cur_token;
             getToken();
             Syntax var_def_item = parseVarDef();
-            list.add(new Tuple<>(comma_item,var_def_item));
+            list.add(new Tuple<>(comma_item, var_def_item));
         }
         semicn_token = cur_token;
         getToken();
         int line_number = var_def.getLineNumber();
-        if(!list.isEmpty()){
-            line_number = list.get(list.size()-1).second().getLineNumber();
+        if (!list.isEmpty()) {
+            line_number = list.get(list.size() - 1).second().getLineNumber();
         }
         handleMissing(semicn_token, TokenType.SEMICN, line_number);
         return new VarDecl(b_type, var_def, list, semicn_token);
@@ -942,23 +934,21 @@ public class Parser {
         return new VarDef(ident, list, assign_token, init_val);
     }
 
-    private void handleMissing(Token token, TokenType tokenType, int line_number){
-        if(token == null || !token.getTokenType().equals(tokenType)){
-            if(tokenType.equals(TokenType.SEMICN)){
+    private void handleMissing(Token token, TokenType tokenType, int line_number) {
+        if (token == null || !token.getTokenType().equals(tokenType)) {
+            if (tokenType.equals(TokenType.SEMICN)) {
                 ErrorHandler.getInstance().addError(new Error(ErrorType.MISSINGSEMICN, line_number));
-            }
-            else if(tokenType.equals(TokenType.RBRACK)){
+            } else if (tokenType.equals(TokenType.RBRACK)) {
                 ErrorHandler.getInstance().addError(new Error(ErrorType.MISSINGRBRACK, line_number));
-            }
-            else if(tokenType.equals(TokenType.RPARENT)){
+            } else if (tokenType.equals(TokenType.RPARENT)) {
                 ErrorHandler.getInstance().addError(new Error(ErrorType.MISSINGRPARENT, line_number));
             }
             back();
         }
     }
 
-    private boolean isExpFirst(Token token){
-        if(token==null) return false;
+    private boolean isExpFirst(Token token) {
+        if (token == null) return false;
         TokenType tokenType = token.getTokenType();
         return tokenType.equals(TokenType.LPARENT)
                 || tokenType.equals(TokenType.IDENFR)

@@ -6,10 +6,12 @@ import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.ConstantInt;
 import q9k.buaa.IR.Function;
-import q9k.buaa.IR.Instruction;
 import q9k.buaa.IR.Instructions.BinaryOperator;
+import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Instructions.CallInst;
+import q9k.buaa.IR.Instructions.IcmpInst;
 import q9k.buaa.IR.Types.FunctionType;
 import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Types.Type;
@@ -35,7 +37,7 @@ public class UnaryExp implements Syntax {
     private Token rparent;
     private Syntax unary_op;
     private Syntax unary_exp;
-    
+
     private FuncSymbol funcSymbol;
 
     public UnaryExp(Syntax primary_exp, Syntax ident, Token lparent, Syntax func_r_params, Token rparent, Syntax unary_op, Syntax unary_exp) {
@@ -68,12 +70,12 @@ public class UnaryExp implements Syntax {
 
     @Override
     public void visit() {
-        
+
         if (primary_exp != null) {
             primary_exp.visit();
         } else if (ident != null) {
             if (SymbolTable.checkFuncInvoke(ident)) {
-                this.funcSymbol = (FuncSymbol) SymbolTable.getCurrent().getSymbol(ident);
+                this.funcSymbol = (FuncSymbol) SymbolTable.getGlobal().getSymbol(ident);
                 List<Syntax> list = new ArrayList<>();
                 if (func_r_params != null) {
                     func_r_params.visit();
@@ -93,8 +95,7 @@ public class UnaryExp implements Syntax {
                                     break;
                                 }
                             } else {
-                                ErrorHandler.getInstance().addError(new Error(ErrorType.NOTDEFNAME, exp.getLineNumber()));
-                                break;
+                                exp.visit();
                             }
                         }
                     }
@@ -123,37 +124,39 @@ public class UnaryExp implements Syntax {
         } else if (ident != null) {
             SymbolType symbolType = funcSymbol.getReturn_type();
             Type type;
-            if(symbolType==SymbolType.VOID){
-                type = VoidType.voidType;
+            if (symbolType == SymbolType.VOID) {
+                type = VoidType.VoidType;
+            } else {
+                type = IntegerType.i32;
             }
-            else{
-                type=IntegerType.i32;
-            }
-            CallInst callInst = new CallInst(null, type);
+            CallInst callInst = new CallInst(type);
             CallInst current = IRGenerator.getCurCallInst();
             IRGenerator.setCurCallInst(callInst);
             if (func_r_params != null) {
                 func_r_params.generateIR();
             }
             IRGenerator.setCurCallInst(current);
-            callInst.addOperand(new Function("@"+ident.toString(), FunctionType.functionType));
+            callInst.addOperand(new Function("@" + ident.toString(), FunctionType.FunctionType));
             IRGenerator.getCurBasicBlock().addInstruction(callInst);
             return callInst;
         } else {
-            Instruction instruction = new BinaryOperator(null, IntegerType.i32);
             Token op_token = ((UnaryOp) unary_op).getOp_token();
             if (op_token.getTokenType().equals(TokenType.PLUS)) {
                 return unary_exp.generateIR();
+            } else if (op_token.getTokenType().equals(TokenType.MINU)) {
+
+                UnaryExp temp = (UnaryExp) unary_exp;
+                BinaryOperator binaryOperator = new BinaryOperator(ConstantInt.ZERO, temp.generateIR(), op_token.getTokenType());
+
+                IRGenerator.getCurBasicBlock().addInstruction(binaryOperator);
+                return binaryOperator;
+            } else if (op_token.getTokenType().equals(TokenType.NOT)) {
+                IcmpInst icmpInst = new IcmpInst(unary_exp.generateIR(), ConstantInt.ZERO, TokenType.EQL);
+                IRGenerator.getCurBasicBlock().addInstruction(icmpInst);
+
+                return icmpInst;
             }
-            instruction.setOpcode(op_token);
-            Value value_1 = new Value(null, IntegerType.i32);
-            value_1.setValue(0);
-            UnaryExp temp = (UnaryExp) unary_exp;
-            Value value_2 = temp.generateIR();
-            instruction.addOperand(value_1);
-            instruction.addOperand(value_2);
-            IRGenerator.getCurBasicBlock().addInstruction(instruction);
-            return instruction;
+            return null;
         }
     }
 
@@ -170,7 +173,14 @@ public class UnaryExp implements Syntax {
             content.append(rparent.toString());
             return content.toString();
         } else {
-            return unary_op.toString() + unary_exp.toString();
+            Token op_token = ((UnaryOp) unary_op).getOp_token();
+            if (op_token.getTokenType().equals(TokenType.NOT)) {
+                return unary_op.toString() + unary_exp.toString();
+            } else {
+                String content = "(0"+unary_op.toString()+unary_exp.toString()+")";
+//                System.out.println(content);
+                return content;
+            }
         }
     }
 
@@ -206,7 +216,7 @@ public class UnaryExp implements Syntax {
                         return SymbolType.VAR;
                     } else if (lbrack_count == 0) {
                         return SymbolType.ARRAY;
-                    } else{
+                    } else {
                         return null;
                     }
                 } else if (symbolType.equals(SymbolType.MULTIARRAY)) {
@@ -216,10 +226,10 @@ public class UnaryExp implements Syntax {
                         return SymbolType.ARRAY;
                     } else if (lbrack_count == 2) {
                         return SymbolType.VAR;
-                    } else{
+                    } else {
                         return null;
                     }
-                }else{
+                } else {
                     return symbolType;
                 }
             }

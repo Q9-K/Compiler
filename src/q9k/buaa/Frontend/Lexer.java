@@ -11,7 +11,7 @@ import java.util.List;
 public class Lexer {
     private int line_number = 1;
     private int number_value = 0;
-    private final StringBuffer token_content =new StringBuffer();
+    private final StringBuffer token_content = new StringBuffer();
     private final StringBuffer file_content;
     private Character character = ' ';
     private int cur_pos = 0;
@@ -23,6 +23,7 @@ public class Lexer {
         file_content.append('\n');
         this.file_content = file_content;
     }
+
     public static synchronized Lexer getInstance() throws IOException {
         if (lexer == null) {
             System.out.println("Something wrong happened at lexer init!");
@@ -38,19 +39,19 @@ public class Lexer {
         return lexer;
     }
 
-    public static void clearInstance(){
+    public static void clearInstance() {
         lexer = null;
     }
 
-    public List<Token> getToken_stream(){
+    public List<Token> getTokenStream() {
         return this.token_stream;
     }
 
     public void run() throws IOException {
-        while (!isEND()){
+        while (!isEND()) {
             next();
         }
-        if(Config.lexer_output_open){
+        if (Config.lexer_output_open) {
             for (Token token : token_stream) {
                 token.print();
             }
@@ -61,26 +62,26 @@ public class Lexer {
     private void next() {
         clearToken();
         clearCharacter();
-        while (isBlank(character)&&!isEND()) {
+        while (isBlank(character) && !isEND()) {
             if (character.equals('\n')) {
                 this.line_number++;
             }
             getchar();
         }
-        if(isEND()) return;
+        if (isEND()) return;
         //处理注释
         if (character.equals('/')) {
             getchar();
             //多行注释
             if (character.equals('*')) {
                 getchar();
-                do{
+                do {
                     catToken();
                     getchar();
-                    if(character.equals('\n')){
+                    if (character.equals('\n')) {
                         this.line_number++;
                     }
-                } while(!token_content.toString().endsWith("*/")&&!isEND());
+                } while (!token_content.toString().endsWith("*/") && !isEND());
                 retract();
                 return;
             }
@@ -93,22 +94,38 @@ public class Lexer {
                 return;
             }
             //div
-            else{
+            else {
                 retract();
                 catToken('/');
             }
         }
-        //<,=,>情况
-        else if (character.equals('<') || character.equals('>') ||
-                character.equals('=') || character.equals('!') ||
-                character.equals('|') || character.equals('&')
-        ) {
+        //<,<=,>,>=, !, !+,=,==情况
+        else if(character.equals('<')||character.equals('>')||character.equals('=')||character.equals('!')){
             catToken();
             getchar();
-            if (character.equals('<') || character.equals('>') ||
-                    character.equals('=') || character.equals('!') ||
-                    character.equals('|') || character.equals('&')
-            ) {
+            if(character.equals('=')){
+                catToken();
+            }
+            else{
+                retract();
+            }
+        }
+        // &&情况
+        else if(character.equals('&')){
+            catToken();
+            getchar();
+            if(character.equals('&')){
+                catToken();
+            }
+            else{
+                retract();
+            }
+        }
+        // ||情况
+        else if(character.equals('|')){
+            catToken();
+            getchar();
+            if(character.equals('|')){
                 catToken();
             }
             else{
@@ -125,8 +142,8 @@ public class Lexer {
             getNumber_value();
         }
         //标识符
-        else if (Character.isLetter(character)||character.equals('_')) {
-            while (Character.isLetterOrDigit(character)||character.equals('_')) {
+        else if (Character.isLetter(character) || character.equals('_')) {
+            while (Character.isLetterOrDigit(character) || character.equals('_')) {
                 catToken();
                 getchar();
             }
@@ -137,10 +154,10 @@ public class Lexer {
             catToken();
         }
         //字符串
-        else if(character.equals('"')){
+        else if (character.equals('"')) {
             catToken();
             getchar();
-            while(character!='"'){
+            while (character != '"') {
                 catToken();
                 getchar();
             }
@@ -162,9 +179,10 @@ public class Lexer {
         return this.character;
     }
 
-    private void clearCharacter(){
+    private void clearCharacter() {
         this.character = ' ';
     }
+
     private void clearToken() {
         this.token_content.delete(0, this.token_content.length());
     }
@@ -182,6 +200,7 @@ public class Lexer {
     private void catToken() {
         this.token_content.append(character);
     }
+
     private void catToken(Character character) {
         this.token_content.append(character);
     }
@@ -201,7 +220,7 @@ public class Lexer {
     }
 
     private boolean isSingleSymbol(Character character) {
-        Character[] characters = {'(', ')', '[', ']', '{', '}', ',', ';', '+', '-', '*','%'};
+        Character[] characters = {'(', ')', '[', ']', '{', '}', ',', ';', '+', '-', '*', '%'};
         List<Character> list = Arrays.asList(characters);
         return list.contains(character);
     }

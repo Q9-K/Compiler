@@ -1,5 +1,6 @@
 package q9k.buaa.IR;
 
+import q9k.buaa.IR.Instructions.BinaryOperator;
 import q9k.buaa.IR.Instructions.ReturnInst;
 import q9k.buaa.IR.Types.Type;
 import q9k.buaa.Symbol.SymbolType;
@@ -51,7 +52,7 @@ public class Function extends GlobalValue {
         StringBuilder content = new StringBuilder();
         if (isExternal) {
             content.append("declare ").append(returnType.toString()).
-                    append(" ").append(IRModule.LOCAL_PREFIX).append(this.getName()).append("(");
+                    append(" ").append(this.getName()).append("(");
             if (!arguments.isEmpty()) {
                 int index = 0;
                 for (; index < arguments.size() - 1; ++index) {
@@ -62,7 +63,7 @@ public class Function extends GlobalValue {
             content.append(")");
         } else {
             content.append("define dso_local ").append(returnType.toString()).
-                    append(" ").append(IRModule.LOCAL_PREFIX).append(this.getName()).append("(");
+                    append(" ").append(this.getName()).append("(");
             if (!arguments.isEmpty()) {
                 int index = 0;
                 for (; index < arguments.size() - 1; ++index) {
@@ -71,20 +72,30 @@ public class Function extends GlobalValue {
                 content.append(arguments.get(index).getType().toString()).append(" ").append(arguments.get(index).getName());
             }
             content.append(")").append(" {").append("\n");
-            this.number++;
             int index = 0;
-            for (;index<basicBlocks.size()-1;index++) {
+            for(BasicBlock basicBlock : basicBlocks){
+                basicBlock.getName();
+                for(Instruction instruction: basicBlock.getInstructions()){
+                    instruction.getName();
+                }
+            }
+            for (; index < basicBlocks.size() - 1; index++) {
                 BasicBlock basicBlock = basicBlocks.get(index);
 //                content.append(";<label>:").append(this.number++).append("\n");
+                if (index > 0) {
+                    content.append(basicBlock.getName()).append(":").append("\n");
+                }
                 content.append(basicBlock.toString());
             }
             BasicBlock basicBlock = basicBlocks.get(index);
             Instruction instruction = basicBlock.getTerminator();
 //            System.out.println(instruction.getClass());
-            if(!instruction.getClass().equals(ReturnInst.class)){
-                ReturnInst returnInst = new ReturnInst(null, null);
-                returnInst.setOpcode(new Token("return", -1));
+            if (!(instruction instanceof ReturnInst)) {
+                ReturnInst returnInst = new ReturnInst();
                 basicBlock.addInstruction(returnInst);
+            }
+            if (index > 0) {
+                content.append(basicBlock.getName()).append(":").append("\n");
             }
             content.append(basicBlock.toString());
             content.append("}").append("\n");

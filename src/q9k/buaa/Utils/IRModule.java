@@ -11,11 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IRModule {
-    public static String GLOBAL_PREFIX = "%";
-    public static String LOCAL_PREFIX = "@";
-    public static String GLOBAL_NAME_PREFIX = "g_";
-    public static String LOCAL_NAME_PREFIX = "v";
-    public static String FPARAM_NAME_PREFIX = "f";
 
     private List<Constant> globalValues;
     private List<Function> functions;
@@ -45,12 +40,6 @@ public class IRModule {
         return functions;
     }
 
-    public Function getCurFunction() {
-        if (!functions.isEmpty()) {
-            return functions.get(functions.size() - 1);
-        }
-        return null;
-    }
 
     public void addFunction(Function function) {
         this.functions.add(function);
@@ -65,13 +54,6 @@ public class IRModule {
         output.write(irModule.toString());
     }
 
-    public void removeGlobalVar(GlobalValue globalValue) {
-        this.globalValues.remove(globalValue);
-    }
-
-    public void insertFunction(Function function) {
-        this.functions.add(function);
-    }
 
     @Override
     public String toString() {

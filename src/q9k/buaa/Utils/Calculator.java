@@ -1,7 +1,9 @@
 package q9k.buaa.Utils;
 
 import q9k.buaa.AST.Syntax;
-import q9k.buaa.IR.Constant;
+import q9k.buaa.IR.ConstantArray;
+import q9k.buaa.IR.ConstantInt;
+import q9k.buaa.IR.GlobalVariable;
 import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
 
@@ -19,15 +21,11 @@ public class Calculator {
     }
 
     public int calculate(Syntax syntax) {
-//        Constant constant = new Constant(null, IntegerType.i32);
         if (syntax == null) {
             return 0;
         } else {
-            System.out.print("表达式计算结果: "+syntax);
-            int value = calculateExpression("0+"+syntax.toString());
-            System.out.println(" = " + value);
-//            constant.setValue(value);
-            return value;
+            System.out.println(syntax.toString());
+            return calculateExpression("0+" + syntax.toString());
         }
     }
 
@@ -40,18 +38,39 @@ public class Calculator {
         Stack<Character> operators = new Stack<>();
 
         for (int i = 0; i < tokens.length; i++) {
-            if (tokens[i] == ' ')
+            if (tokens[i] == ' ' || tokens[i] == '\r' || tokens[i] == '\n' || tokens[i] == '\t')
                 continue;
-            if (Character.isLetter(tokens[i])) {
+            //处理identifer, 但是后来说ConstExp都是常值表达式
+            if (Character.isLetter(tokens[i]) || tokens[i] == '_') {
                 StringBuilder sb = new StringBuilder();
-                while (i < tokens.length && (Character.isLetterOrDigit(tokens[i]) || tokens[i] == '_')) {
+                while (i < tokens.length && (Character.isLetterOrDigit(tokens[i]) || tokens[i] == '_' ||
+                        tokens[i] == '[' || tokens[i] == ']')) {
                     sb.append(tokens[i++]);
                 }
                 i--;
-                Symbol symbol = SymbolTable.getGlobal().getSymbol(sb.toString());
-                Constant globalVariable = (Constant) symbol.getIR();
-//                System.out.println(globalVariable.getInitializer());
-                values.push(globalVariable.getInitializer());
+                if (!sb.toString().contains("[")) {
+                    Symbol symbol = SymbolTable.getGlobal().getSymbol(sb.toString());
+                    GlobalVariable globalVariable = (GlobalVariable) symbol.getIR();
+                    values.push(((ConstantInt) globalVariable.getInitializer()).getValue());
+                } else {
+                    String[] parts = sb.toString().split("\\]\\[|\\[|\\]");
+                    if(parts.length == 2){
+                        //一维数组
+                        Symbol symbol = SymbolTable.getGlobal().getSymbol(parts[0]);
+                        GlobalVariable globalVariable = (GlobalVariable) symbol.getIR();
+                        ConstantArray constantArray = ((ConstantArray) globalVariable.getInitializer());
+                        ConstantInt constantInt = (ConstantInt) constantArray.getConstants().get(Integer.parseInt(parts[1]));
+                        values.push(constantInt.getValue());
+                    }
+                    else if(parts.length==3){
+                        Symbol symbol = SymbolTable.getGlobal().getSymbol(parts[0]);
+                        GlobalVariable globalVariable = (GlobalVariable) symbol.getIR();
+                        ConstantArray constantArray = ((ConstantArray) globalVariable.getInitializer());
+                        ConstantArray constantArray1 = (ConstantArray) constantArray.getConstants().get(Integer.parseInt(parts[1]));
+                        ConstantInt constantInt = (ConstantInt) constantArray1.getConstants().get(Integer.parseInt(parts[2]));
+                        values.push(constantInt.getValue());
+                    }
+                }
             } else if (Character.isDigit(tokens[i])) {
                 StringBuilder sb = new StringBuilder();
                 while (i < tokens.length && Character.isDigit(tokens[i])) {
@@ -59,10 +78,6 @@ public class Calculator {
                 }
                 i--;
                 int value = Integer.parseInt(sb.toString());
-                if (minus_prefix) {
-                    minus_prefix = false;
-                    value = -value;
-                }
                 values.push(value);
             } else if (tokens[i] == '(') {
                 operators.push(tokens[i]);

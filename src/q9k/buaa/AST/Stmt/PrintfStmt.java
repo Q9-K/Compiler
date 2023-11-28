@@ -5,10 +5,10 @@ import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.ConstantInt;
 import q9k.buaa.IR.Function;
 import q9k.buaa.IR.Instructions.CallInst;
 import q9k.buaa.IR.Types.FunctionType;
-import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Types.VoidType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Token.Token;
@@ -72,25 +72,21 @@ public class PrintfStmt implements Stmt {
         String content = format_string.toString();
         int pos = 0;
         for (int index = 1; index < content.length() - 1; ++index) {
-            CallInst callInst = new CallInst(null, VoidType.voidType);
+            CallInst callInst = new CallInst(VoidType.VoidType);
             Function function;
             Value value;
             char c = content.charAt(index);
             if (c == '%' && content.charAt(index + 1) == 'd') {
                 index++;
-                function = new Function("@putint", FunctionType.functionType);
+                function = new Function("@putint", FunctionType.FunctionType);
                 value = list.get(pos++).second().generateIR();
-            }
-            else if(c=='\\'&&content.charAt(index+1)=='n'){
+            } else if (c == '\\' && content.charAt(index + 1) == 'n') {
                 index++;
-                function = new Function("@putch", FunctionType.functionType);
-                value = new Value(null, IntegerType.i32);
-                value.setValue((int)'\n');
-            }
-            else {
-                function = new Function("@putch", FunctionType.functionType);
-                value = new Value(null, IntegerType.i32);
-                value.setValue((int) c);
+                function = new Function("@putch", FunctionType.FunctionType);
+                value = new ConstantInt((int) '\n');
+            } else {
+                function = new Function("@putch", FunctionType.FunctionType);
+                value = new ConstantInt((int) c);
             }
             callInst.addParam(value);
             callInst.addOperand(function);

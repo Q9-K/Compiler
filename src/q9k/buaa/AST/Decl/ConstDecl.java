@@ -2,7 +2,6 @@ package q9k.buaa.AST.Decl;
 
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.IR.Value;
-import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.*;
 import q9k.buaa.Utils.Tuple;
 

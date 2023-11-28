@@ -8,6 +8,7 @@ import q9k.buaa.Utils.Output;
 import java.io.IOException;
 
 public class Config {
+    public static boolean DEBUG = true;
     private static String input_path="testfile.txt";
     private static String output_path="output.txt";
     private static String error_path="error.txt";

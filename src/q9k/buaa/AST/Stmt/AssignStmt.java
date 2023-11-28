@@ -1,5 +1,6 @@
 package q9k.buaa.AST.Stmt;
 
+import q9k.buaa.AST.LVal;
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
@@ -83,17 +84,17 @@ public class AssignStmt implements Stmt{
     @Override
     public Value generateIR() {
         if(exp!=null){
-            Instruction instruction = new StoreInst(null, IntegerType.i32);
-            instruction.addOperand(this.symbol.getIR());
+            Instruction instruction = new StoreInst();
+            instruction.addOperand(((LVal)l_val).getAddress());
             instruction.addOperand(exp.generateIR());
             IRGenerator.getCurBasicBlock().addInstruction(instruction);
         }
         else{
-            Instruction instruction = new CallInst(null,   IntegerType.i32);
-            instruction.addOperand(new Function("@getint", FunctionType.functionType));
+            Instruction instruction = new CallInst(IntegerType.i32);
+            instruction.addOperand(new Function("@getint", FunctionType.FunctionType));
             IRGenerator.getCurBasicBlock().addInstruction(instruction);
-            Instruction storeInst = new StoreInst(null, null);
-            storeInst.addOperand(this.symbol.getIR());
+            Instruction storeInst = new StoreInst();
+            storeInst.addOperand(((LVal)l_val).getAddress());
             storeInst.addOperand(instruction);
             IRGenerator.getCurBasicBlock().addInstruction(storeInst);
         }

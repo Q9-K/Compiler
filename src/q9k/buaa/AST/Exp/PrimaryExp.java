@@ -2,6 +2,7 @@ package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.Token;
 
@@ -14,7 +15,7 @@ public class PrimaryExp implements Syntax {
     private Token rparent;
     private Syntax l_val;
     private Syntax number;
-    
+    private Symbol symbol;
 
     public PrimaryExp(Token lparent, Syntax exp, Token rparent, Syntax l_val, Syntax number) {
         this.lparent = lparent;

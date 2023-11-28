@@ -1,101 +1,73 @@
 package q9k.buaa.AST.Stmt;
 
 import q9k.buaa.AST.Syntax;
+import q9k.buaa.Error.Error;
+import q9k.buaa.Error.ErrorHandler;
+import q9k.buaa.Error.ErrorType;
+import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.Instruction;
+import q9k.buaa.IR.Instructions.StoreInst;
+import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Value;
-import q9k.buaa.Token.Token;
+import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Token.Token;
 
 import java.io.IOException;
 
-public class ForStmt implements Stmt {
-    private Token for_token;
-    private Token lparent_token;
-    private Syntax for_stmt1;
-    private Token semicn_token1;
-    private Syntax cond;
-    private Token semicn_token2;
-    private Syntax for_stmt2;
-    private Token rparent_token;
-    private Syntax stmt;
+public class ForStmt implements Syntax {
+    private Syntax l_val;
+    private Token assign_token;
+    private Syntax exp;
+    Symbol symbol;
     
 
-    public ForStmt(Token for_token, Token lparent_token, Syntax for_stmt1, Token semicn_token1, Syntax cond, Token semicn_token2, Syntax for_stmt2, Token rparent_token, Syntax stmt) {
-        this.for_token = for_token;
-        this.lparent_token = lparent_token;
-        this.for_stmt1 = for_stmt1;
-        this.semicn_token1 = semicn_token1;
-        this.cond = cond;
-        this.semicn_token2 = semicn_token2;
-        this.for_stmt2 = for_stmt2;
-        this.rparent_token = rparent_token;
-        this.stmt = stmt;
+    public ForStmt(Syntax l_val, Token assign_token, Syntax exp) {
+        this.l_val = l_val;
+        this.assign_token = assign_token;
+        this.exp = exp;
     }
 
     @Override
     public void print() throws IOException {
-        for_token.print();
-        lparent_token.print();
-        if(for_stmt1!=null){
-            for_stmt1.print();
-        }
-        semicn_token1.print();
-        if(cond!=null){
-            cond.print();
-        }
-        semicn_token2.print();
-        if(for_stmt2!=null){
-            for_stmt2.print();
-        }
-        rparent_token.print();
-        stmt.print();
-        printAstName(Stmt.class);
+        l_val.print();
+        assign_token.print();
+        exp.print();
+        printAstName(ForStmt.class);
     }
 
     @Override
     public void visit() {
-        
-        if(for_stmt1!=null){
-            for_stmt1.visit();
+        l_val.visit();
+        this.symbol = SymbolTable.getCurrent().getSymbol(l_val);
+        if(symbol!=null){
+            if(symbol.isConst()){
+                ErrorHandler.getInstance().addError(new Error(ErrorType.CHANGECONST, l_val.getLineNumber()));
+            }
         }
-        if(cond!=null){
-            cond.visit();
-        }
-        if(for_stmt2!=null){
-            for_stmt2.visit();
-        }
-        SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
-        SymbolTable.getCurrent().setFor_block(true);
-        stmt.visit();
-        SymbolTable.changeToFather();
+        exp.visit();
     }
 
     @Override
     public int getLineNumber() {
-        return 0;
+        return l_val.getLineNumber();
     }
 
     @Override
     public Value generateIR() {
+        Instruction instruction = new StoreInst();
+        instruction.addOperand(this.symbol.getIR());
+        instruction.addOperand(exp.generateIR());
+        IRGenerator.getCurBasicBlock().addInstruction(instruction);
         return null;
     }
 
+
     @Override
     public String toString() {
-        StringBuilder content = new StringBuilder();
-        content.append(for_token.toString()).append(lparent_token.toString());
-        if(for_stmt1!=null){
-            content.append(for_stmt1.toString());
-        }
-        content.append(semicn_token1.toString());
-        if(cond!=null){
-            content.append(cond.toString());
-        }
-        content.append(semicn_token2.toString());
-        if(for_stmt2!=null){
-            content.append(for_stmt2.toString());
-        }
-        content.append(rparent_token.toString()).append(stmt.toString());
-        return content.toString();
+        return l_val.toString()+assign_token.toString()+exp.toString();
     }
-
 }
+
+
+

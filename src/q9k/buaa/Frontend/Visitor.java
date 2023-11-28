@@ -28,7 +28,7 @@ public class Visitor {
         return visitor;
     }
 
-    public void run(){
+    public void run() {
         SymbolTable symbolTable = SymbolTable.getGlobal();
         SymbolTable.changeTo(symbolTable);
         ast.visit();

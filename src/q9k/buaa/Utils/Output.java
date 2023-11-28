@@ -28,10 +28,10 @@ public class Output {
     }
     public <T> void write(T log) throws IOException {
         //当文件不存在时创建，同时使用追加输出选项
-        if(log.getClass().equals(StringBuffer.class)){
+        if(log instanceof StringBuilder){
             Files.write(Paths.get(this.file_path),log.toString().getBytes(), StandardOpenOption.APPEND);
         }
-        else if(log.getClass().equals(String.class)){
+        else if(log instanceof String){
             Files.write(Paths.get(this.file_path),((String) log).getBytes(),StandardOpenOption.APPEND);
         }
     }

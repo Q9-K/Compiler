@@ -70,7 +70,7 @@ public class SymbolTable {
 
 
     public Symbol getSymbol(String content) {
-        SymbolTable symbolTable = SymbolTable.getCurrent();
+        SymbolTable symbolTable = this;
         while (symbolTable != null) {
             Symbol symbol = symbolTable.symbolMap.get(content);
             if (symbol != null) {

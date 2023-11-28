@@ -6,6 +6,7 @@ import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.BasicBlock;
 import q9k.buaa.IR.Function;
 import q9k.buaa.IR.Types.FunctionType;
+import q9k.buaa.IR.Types.LabelType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolType;
 import q9k.buaa.Token.Token;
@@ -62,11 +63,16 @@ public class MainFuncDef implements Syntax {
 
     @Override
     public Value generateIR() {
-        Function function = new Function("main", FunctionType.functionType);
+        Function function = new Function("@main", FunctionType.FunctionType);
+        function.setReturnType(SymbolType.VAR);
         IRModule.getInstance().addFunction(function);
         IRGenerator.setCurFunction(function);
+
+        BasicBlock basicBlock = new BasicBlock();
+        IRGenerator.getCurFunction().addBasicBlock(basicBlock);
+        IRGenerator.setCurBasicBlock(basicBlock);
+
         block.generateIR();
-        function.setReturnType(SymbolType.VAR);
         return function;
     }
 }
