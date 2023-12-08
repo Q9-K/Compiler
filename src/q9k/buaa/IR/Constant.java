@@ -4,7 +4,6 @@ import q9k.buaa.IR.Types.Type;
 
 public abstract class Constant extends User {
 
-
     public Constant() {
         super();
     }

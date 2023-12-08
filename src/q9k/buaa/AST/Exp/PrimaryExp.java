@@ -4,6 +4,7 @@ import q9k.buaa.AST.Syntax;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ public class PrimaryExp implements Syntax {
     private Token rparent;
     private Syntax l_val;
     private Syntax number;
-    private Symbol symbol;
+    private SymbolTable symbolTable;
 
     public PrimaryExp(Token lparent, Syntax exp, Token rparent, Syntax l_val, Syntax number) {
         this.lparent = lparent;
@@ -41,6 +42,7 @@ public class PrimaryExp implements Syntax {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         if (exp != null) {
             exp.visit();
         } else if (l_val != null) {

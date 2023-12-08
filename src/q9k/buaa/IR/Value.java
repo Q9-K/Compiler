@@ -53,4 +53,6 @@ public abstract class Value {
     public void replaceAllUsesWith(Value value) {
 
     }
+
+    public abstract void translate();
 }

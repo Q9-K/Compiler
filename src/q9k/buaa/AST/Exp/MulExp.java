@@ -4,6 +4,8 @@ import q9k.buaa.AST.Syntax;
 import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.Instructions.BinaryOperator;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -14,6 +16,7 @@ public class MulExp implements Syntax {
     private Syntax mul_exp;
 
     private Value pre_value;
+    private SymbolTable symbolTable;
 
     public MulExp(Syntax unary_exp, Token op_token, Syntax mul_exp) {
         this.unary_exp = unary_exp;
@@ -33,7 +36,7 @@ public class MulExp implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         unary_exp.visit();
         if (mul_exp != null) {
             mul_exp.visit();

@@ -7,6 +7,8 @@ import q9k.buaa.IR.Instructions.IcmpInst;
 import q9k.buaa.IR.Instructions.ResizeInst;
 import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -16,6 +18,7 @@ public class RelExp implements Syntax {
     private Token op_token;
     private Syntax rel_exp;
     private Value pre_value;
+    private SymbolTable symbolTable;
 
 
     public RelExp(Syntax add_exp, Token op_token, Syntax rel_exp) {
@@ -36,7 +39,7 @@ public class RelExp implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         add_exp.visit();
         if (rel_exp != null) {
             rel_exp.visit();

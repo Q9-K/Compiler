@@ -2,6 +2,8 @@ package q9k.buaa.AST;
 
 import q9k.buaa.IR.ConstantInt;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -9,6 +11,7 @@ import java.io.IOException;
 public class IntConst implements Syntax {
 
     private Token intcon_token;
+    private SymbolTable symbolTable;
 
 
     public IntConst(Token intcon_token) {
@@ -22,7 +25,7 @@ public class IntConst implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
     }
 
     @Override

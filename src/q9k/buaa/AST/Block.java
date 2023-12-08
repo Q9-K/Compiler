@@ -5,6 +5,7 @@ import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Token.TokenType;
 
@@ -15,7 +16,7 @@ public class Block implements Syntax {
     private Token lbrace_token;
     private List<Syntax> block_items;
     private Token rbrace_token;
-
+    private SymbolTable symbolTable;
 
     public Block(Token lbrace_token, List<Syntax> block_items, Token rbrace_token) {
         this.lbrace_token = lbrace_token;
@@ -35,14 +36,14 @@ public class Block implements Syntax {
 
     @Override
     public void visit() {
-        
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         for (Syntax item : block_items) {
             item.visit();
         }
     }
 
     public void checkReturn() {
-        if (SymbolTable.getCurrent().isFunc_block() == 2) {
+        if (SymbolTableFactory.getInstance().getCurrent().getFuncBlock() == 2) {
             if(block_items.isEmpty()||!block_items.get(block_items.size()-1).toString().startsWith(TokenType.RETURNTK.getName())){
                 ErrorHandler.getInstance().addError(new Error(ErrorType.LACKOFRETURN, getLineNumber()));
             }

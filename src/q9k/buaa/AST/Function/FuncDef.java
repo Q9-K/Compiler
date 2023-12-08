@@ -9,6 +9,7 @@ import q9k.buaa.IR.Types.FunctionType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.FuncSymbol;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Symbol.SymbolType;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Token.TokenType;
@@ -25,6 +26,7 @@ public class FuncDef implements Syntax {
     private Token rparent;
     private Syntax block;
     private SymbolType returnType;
+    private SymbolTable symbolTable;
 
 
     public FuncDef(Syntax func_type, Syntax ident, Token lparent, Syntax func_f_params, Token rparent, Syntax block) {
@@ -51,7 +53,7 @@ public class FuncDef implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         if (SymbolTable.checkDef(ident)) {
             TokenType tokenType = TokenType.getTokenType(func_type.toString());
             if (tokenType.equals(TokenType.VOIDTK)) {
@@ -60,20 +62,20 @@ public class FuncDef implements Syntax {
                 this.returnType = SymbolType.VAR;
             }
             FuncSymbol funcSymbol = new FuncSymbol(ident.toString(), this.returnType);
-            SymbolTable.getCurrent().addSymbol(funcSymbol);
-            SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
+            SymbolTableFactory.getInstance().getCurrent().addSymbol(funcSymbol);
+            SymbolTableFactory.getInstance().setCurrent(SymbolTableFactory.getInstance().createSymbolTable());
             if (func_f_params != null) {
                 funcSymbol.setParam_type_list(((FuncFParams) func_f_params).getSymbolTypeList());
                 func_f_params.visit();
             }
             if (this.returnType.equals(SymbolType.VOID)) {
-                SymbolTable.getCurrent().setFunc_block(1);
+                SymbolTableFactory.getInstance().getCurrent().setFuncBlock(1);
             } else {
-                SymbolTable.getCurrent().setFunc_block(2);
+                SymbolTableFactory.getInstance().getCurrent().setFuncBlock(2);
             }
             block.visit();
             ((Block) block).checkReturn();
-            SymbolTable.changeToFather();
+            SymbolTableFactory.getInstance().setCurrent(SymbolTableFactory.getInstance().getCurrent().getFather());
         }
     }
 

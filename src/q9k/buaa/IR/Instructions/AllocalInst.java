@@ -20,4 +20,8 @@ public class AllocalInst extends Instruction {
         return this.getName() + " = alloca " + source_type.toString();
     }
 
+    @Override
+    public void translate() {
+
+    }
 }

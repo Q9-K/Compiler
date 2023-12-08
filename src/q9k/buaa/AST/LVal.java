@@ -12,6 +12,7 @@ import q9k.buaa.IR.Types.Type;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Triple;
 
@@ -23,7 +24,7 @@ public class LVal implements Syntax {
     private Syntax ident;
     private List<Triple<Token, Syntax, Token>> list;
     private Symbol symbol;
-
+    private SymbolTable symbolTable;
     public LVal(Syntax ident, List<Triple<Token, Syntax, Token>> list) {
         this.ident = ident;
         this.list = list;
@@ -43,7 +44,8 @@ public class LVal implements Syntax {
 
     @Override
     public void visit() {
-        this.symbol = SymbolTable.getCurrent().checkVarInvoke(ident);
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
+        this.symbol = SymbolTableFactory.getInstance().getCurrent().checkVarInvoke(ident);
         for (Triple<Token, Syntax, Token> item : list) {
             item.second().visit();
         }
@@ -56,6 +58,7 @@ public class LVal implements Syntax {
 
     @Override
     public Value generateIR() {
+        System.out.println(this.symbolTable);
         if (list.isEmpty()) {
             //
             PointerType pointerType = (PointerType) this.symbol.getIR().getType();

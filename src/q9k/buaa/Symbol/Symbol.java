@@ -10,6 +10,7 @@ public abstract class Symbol {
     private SymbolType symbolType;
     private boolean is_const;
     private Value value;
+    private Value cal_value;
 
 
     public Symbol(int table_id, String content) {
@@ -19,7 +20,7 @@ public abstract class Symbol {
     }
 
     public Symbol(String content) {
-        this.table_id = SymbolTable.getCurrent().getId();
+        this.table_id = SymbolTableFactory.getInstance().getCurrent().getId();
         this.content = content;
         this.id = symbol_id++;
     }
@@ -49,5 +50,11 @@ public abstract class Symbol {
     }
     public Value getIR() {
         return value;
+    }
+    public void setCalValue(Value cal_value){
+        this.cal_value = cal_value;
+    }
+    public Value getCalValue(){
+        return cal_value;
     }
 }

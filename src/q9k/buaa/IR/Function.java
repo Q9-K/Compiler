@@ -23,6 +23,8 @@ public class Function extends GlobalValue {
         this.arguments = new ArrayList<>();
     }
 
+
+
     public Function(String name, Type type, boolean isExternal) {
         super(name, type);
         this.isExternal = isExternal;
@@ -112,4 +114,9 @@ public class Function extends GlobalValue {
         return this.returnType;
     }
 
+
+    @Override
+    public void translate() {
+
+    }
 }

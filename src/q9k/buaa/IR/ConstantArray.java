@@ -69,4 +69,10 @@ public class ConstantArray extends Constant {
         }
         return null;
     }
+
+
+    @Override
+    public void translate() {
+
+    }
 }

@@ -19,4 +19,9 @@ public class ReturnInst extends Instruction {
             return "ret " + getFirst().getType().toString() + " " + this.getFirst().getName();
         }
     }
+
+    @Override
+    public void translate() {
+
+    }
 }

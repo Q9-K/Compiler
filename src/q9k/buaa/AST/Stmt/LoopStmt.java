@@ -6,6 +6,7 @@ import q9k.buaa.IR.BasicBlock;
 import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ public class LoopStmt implements Stmt {
     private Syntax for_stmt2;
     private Token rparent_token;
     private Syntax stmt;
+    private SymbolTable symbolTable;
 
 
     public LoopStmt(Token for_token, Token lparent_token, Syntax for_stmt1, Token semicn_token1, Syntax cond, Token semicn_token2, Syntax for_stmt2, Token rparent_token, Syntax stmt) {
@@ -56,7 +58,7 @@ public class LoopStmt implements Stmt {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         if (for_stmt1 != null) {
             for_stmt1.visit();
         }
@@ -66,10 +68,10 @@ public class LoopStmt implements Stmt {
         if (for_stmt2 != null) {
             for_stmt2.visit();
         }
-        SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
-        SymbolTable.getCurrent().setFor_block(true);
+        SymbolTableFactory.getInstance().setCurrent(SymbolTableFactory.getInstance().createSymbolTable());
+        SymbolTableFactory.getInstance().getCurrent().setForBlock(true);
         stmt.visit();
-        SymbolTable.changeToFather();
+        SymbolTableFactory.getInstance().setCurrent(SymbolTableFactory.getInstance().getCurrent().getFather());
     }
 
     @Override

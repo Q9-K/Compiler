@@ -3,12 +3,14 @@ package q9k.buaa.AST;
 import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 
 import java.io.IOException;
 
 public class Number implements Syntax {
 
     private Syntax int_const;
+    private SymbolTable symbolTable;
     
 
     public Number(Syntax int_const) {
@@ -23,7 +25,7 @@ public class Number implements Syntax {
 
     @Override
     public void visit() {
-        
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
     }
 
     @Override

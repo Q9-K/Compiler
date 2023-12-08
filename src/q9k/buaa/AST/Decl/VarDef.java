@@ -12,10 +12,7 @@ import q9k.buaa.IR.Types.ArrayType;
 import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Types.PointerType;
 import q9k.buaa.IR.Value;
-import q9k.buaa.Symbol.ArraySymbol;
-import q9k.buaa.Symbol.Symbol;
-import q9k.buaa.Symbol.SymbolTable;
-import q9k.buaa.Symbol.VarSymbol;
+import q9k.buaa.Symbol.*;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Calculator;
 import q9k.buaa.Utils.IRModule;
@@ -31,6 +28,7 @@ public class VarDef implements Syntax {
     private Syntax init_val;
 
     private Symbol symbol;
+    private SymbolTable symbolTable;
 
     public VarDef(Syntax ident, List<Triple<Token, Syntax, Token>> list, Token assign_token, Syntax init_val) {
         this.ident = ident;
@@ -56,16 +54,17 @@ public class VarDef implements Syntax {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         if (SymbolTable.checkDef(ident)) {
             if (list.isEmpty()) {
                 symbol = new VarSymbol(ident.toString());
-//                SymbolTable.getCurrent().addSymbol(new VarSymbol(ident.toString()));
+
             } else if (list.size() == 1) {
                 symbol = new ArraySymbol(ident.toString(), list.get(0).second(), null);
-//                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(),list.get(0).second(),null));
+
             } else {
                 symbol = new ArraySymbol(ident.toString(), list.get(0).second(), list.get(1).second());
-//                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(),list.get(0).second(),list.get(1).second()));
+
             }
             for (Triple<Token, Syntax, Token> item : list) {
                 item.second().visit();
@@ -73,7 +72,7 @@ public class VarDef implements Syntax {
             if (init_val != null) {
                 init_val.visit();
             }
-            SymbolTable.getCurrent().addSymbol(symbol);
+            SymbolTableFactory.getInstance().getCurrent().addSymbol(symbol);
         }
     }
 
@@ -119,7 +118,7 @@ public class VarDef implements Syntax {
 
             } else if (list.size() == 1) {
                 //一维数组
-                int dim = Calculator.getInstance().calculate(list.get(0).second());
+                int dim = Calculator.getInstance().calculate(list.get(0).second(), symbolTable);
                 ArrayType arrayType = new ArrayType(IntegerType.i32, dim);
                 GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType((arrayType)));
                 if (init_val != null) {
@@ -131,8 +130,8 @@ public class VarDef implements Syntax {
 
             } else if (list.size() == 2) {
                 //二维数组
-                int dim1 = Calculator.getInstance().calculate(list.get(0).second());
-                int dim2 = Calculator.getInstance().calculate(list.get(1).second());
+                int dim1 = Calculator.getInstance().calculate(list.get(0).second(), symbolTable);
+                int dim2 = Calculator.getInstance().calculate(list.get(1).second(), symbolTable);
                 ArrayType arrayType1 = new ArrayType(IntegerType.i32, dim2);
                 ArrayType arrayType2 = new ArrayType(arrayType1, dim1);
                 GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType(arrayType2));
@@ -156,7 +155,7 @@ public class VarDef implements Syntax {
                 }
             } else if (list.size() == 1) {
                 //一维数组
-                int dim = Calculator.getInstance().calculate(list.get(0).second());
+                int dim = Calculator.getInstance().calculate(list.get(0).second(), symbolTable);
                 ArrayType arrayType = new ArrayType(IntegerType.i32, dim);
                 Instruction instruction = new AllocalInst(arrayType);
                 this.symbol.setIR(instruction);
@@ -180,8 +179,8 @@ public class VarDef implements Syntax {
                 }
             } else if (list.size() == 2) {
                 //二维数组
-                int dim1 = Calculator.getInstance().calculate(list.get(0).second());
-                int dim2 = Calculator.getInstance().calculate(list.get(1).second());
+                int dim1 = Calculator.getInstance().calculate(list.get(0).second(), symbolTable);
+                int dim2 = Calculator.getInstance().calculate(list.get(1).second(), symbolTable);
                 ArrayType arrayType1 = new ArrayType(IntegerType.i32, dim2);
                 ArrayType arrayType2 = new ArrayType(arrayType1, dim1);
                 Instruction instruction = new AllocalInst(arrayType2);

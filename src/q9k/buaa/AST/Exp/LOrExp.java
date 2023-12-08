@@ -5,6 +5,8 @@ import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.BasicBlock;
 import q9k.buaa.IR.Types.LabelType;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -13,8 +15,7 @@ public class LOrExp implements Syntax {
     private Syntax l_and_exp;
     private Token or_token;
     private Syntax l_or_exp;
-
-    private Value pre_value;
+    private SymbolTable symbolTable;
     
 
     public LOrExp(Syntax l_and_exp, Token or_token, Syntax l_or_exp) {
@@ -35,7 +36,7 @@ public class LOrExp implements Syntax {
 
     @Override
     public void visit() {
-        
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         l_and_exp.visit();
         if(l_or_exp!=null){
             l_or_exp.visit();

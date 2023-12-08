@@ -58,4 +58,9 @@ public class GlobalVariable extends GlobalValue {
     public boolean isConst() {
         return isConst;
     }
+
+    @Override
+    public void translate() {
+        
+    }
 }

@@ -8,6 +8,8 @@ import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Instructions.IcmpInst;
 import q9k.buaa.IR.Types.LabelType;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Token.TokenType;
 
@@ -18,8 +20,7 @@ public class LAndExp implements Syntax {
     private Syntax eq_exp;
     private Token and_token;
     private Syntax l_and_exp;
-
-    private Value pre_value;
+    private SymbolTable symbolTable;
 
 
     public LAndExp(Syntax eq_exp, Token and_token, Syntax l_and_exp) {
@@ -40,7 +41,7 @@ public class LAndExp implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         eq_exp.visit();
         if (l_and_exp != null) {
             l_and_exp.visit();

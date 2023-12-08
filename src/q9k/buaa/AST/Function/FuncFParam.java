@@ -27,6 +27,7 @@ public class FuncFParam implements Syntax {
     private List<Triple<Token, Syntax, Token>> list;
 
     private Symbol symbol;
+    private SymbolTable symbolTable;
     
 
     public FuncFParam(Syntax b_type, Syntax ident, Token lbrack, Token rbrack, List<Triple<Token, Syntax, Token>> list) {
@@ -55,7 +56,7 @@ public class FuncFParam implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         if (SymbolTable.checkDef(ident)) {
             if (lbrack == null) {
                 symbol = new VarSymbol(ident.toString());
@@ -67,7 +68,7 @@ public class FuncFParam implements Syntax {
                 symbol = new ArraySymbol(ident.toString(), null, list.get(0).second());
 //                SymbolTable.getCurrent().addSymbol(new ArraySymbol(ident.toString(), null, list.get(0).second()));
             }
-            SymbolTable.getCurrent().addSymbol(symbol);
+            SymbolTableFactory.getInstance().getCurrent().addSymbol(symbol);
         }
     }
 
@@ -106,7 +107,7 @@ public class FuncFParam implements Syntax {
             return argument;
         }
         else if(list.size()==1){
-            int numElements = Calculator.getInstance().calculate(list.get(0).second());
+            int numElements = Calculator.getInstance().calculate(list.get(0).second(), symbolTable);
             Argument argument = new Argument(null, new PointerType((new ArrayType(IntegerType.i32, numElements))));
             IRGenerator.getCurFunction().addArgument(argument);
 

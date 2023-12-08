@@ -5,6 +5,8 @@ import q9k.buaa.IR.Constant;
 import q9k.buaa.IR.ConstantArray;
 import q9k.buaa.IR.ConstantInt;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Calculator;
 import q9k.buaa.Utils.Tuple;
@@ -19,6 +21,7 @@ public class InitVal implements Syntax {
     private Syntax init_val;
     private List<Tuple<Token, Syntax>> list;
     private Token rbrace;
+    private SymbolTable symbolTable;
 
 
     public InitVal(Syntax exp, Token lbrace, Syntax init_val, List<Tuple<Token, Syntax>> list, Token rbrace) {
@@ -49,7 +52,7 @@ public class InitVal implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         if (exp != null) {
             exp.visit();
         } else {
@@ -102,7 +105,7 @@ public class InitVal implements Syntax {
 
     public Constant getInitializer() {
         if (exp != null) {
-            return new ConstantInt(Calculator.getInstance().calculate(exp));
+            return new ConstantInt(Calculator.getInstance().calculate(exp, symbolTable));
         } else if (init_val != null) {
             List<Constant> constants = new ArrayList<>();
             Constant constant = ((InitVal) init_val).getInitializer();

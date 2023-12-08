@@ -28,4 +28,9 @@ public class Argument extends Value{
     public String toString() {
         return this.getType()+" "+this.getName();
     }
+
+    @Override
+    public void translate() {
+
+    }
 }

@@ -2,13 +2,13 @@ import q9k.buaa.AST.Syntax;
 import q9k.buaa.Backend.MipsGenerator;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Frontend.IRGenerator;
-import q9k.buaa.Frontend.Visitor;
-import q9k.buaa.INIT.Config;
-import q9k.buaa.Utils.IRModule;
-import q9k.buaa.Utils.Input;
 import q9k.buaa.Frontend.Lexer;
 import q9k.buaa.Frontend.Parser;
+import q9k.buaa.Frontend.Visitor;
+import q9k.buaa.INIT.Config;
 import q9k.buaa.Token.Token;
+import q9k.buaa.Utils.IRModule;
+import q9k.buaa.Utils.Input;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,8 +23,8 @@ public class Compiler {
         new Compiler().run();
     }
 
-    public void run() throws IOException{
-        try{
+    public void run() throws IOException {
+        try {
 
             //配置信息
             compilerInit();
@@ -43,32 +43,35 @@ public class Compiler {
             Visitor.getInstance(ast).run();
             //错误
             ErrorHandler.getInstance().run();
-            if(!ErrorHandler.getInstance().hasError()) {
+            if (!ErrorHandler.getInstance().hasError()) {
                 //生成中间代码llvm_ir
                 IRGenerator irGenerator = IRGenerator.getInstance(ast);
                 irGenerator.run();
                 //中端部分开始
 
                 //后端部分开始
-                MipsGenerator mipsGenerator = MipsGenerator.getInstance(IRModule.getInstance());
-                mipsGenerator.run();
-            }
-            else{
+                if (Config.mips_output_open) {
+                    MipsGenerator mipsGenerator = MipsGenerator.getInstance(IRModule.getInstance());
+                    mipsGenerator.run();
+                }
+            } else {
                 System.out.println("There is something wrong in your code. View error.txt to look for more info.");
             }
             System.exit(0);
-        }catch (RuntimeException e){
-            if(Config.DEBUG){
+        } catch (RuntimeException e) {
+            if (Config.DEBUG) {
                 System.out.println("You see the following message because DEBUG mode open!");
                 e.printStackTrace();
             }
             System.exit(-1);
         }
     }
+
     private void compilerInit() throws IOException {
         Config.init();
         Config.setError_output_open(true);
         Config.setLlvm_ir_output_open(true);
+        Config.setMips_output_open(true);
         Config.printInfo();
     }
 }

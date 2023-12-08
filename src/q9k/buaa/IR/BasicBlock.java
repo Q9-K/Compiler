@@ -1,6 +1,7 @@
 package q9k.buaa.IR;
 
 import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Types.LabelType;
 
 import java.util.ArrayList;
@@ -31,6 +32,9 @@ public class BasicBlock extends Value {
         StringBuilder content = new StringBuilder();
         for (Instruction instruction : instructions) {
             content.append("\t").append(instruction.toString()).append("\n");
+            if (instruction instanceof BranchInst && ((BranchInst) instruction).isUnCOnditional()) {
+                break;
+            }
         }
         return content.toString();
     }
@@ -60,5 +64,10 @@ public class BasicBlock extends Value {
             super.setName("t" + this.parent.number++);
         }
         return super.getName();
+    }
+
+    @Override
+    public void translate() {
+        
     }
 }

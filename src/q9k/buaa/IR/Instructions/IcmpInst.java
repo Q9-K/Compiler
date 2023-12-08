@@ -26,4 +26,9 @@ public class IcmpInst extends Instruction {
                 getLast().getName();
     }
 
+
+    @Override
+    public void translate() {
+
+    }
 }

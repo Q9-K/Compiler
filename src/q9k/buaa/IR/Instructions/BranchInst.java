@@ -51,4 +51,9 @@ public class BranchInst extends Instruction {
     public BasicBlock getBasicBlock(int index) {
         return this.basicBlocks.get(index);
     }
+
+    @Override
+    public void translate() {
+
+    }
 }

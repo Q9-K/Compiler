@@ -12,11 +12,8 @@ import q9k.buaa.IR.Types.ArrayType;
 import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Types.PointerType;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.*;
 import q9k.buaa.Token.Token;
-import q9k.buaa.Symbol.ArraySymbol;
-import q9k.buaa.Symbol.Symbol;
-import q9k.buaa.Symbol.SymbolTable;
-import q9k.buaa.Symbol.VarSymbol;
 import q9k.buaa.Utils.Calculator;
 import q9k.buaa.Utils.IRModule;
 import q9k.buaa.Utils.Triple;
@@ -31,6 +28,7 @@ public class ConstDef implements Syntax {
     private Token assign_token;
     private Syntax const_init_val;
     private Symbol symbol;
+    private SymbolTable symbolTable;
 
 
     public ConstDef(Syntax ident, List<Triple<Token, Syntax, Token>> list, Token assign_token, Syntax const_init_val) {
@@ -55,7 +53,7 @@ public class ConstDef implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         if (SymbolTable.checkDef(ident)) {
             if (list.isEmpty()) {
                 symbol = new VarSymbol(ident.toString());
@@ -69,7 +67,7 @@ public class ConstDef implements Syntax {
                 item.second().visit();
             }
             const_init_val.visit();
-            SymbolTable.getCurrent().addSymbol(symbol);
+            SymbolTableFactory.getInstance().getCurrent().addSymbol(symbol);
         }
     }
 
@@ -88,19 +86,21 @@ public class ConstDef implements Syntax {
                     globalVariable.setInitializer(((ConstInitVal) const_init_val).getInitializer());
                 }
                 this.symbol.setIR(globalVariable);
+                this.symbol.setCalValue(globalVariable);
                 IRModule.getInstance().addGlobalVar(globalVariable);
             } else if (list.size() == 1) {
-                int dim = Calculator.getInstance().calculate(list.get(0).second());
+                int dim = Calculator.getInstance().calculate(list.get(0).second(), symbolTable);
                 ArrayType arrayType = new ArrayType(IntegerType.i32, dim);
                 GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType((arrayType)), true);
                 if (const_init_val != null) {
                     globalVariable.setInitializer(((ConstInitVal) const_init_val).getInitializer());
                 }
                 this.symbol.setIR(globalVariable);
+                this.symbol.setCalValue(globalVariable);
                 IRModule.getInstance().addGlobalVar(globalVariable);
             } else if (list.size() == 2) {
-                int dim1 = Calculator.getInstance().calculate(list.get(0).second());
-                int dim2 = Calculator.getInstance().calculate(list.get(1).second());
+                int dim1 = Calculator.getInstance().calculate(list.get(0).second(), symbolTable);
+                int dim2 = Calculator.getInstance().calculate(list.get(1).second(), symbolTable);
                 ArrayType arrayType1 = new ArrayType(IntegerType.i32, dim2);
                 ArrayType arrayType2 = new ArrayType(arrayType1, dim1);
                 GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType(arrayType2));
@@ -108,6 +108,7 @@ public class ConstDef implements Syntax {
                     globalVariable.setInitializer(((ConstInitVal) const_init_val).getInitializer());
                 }
                 this.symbol.setIR(globalVariable);
+                this.symbol.setCalValue(globalVariable);
                 IRModule.getInstance().addGlobalVar(globalVariable);
             }
         } else {
@@ -121,8 +122,13 @@ public class ConstDef implements Syntax {
                     storeInst.addOperand(const_init_val.generateIR());
                     IRGenerator.getCurBasicBlock().addInstruction(storeInst);
                 }
+                GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType(IntegerType.i32), true);
+                if (const_init_val != null) {
+                    globalVariable.setInitializer(((ConstInitVal) const_init_val).getInitializer());
+                }
+                this.symbol.setCalValue(globalVariable);
             } else if (list.size() == 1) {
-                int dim = Calculator.getInstance().calculate(list.get(0).second());
+                int dim = Calculator.getInstance().calculate(list.get(0).second(), symbolTable);
                 ArrayType arrayType = new ArrayType(IntegerType.i32, dim);
                 Instruction instruction = new AllocalInst(arrayType);
                 this.symbol.setIR(instruction);
@@ -144,9 +150,14 @@ public class ConstDef implements Syntax {
                         index++;
                     }
                 }
+                GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType((arrayType)), true);
+                if (const_init_val != null) {
+                    globalVariable.setInitializer(((ConstInitVal) const_init_val).getInitializer());
+                }
+                this.symbol.setCalValue(globalVariable);
             } else if (list.size() == 2) {
-                int dim1 = Calculator.getInstance().calculate(list.get(0).second());
-                int dim2 = Calculator.getInstance().calculate(list.get(1).second());
+                int dim1 = Calculator.getInstance().calculate(list.get(0).second(), symbolTable);
+                int dim2 = Calculator.getInstance().calculate(list.get(1).second(), symbolTable);
                 ArrayType arrayType1 = new ArrayType(IntegerType.i32, dim2);
                 ArrayType arrayType2 = new ArrayType(arrayType1, dim1);
                 Instruction instruction = new AllocalInst(arrayType2);
@@ -174,6 +185,11 @@ public class ConstDef implements Syntax {
                         index1++;
                     }
                 }
+                GlobalVariable globalVariable = new GlobalVariable("@" + ident.toString(), new PointerType(arrayType2));
+                if (const_init_val != null) {
+                    globalVariable.setInitializer(((ConstInitVal) const_init_val).getInitializer());
+                }
+                this.symbol.setCalValue(globalVariable);
             }
         }
         return null;

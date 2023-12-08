@@ -3,6 +3,7 @@ package q9k.buaa.AST;
 import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,6 +12,7 @@ public class CompUnit implements Syntax {
     private List<Syntax> decls;
     private List<Syntax> func_defs;
     private Syntax main_func_def;
+    private SymbolTable symbolTable;
     
 
     public CompUnit(List<Syntax> decls, List<Syntax> func_defs, Syntax main_func_def) {
@@ -33,6 +35,7 @@ public class CompUnit implements Syntax {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         for (Syntax item : decls) {
             item.visit();
         }

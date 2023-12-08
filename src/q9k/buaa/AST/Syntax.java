@@ -1,6 +1,7 @@
 package q9k.buaa.AST;
 
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Utils.Output;
 
 import java.io.IOException;
@@ -13,5 +14,4 @@ public interface Syntax {
     default void printAstName(Class<?> objectClass) throws IOException{
         Output.getInstance().write("<"+objectClass.getSimpleName()+">\n");
     }
-
 }

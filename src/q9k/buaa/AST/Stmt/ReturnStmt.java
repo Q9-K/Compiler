@@ -5,11 +5,10 @@ import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.IRGenerator;
-import q9k.buaa.Frontend.Parser;
 import q9k.buaa.IR.Instruction;
 import q9k.buaa.IR.Instructions.ReturnInst;
-import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolTable;
 
@@ -40,16 +39,16 @@ public class ReturnStmt implements Stmt{
 
     @Override
     public void visit() {
-        
-        SymbolTable current = SymbolTable.getCurrent();
-        if(current.isFunc_block() == 0){
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
+        SymbolTable current = SymbolTableFactory.getInstance().getCurrent();
+        if(current.getFuncBlock() == 0){
             ErrorHandler.getInstance().addError(new Error(ErrorType.REVERSERROR, getLineNumber()));
         }
         else{
-            if(current.isFunc_block() == 1 && exp != null){
+            if(current.getFuncBlock() == 1 && exp != null){
                 ErrorHandler.getInstance().addError(new Error(ErrorType.EXTRARETURNTYPE,getLineNumber()));
             }
-            if(current.isFunc_block() == 2 && exp==null){
+            if(current.getFuncBlock() == 2 && exp==null){
                 ErrorHandler.getInstance().addError(new Error(ErrorType.REVERSERROR, getLineNumber()));
             }
         }

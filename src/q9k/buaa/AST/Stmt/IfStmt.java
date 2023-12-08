@@ -6,6 +6,7 @@ import q9k.buaa.IR.BasicBlock;
 import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ public class IfStmt implements Stmt {
     private Syntax stmt1;
     private Token else_token;
     private Syntax stmt2;
+    private SymbolTable symbolTable;
 
     public IfStmt(Token if_token, Token lparent_token, Syntax cond, Token rparent_token, Syntax stmt1, Token else_token, Syntax stmt2) {
         this.if_token = if_token;
@@ -45,15 +47,15 @@ public class IfStmt implements Stmt {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         cond.visit();
-        SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
+        SymbolTableFactory.getInstance().setCurrent(SymbolTableFactory.getInstance().createSymbolTable());
         stmt1.visit();
-        SymbolTable.changeToFather();
+        SymbolTableFactory.getInstance().setCurrent(SymbolTableFactory.getInstance().getCurrent().getFather());
         if (else_token != null) {
-            SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
+            SymbolTableFactory.getInstance().setCurrent(SymbolTableFactory.getInstance().createSymbolTable());
             stmt2.visit();
-            SymbolTable.changeToFather();
+            SymbolTableFactory.getInstance().setCurrent(SymbolTableFactory.getInstance().getCurrent().getFather());
         }
     }
 

@@ -3,6 +3,8 @@ package q9k.buaa.AST.Function;
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Tuple;
 
@@ -13,6 +15,7 @@ import java.util.List;
 public class FuncRParams implements Syntax {
     private Syntax exp;
    private List<Tuple<Token, Syntax>> list;
+   private SymbolTable symbolTable;
    
 
     public FuncRParams(Syntax exp, List<Tuple<Token, Syntax>> list) {
@@ -32,6 +35,7 @@ public class FuncRParams implements Syntax {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         exp.visit();
         for(Tuple<Token, Syntax> item : list){
             item.second().visit();

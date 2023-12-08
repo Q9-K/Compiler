@@ -20,4 +20,9 @@ public class ResizeInst extends Instruction {
         Value value = getFirst();
         return this.getName() + " = " + opcode + " " + value.getType().toString() + " " + value.getName() + " to " + getType().toString();
     }
+
+    @Override
+    public void translate() {
+
+    }
 }

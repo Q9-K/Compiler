@@ -20,4 +20,9 @@ public class BinaryOperator extends Instruction {
                 " " + getType().toString() + " " +
                 getFirst().getName() + ", " + getLast().getName();
     }
+
+    @Override
+    public void translate() {
+
+    }
 }

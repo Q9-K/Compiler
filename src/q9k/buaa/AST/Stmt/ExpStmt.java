@@ -3,6 +3,7 @@ package q9k.buaa.AST.Stmt;
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.io.IOException;
 public class ExpStmt implements Stmt{
     private Syntax exp;
     private Token semicn_token;
+    private SymbolTable symbolTable;
     
 
     public ExpStmt(Syntax exp, Token semicn_token) {
@@ -28,7 +30,7 @@ public class ExpStmt implements Stmt{
 
     @Override
     public void visit() {
-        
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         if(exp!=null){
             exp.visit();
         }

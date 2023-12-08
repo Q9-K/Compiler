@@ -7,6 +7,8 @@ import q9k.buaa.IR.Instructions.IcmpInst;
 import q9k.buaa.IR.Instructions.ResizeInst;
 import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -16,6 +18,7 @@ public class EqExp implements Syntax {
     private Token op_token;
     private Syntax eq_exp;
     private Value pre_value;
+    private SymbolTable symbolTable;
 
 
     public EqExp(Syntax rel_exp, Token op_token, Syntax eq_exp) {
@@ -36,7 +39,7 @@ public class EqExp implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         rel_exp.visit();
         if (eq_exp != null) {
             eq_exp.visit();

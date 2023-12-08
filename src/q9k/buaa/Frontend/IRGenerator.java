@@ -21,19 +21,13 @@ public class IRGenerator {
     private static Type cur_type;
     private static BasicBlock cur_basicblock;
     private static Function cur_function;
-
     private static CallInst cur_callInst;
-
     private static BasicBlock trueBasicBlock;
     private static BasicBlock falseBasicBlock;
-
     private static BasicBlock stepBasicBlock;
     private static BasicBlock loopFollowBlock;
 
-
     private static boolean global;
-
-
 
 
     private IRGenerator(Syntax ast){

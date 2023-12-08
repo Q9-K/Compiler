@@ -25,4 +25,9 @@ public class LoadInst extends Instruction {
         return this.getName()+" = "+"load"+" "+this.getType().toString()+", "+value.getType()+" "+value.getName();
     }
 
+
+    @Override
+    public void translate() {
+
+    }
 }

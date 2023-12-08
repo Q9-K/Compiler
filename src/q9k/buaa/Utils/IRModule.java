@@ -4,7 +4,9 @@ import q9k.buaa.INIT.Config;
 import q9k.buaa.IR.Constant;
 import q9k.buaa.IR.Function;
 import q9k.buaa.IR.GlobalValue;
+import q9k.buaa.IR.GlobalVariable;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +23,7 @@ public class IRModule {
     private IRModule() {
         this.globalValues = new ArrayList<>();
         this.functions = new ArrayList<>();
-        this.symbolTable = SymbolTable.getGlobal();
+        this.symbolTable = SymbolTableFactory.getInstance().getGlobal();
 
     }
 
@@ -65,5 +67,11 @@ public class IRModule {
             content.append(function.toString()).append('\n');
         }
         return content.toString();
+    }
+
+    public void translate(){
+        for(Constant globalValue : globalValues){
+
+        }
     }
 }

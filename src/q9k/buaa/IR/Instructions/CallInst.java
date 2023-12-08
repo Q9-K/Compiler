@@ -68,4 +68,9 @@ public class CallInst extends Instruction {
             return super.getName();
         }
     }
+
+    @Override
+    public void translate() {
+
+    }
 }

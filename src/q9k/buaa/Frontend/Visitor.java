@@ -2,6 +2,7 @@ package q9k.buaa.Frontend;
 
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 
 public class Visitor {
     private Syntax ast;
@@ -29,8 +30,8 @@ public class Visitor {
     }
 
     public void run() {
-        SymbolTable symbolTable = SymbolTable.getGlobal();
-        SymbolTable.changeTo(symbolTable);
+        SymbolTable symbolTable = SymbolTableFactory.getInstance().getGlobal();
+        SymbolTableFactory.getInstance().setCurrent(symbolTable);
         ast.visit();
         System.out.println("Visitor analyze finished!");
     }

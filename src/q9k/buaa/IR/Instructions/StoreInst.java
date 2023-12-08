@@ -17,4 +17,9 @@ public class StoreInst extends Instruction {
         Value value_2 = this.getOperand(1);
         return "store"+" "+value_2.getType()+" "+value_2.getName()+", "+value_1.getType()+" "+value_1.getName();
     }
+
+    @Override
+    public void translate() {
+
+    }
 }

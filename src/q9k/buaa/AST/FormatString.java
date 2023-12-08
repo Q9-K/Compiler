@@ -2,12 +2,14 @@ package q9k.buaa.AST;
 
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
 
 public class FormatString implements Syntax {
     private Token strcon_token;
+    private SymbolTable symbolTable;
     
 
     public FormatString(Token strcon_token) {
@@ -21,7 +23,7 @@ public class FormatString implements Syntax {
 
     @Override
     public void visit() {
-        
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
     }
 
     @Override

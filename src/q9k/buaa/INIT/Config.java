@@ -17,7 +17,7 @@ public class Config {
     public static boolean lexer_output_open = false;
     public static boolean parser_output_open = false;
     public static boolean error_output_open = false;
-    public static boolean llvm_ir_output_open = true;
+    public static boolean llvm_ir_output_open = false;
     public static boolean mips_output_open = false;
 
     public static void setInput_path(String input_path) {
@@ -55,7 +55,6 @@ public class Config {
         Input input = Input.getInstance(input_path);//input初始化
         Output output = Output.getInstance(output_path);//output初始化
         ErrorHandler errorHandler = ErrorHandler.getInstance(error_path);//错误处理初始化
-        SymbolTable.clearTable();
     }
     public static void setLexer_output_open(boolean lexer_output_open) {
         Config.lexer_output_open = lexer_output_open;

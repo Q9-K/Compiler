@@ -11,6 +11,8 @@ import q9k.buaa.IR.Instructions.CallInst;
 import q9k.buaa.IR.Types.FunctionType;
 import q9k.buaa.IR.Types.VoidType;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Tuple;
 
@@ -24,6 +26,7 @@ public class PrintfStmt implements Stmt {
     private List<Tuple<Token, Syntax>> list;
     private Token rparent_token;
     private Token semicn_token;
+    private SymbolTable symbolTable;
 
 
     public PrintfStmt(Token printf_token, Token lparent_token, Syntax format_string, List<Tuple<Token, Syntax>> list, Token rparent_token, Token semicn_token) {
@@ -51,7 +54,7 @@ public class PrintfStmt implements Stmt {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         int count = getParamNum();
         if (count != list.size()) {
             ErrorHandler.getInstance().addError(new Error(ErrorType.NOTPRINTFIT, getLineNumber()));

@@ -12,8 +12,6 @@ import java.util.Map;
 
 public class SymbolTable {
     private static int symbol_table_id = 0;
-    private static SymbolTable global;
-    private static SymbolTable current = null;
     private int id;
     private List<SymbolTable> children;
     private SymbolTable father;
@@ -22,46 +20,41 @@ public class SymbolTable {
     private Map<String, Symbol> symbolMap = new HashMap<>();
 
 
-    public boolean isFor_block() {
+    public boolean isForBlock() {
         return for_block;
     }
 
-    public void setFor_block(boolean for_block) {
+    public void setForBlock(boolean for_block) {
         this.for_block = for_block;
     }
 
-    public int isFunc_block() {
+    public int getFuncBlock() {
         return func_block;
     }
 
-    public void setFunc_block(int func_block) {
+    public void setFuncBlock(int func_block) {
         this.func_block = func_block;
     }
 
-
-    public static SymbolTable getGlobal() {
-        if (global == null) {
-            global = new SymbolTable();
-        }
-        return global;
+    public void setFather(SymbolTable father){
+        this.father = father;
     }
 
-    public static void clearTable() {
-        global = null;
-        current = null;
+    public SymbolTable getFather() {
+        return father;
     }
 
-    public static SymbolTable getCurrent() {
-        return current;
+    public void setChildren(List<SymbolTable> children) {
+        this.children = children;
     }
 
-    private SymbolTable() {
+    public List<SymbolTable> getChildren() {
+        return children;
+    }
+
+    public SymbolTable() {
         this.id = symbol_table_id++;
         children = new ArrayList<>();
-    }
-
-    public static void changeTo(SymbolTable symbolTable) {
-        current = symbolTable;
     }
 
     public int getId() {
@@ -96,22 +89,10 @@ public class SymbolTable {
         return getSymbol(content);
     }
 
-    public SymbolTable createSymbolTable() {
-        SymbolTable symbolTable = new SymbolTable();
-        symbolTable.func_block = this.func_block;
-        symbolTable.for_block = this.for_block;
-        symbolTable.father = this;
-        this.children.add(symbolTable);
-        return symbolTable;
-    }
-
     public void addSymbol(Symbol symbol) {
         this.symbolMap.put(symbol.toString(), symbol);
     }
 
-    public static void changeToFather() {
-        SymbolTable.current = SymbolTable.current.father;
-    }
 
     public static boolean checkDef(Syntax syntax) {
         String content = syntax.toString();
@@ -124,7 +105,7 @@ public class SymbolTable {
             index++;
         }
         int end = index;
-        Symbol symbol = SymbolTable.getCurrent().symbolMap.get(content.substring(start, end));
+        Symbol symbol = SymbolTableFactory.getInstance().getCurrent().symbolMap.get(content.substring(start, end));
         if (symbol != null) {
             ErrorHandler.getInstance().addError(new Error(ErrorType.REPEAEDNAME, syntax.getLineNumber()));
             return false;
@@ -132,8 +113,8 @@ public class SymbolTable {
         return true;
     }
 
-    public Symbol checkVarInvoke(Syntax syntax) {
-        Symbol symbol = this.getSymbol(syntax);
+    public static Symbol checkVarInvoke(Syntax syntax) {
+        Symbol symbol = SymbolTableFactory.getInstance().getCurrent().getSymbol(syntax);
         if (symbol == null || symbol.getSymbolType().equals(SymbolType.FUNCTION)) {
             ErrorHandler.getInstance().addError(new Error(ErrorType.NOTDEFNAME, syntax.getLineNumber()));
             return null;
@@ -153,15 +134,11 @@ public class SymbolTable {
         }
         int end = index;
         content = content.substring(start, end);
-        Symbol symbol = SymbolTable.getGlobal().symbolMap.get(content);
+        Symbol symbol = SymbolTableFactory.getInstance().getGlobal().symbolMap.get(content);
         if (symbol == null || !symbol.getSymbolType().equals(SymbolType.FUNCTION)) {
             ErrorHandler.getInstance().addError(new Error(ErrorType.NOTDEFNAME, syntax.getLineNumber()));
             return false;
         }
         return true;
-    }
-
-    public SymbolTable getFather() {
-        return father;
     }
 }

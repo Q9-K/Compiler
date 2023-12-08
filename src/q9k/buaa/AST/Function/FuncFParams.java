@@ -3,6 +3,7 @@ package q9k.buaa.AST.Function;
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Symbol.SymbolType;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Tuple;
@@ -14,6 +15,7 @@ import java.util.List;
 public class FuncFParams implements Syntax {
     private Syntax func_f_param;
     private List<Tuple<Token, Syntax>> list;
+    private SymbolTable symbolTable;
     
 
     public FuncFParams(Syntax func_f_param, List<Tuple<Token, Syntax>> list) {
@@ -33,7 +35,7 @@ public class FuncFParams implements Syntax {
 
     @Override
     public void visit() {
-        
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         func_f_param.visit();
         for (Tuple<Token, Syntax> item : list) {
             item.second().visit();

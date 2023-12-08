@@ -3,13 +3,14 @@ package q9k.buaa.AST.Exp;
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
 
 public class UnaryOp implements Syntax {
     private Token op_token;
-    
+    private SymbolTable symbolTable;
 
     public UnaryOp(Token op_token) {
         this.op_token = op_token;
@@ -23,7 +24,7 @@ public class UnaryOp implements Syntax {
 
     @Override
     public void visit() {
-        
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
     }
 
     @Override

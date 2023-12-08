@@ -31,4 +31,9 @@ public class ConstantInt extends Constant{
     public String toString() {
         return String.valueOf(value);
     }
+
+    @Override
+    public void translate() {
+        
+    }
 }

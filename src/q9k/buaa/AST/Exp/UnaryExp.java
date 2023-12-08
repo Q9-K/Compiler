@@ -17,10 +17,7 @@ import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Types.Type;
 import q9k.buaa.IR.Types.VoidType;
 import q9k.buaa.IR.Value;
-import q9k.buaa.Symbol.FuncSymbol;
-import q9k.buaa.Symbol.Symbol;
-import q9k.buaa.Symbol.SymbolTable;
-import q9k.buaa.Symbol.SymbolType;
+import q9k.buaa.Symbol.*;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Token.TokenType;
 
@@ -39,6 +36,7 @@ public class UnaryExp implements Syntax {
     private Syntax unary_exp;
 
     private FuncSymbol funcSymbol;
+    private SymbolTable symbolTable;
 
     public UnaryExp(Syntax primary_exp, Syntax ident, Token lparent, Syntax func_r_params, Token rparent, Syntax unary_op, Syntax unary_exp) {
         this.primary_exp = primary_exp;
@@ -70,12 +68,12 @@ public class UnaryExp implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         if (primary_exp != null) {
             primary_exp.visit();
         } else if (ident != null) {
             if (SymbolTable.checkFuncInvoke(ident)) {
-                this.funcSymbol = (FuncSymbol) SymbolTable.getGlobal().getSymbol(ident);
+                this.funcSymbol = (FuncSymbol) SymbolTableFactory.getInstance().getGlobal().getSymbol(ident);
                 List<Syntax> list = new ArrayList<>();
                 if (func_r_params != null) {
                     func_r_params.visit();
@@ -204,7 +202,7 @@ public class UnaryExp implements Syntax {
         }
         content = content.substring(start, end);
         if (TokenType.getTokenType(content).equals(TokenType.IDENFR)) {
-            Symbol symbol = SymbolTable.getCurrent().getSymbol(exp);
+            Symbol symbol = SymbolTableFactory.getInstance().getCurrent().getSymbol(exp);
             if (symbol == null) {
                 return null;
             } else {

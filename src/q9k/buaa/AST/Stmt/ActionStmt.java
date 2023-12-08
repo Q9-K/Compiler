@@ -6,6 +6,7 @@ import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Token.TokenType;
@@ -15,7 +16,7 @@ import java.io.IOException;
 public class ActionStmt implements Stmt{
     private Token action_token;
     private Token semicn_token;
-    
+    private SymbolTable symbolTable;
 
     public ActionStmt(Token action_token, Token semicn_token) {
         this.action_token = action_token;
@@ -31,9 +32,9 @@ public class ActionStmt implements Stmt{
 
     @Override
     public void visit() {
-        
-        SymbolTable current = SymbolTable.getCurrent();
-        if(!current.isFor_block()){
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
+        SymbolTable current = SymbolTableFactory.getInstance().getCurrent();
+        if(!current.isForBlock()){
             ErrorHandler.getInstance().addError(new Error(ErrorType.USINGCYCLEBC,getLineNumber()));
         }
     }

@@ -1,6 +1,10 @@
 package q9k.buaa.Backend;
 
+import q9k.buaa.INIT.Config;
 import q9k.buaa.Utils.IRModule;
+import q9k.buaa.Utils.Output;
+
+import java.io.IOException;
 
 public class MipsGenerator {
     private IRModule irModule;
@@ -24,7 +28,10 @@ public class MipsGenerator {
         }
         return mipsGenerator;
     }
-    public void run(){
-        System.out.println("保留接口!");
+    public void run() throws IOException {
+        Output output = Output.getInstance(Config.getMips_path());
+        IRModule irModule = IRModule.getInstance();
+        irModule.translate();
+        System.out.println("Mips generate finished!");
     }
 }

@@ -5,6 +5,8 @@ import q9k.buaa.IR.Constant;
 import q9k.buaa.IR.ConstantArray;
 import q9k.buaa.IR.ConstantInt;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Calculator;
 import q9k.buaa.Utils.Tuple;
@@ -19,8 +21,8 @@ public class ConstInitVal implements Syntax {
     private Syntax const_init_val;
     private List<Tuple<Token, Syntax>> list;
     private Token rbrace;
+    private SymbolTable symbolTable;
 
-    
 
     public ConstInitVal(Syntax const_exp, Token lbrace, Syntax const_init_val, List<Tuple<Token, Syntax>> list, Token rbrace) {
         this.const_exp = const_exp;
@@ -32,14 +34,13 @@ public class ConstInitVal implements Syntax {
 
     @Override
     public void print() throws IOException {
-        if(const_exp != null){
+        if (const_exp != null) {
             const_exp.print();
-        }
-        else{
+        } else {
             lbrace.print();
-            if(const_init_val != null){
+            if (const_init_val != null) {
                 const_init_val.print();
-                for(Tuple<Token, Syntax> item : list){
+                for (Tuple<Token, Syntax> item : list) {
                     item.first().print();
                     item.second().print();
                 }
@@ -50,16 +51,14 @@ public class ConstInitVal implements Syntax {
     }
 
     @Override
-    public void visit()
-    {
-        
-        if(const_exp != null){
+    public void visit() {
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
+        if (const_exp != null) {
             const_exp.visit();
-        }
-        else{
-            if(const_init_val != null){
+        } else {
+            if (const_init_val != null) {
                 const_init_val.visit();
-                for(Tuple<Token, Syntax> item : list){
+                for (Tuple<Token, Syntax> item : list) {
                     item.second().visit();
                 }
             }
@@ -69,23 +68,21 @@ public class ConstInitVal implements Syntax {
 
     @Override
     public int getLineNumber() {
-        if(const_exp!=null){
+        if (const_exp != null) {
             return const_exp.getLineNumber();
-        }
-        else{
+        } else {
             return rbrace.getLineNumber();
         }
     }
 
     @Override
     public Value generateIR() {
-        if(const_exp!=null){
+        if (const_exp != null) {
             return const_exp.generateIR();
-        }
-        else{
-            if(const_init_val!=null){
+        } else {
+            if (const_init_val != null) {
                 const_init_val.generateIR();
-                for(Tuple<Token, Syntax> item : list){
+                for (Tuple<Token, Syntax> item : list) {
                     item.second().generateIR();
                 }
             }
@@ -96,16 +93,15 @@ public class ConstInitVal implements Syntax {
 
     @Override
     public String toString() {
-        if(const_exp!=null){
+        if (const_exp != null) {
             return const_exp.toString();
-        }
-        else{
+        } else {
             StringBuilder content = new StringBuilder();
             content.append(lbrace.toString());
-            if(const_init_val!=null) {
+            if (const_init_val != null) {
                 content.append(const_init_val.toString());
             }
-            for(Tuple<Token, Syntax> item : list){
+            for (Tuple<Token, Syntax> item : list) {
                 content.append(item.first().toString()).append(item.second().toString());
             }
             content.append(rbrace.toString());
@@ -113,18 +109,16 @@ public class ConstInitVal implements Syntax {
         }
     }
 
-    public Constant getInitializer(){
-
-        if(const_exp!=null){
-            return new ConstantInt(Calculator.getInstance().calculate(const_exp));
-        }
-        else if(const_init_val!=null){
+    public Constant getInitializer() {
+        if (const_exp != null) {
+            return new ConstantInt(Calculator.getInstance().calculate(const_exp, symbolTable));
+        } else if (const_init_val != null) {
             List<Constant> constants = new ArrayList<>();
-            Constant constant = ((ConstInitVal)const_init_val).getInitializer();
+            Constant constant = ((ConstInitVal) const_init_val).getInitializer();
             constants.add(constant);
 
-            for(Tuple<Token, Syntax> item: list){
-                constant = ((ConstInitVal)item.second()).getInitializer();
+            for (Tuple<Token, Syntax> item : list) {
+                constant = ((ConstInitVal) item.second()).getInitializer();
                 constants.add(constant);
             }
             ConstantArray constantArray = new ConstantArray(constants);
@@ -134,11 +128,11 @@ public class ConstInitVal implements Syntax {
     }
 
 
-    public List<Syntax> getConstInitValList(){
+    public List<Syntax> getConstInitValList() {
         List<Syntax> constInitValList = new ArrayList<>();
-        if(const_init_val!=null){
+        if (const_init_val != null) {
             constInitValList.add(const_init_val);
-            for(Tuple<Token, Syntax> item:list){
+            for (Tuple<Token, Syntax> item : list) {
                 constInitValList.add(item.second());
             }
         }

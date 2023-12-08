@@ -1,15 +1,15 @@
 package q9k.buaa.AST.Stmt;
 
 import q9k.buaa.AST.Syntax;
-import q9k.buaa.Frontend.IRGenerator;
-import q9k.buaa.IR.BasicBlock;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 
 import java.io.IOException;
 
 public class BlockStmt implements Stmt{
     private Syntax block;
+    private SymbolTable symbolTable;
     
 
     public BlockStmt(Syntax block) {
@@ -25,10 +25,10 @@ public class BlockStmt implements Stmt{
 
     @Override
     public void visit() {
-        
-        SymbolTable.changeTo(SymbolTable.getCurrent().createSymbolTable());
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
+        SymbolTableFactory.getInstance().setCurrent(SymbolTableFactory.getInstance().createSymbolTable());
         block.visit();
-        SymbolTable.changeToFather();
+        SymbolTableFactory.getInstance().setCurrent(SymbolTableFactory.getInstance().getCurrent().getFather());
     }
 
     @Override

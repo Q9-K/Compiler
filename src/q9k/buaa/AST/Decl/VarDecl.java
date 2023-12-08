@@ -5,6 +5,7 @@ import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Token.TokenType;
 import q9k.buaa.Utils.Tuple;
@@ -17,7 +18,7 @@ public class VarDecl implements Syntax {
     private Syntax var_def;
     private List<Tuple<Token, Syntax>> list;
     private Token semicn_token;
-
+    private SymbolTable symbolTable;
     
 
     public VarDecl(Syntax b_type, Syntax var_def, List<Tuple<Token, Syntax>> list, Token semicn_token) {
@@ -41,7 +42,7 @@ public class VarDecl implements Syntax {
 
     @Override
     public void visit() {
-        
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         var_def.visit();
         for(Tuple<Token, Syntax> item : list){
             item.second().visit();

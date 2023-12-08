@@ -86,4 +86,9 @@ public class GEPInst extends Instruction {
             return type;
         }
     }
+
+    @Override
+    public void translate() {
+
+    }
 }

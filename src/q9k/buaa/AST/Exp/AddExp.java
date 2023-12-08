@@ -4,6 +4,8 @@ import q9k.buaa.AST.Syntax;
 import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.Instructions.BinaryOperator;
 import q9k.buaa.IR.Value;
+import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -13,6 +15,7 @@ public class AddExp implements Syntax {
     private Token op_token;
     private Syntax add_exp;
     private Value pre_value;
+    private SymbolTable symbolTable;
 
 
     public AddExp(Syntax mul_exp, Token op_token, Syntax add_exp) {
@@ -36,7 +39,7 @@ public class AddExp implements Syntax {
 
     @Override
     public void visit() {
-
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         mul_exp.visit();
         if (op_token != null) {
             add_exp.visit();

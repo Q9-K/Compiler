@@ -11,6 +11,7 @@ import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
+import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
 
 import java.io.IOException;
@@ -19,7 +20,8 @@ public class ForStmt implements Syntax {
     private Syntax l_val;
     private Token assign_token;
     private Syntax exp;
-    Symbol symbol;
+    private Symbol symbol;
+    private SymbolTable symbolTable;
     
 
     public ForStmt(Syntax l_val, Token assign_token, Syntax exp) {
@@ -38,8 +40,9 @@ public class ForStmt implements Syntax {
 
     @Override
     public void visit() {
+        this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         l_val.visit();
-        this.symbol = SymbolTable.getCurrent().getSymbol(l_val);
+        this.symbol = SymbolTableFactory.getInstance().getCurrent().getSymbol(l_val);
         if(symbol!=null){
             if(symbol.isConst()){
                 ErrorHandler.getInstance().addError(new Error(ErrorType.CHANGECONST, l_val.getLineNumber()));
