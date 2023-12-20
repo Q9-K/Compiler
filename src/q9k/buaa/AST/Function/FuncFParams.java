@@ -48,10 +48,10 @@ public class FuncFParams implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
-        func_f_param.generateIR();
+    public Value genIR() {
+        func_f_param.genIR();
         for (Tuple<Token, Syntax> item : list) {
-            item.second().generateIR();
+            item.second().genIR();
         }
         return null;
     }

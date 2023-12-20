@@ -37,8 +37,8 @@ public class BlockStmt implements Stmt{
     }
 
     @Override
-    public Value generateIR() {
-        return block.generateIR();
+    public Value genIR() {
+        return block.genIR();
     }
 
     @Override

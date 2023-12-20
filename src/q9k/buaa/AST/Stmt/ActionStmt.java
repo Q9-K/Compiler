@@ -45,16 +45,20 @@ public class ActionStmt implements Stmt{
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if(action_token.getTokenType().equals(TokenType.CONTINUETK)){
-            BranchInst branchInst = new BranchInst();
-            branchInst.addTargetBlock(IRGenerator.getStepBasicBlock());
-            IRGenerator.getCurBasicBlock().addInstruction(branchInst);
+            if(!IRGenerator.getCurBasicBlock().isEnd()){
+                BranchInst branchInst = new BranchInst();
+                branchInst.addTargetBlock(IRGenerator.getStepBasicBlock());
+                IRGenerator.getCurBasicBlock().addInstruction(branchInst);
+            }
         }
         else if(action_token.getTokenType().equals(TokenType.BREAKTK)){
-            BranchInst branchInst = new BranchInst();
-            branchInst.addTargetBlock(IRGenerator.getLoopFollowBlock());
-            IRGenerator.getCurBasicBlock().addInstruction(branchInst);
+            if(!IRGenerator.getCurBasicBlock().isEnd()){
+                BranchInst branchInst = new BranchInst();
+                branchInst.addTargetBlock(IRGenerator.getLoopFollowBlock());
+                IRGenerator.getCurBasicBlock().addInstruction(branchInst);
+            }
         }
         return null;
     }

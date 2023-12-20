@@ -1,7 +1,6 @@
 package q9k.buaa.IR;
 
 import q9k.buaa.IR.Types.IntegerType;
-import q9k.buaa.IR.Types.Type;
 
 public class ConstantInt extends Constant{
 
@@ -33,7 +32,12 @@ public class ConstantInt extends Constant{
     }
 
     @Override
-    public void translate() {
-        
+    public String genMips() {
+        return String.valueOf(value);
+    }
+
+    @Override
+    public void optimize() {
+
     }
 }

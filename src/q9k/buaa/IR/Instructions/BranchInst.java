@@ -2,7 +2,6 @@ package q9k.buaa.IR.Instructions;
 
 import q9k.buaa.IR.BasicBlock;
 import q9k.buaa.IR.Instruction;
-import q9k.buaa.IR.Types.Type;
 import q9k.buaa.IR.Types.VoidType;
 import q9k.buaa.IR.Value;
 
@@ -13,14 +12,14 @@ public class BranchInst extends Instruction {
     private List<BasicBlock> basicBlocks;
 
 
-    public BranchInst(){
+    public BranchInst() {
         setType(VoidType.VoidType);
         this.basicBlocks = new ArrayList<>();
     }
 
     @Override
     public String toString() {
-        if (isUnCOnditional()) {
+        if (isUnConditional()) {
             return "br label " + "%" + this.getBasicBlock(0).getName();
         } else {
             Value value = this.getOperand(0);
@@ -36,7 +35,7 @@ public class BranchInst extends Instruction {
         return this.basicBlocks.size() == 2;
     }
 
-    public boolean isUnCOnditional() {
+    public boolean isUnConditional() {
         return this.basicBlocks.size() == 1;
     }
 
@@ -53,7 +52,25 @@ public class BranchInst extends Instruction {
     }
 
     @Override
-    public void translate() {
-
+    public String genMips() {
+        StringBuilder content = new StringBuilder();
+        if (isUnConditional()) {
+            BasicBlock basicBlock = this.getBasicBlock(0);
+            content.append('\t').append("j ").append(basicBlock.getParent().getName().substring(1))
+                    .append('_').append(basicBlock.getName()).append('\n');
+        } else {
+            IcmpInst icmpInst = (IcmpInst) getFirst();
+            int reg_number = icmpInst.getRegNumber();
+            BasicBlock trueBlock = getBasicBlock(0);
+            BasicBlock falseBlock = getBasicBlock(1);
+            content.append('\t').append("bne $t").append(reg_number).append(", $zero, ")
+                    .append(trueBlock.getParent().getName().substring(1))
+                    .append('_').append(trueBlock.getName()).append('\n');
+            content.append('\t').append("beq $t").append(reg_number).append(", $zero, ")
+                    .append(falseBlock.getParent().getName().substring(1))
+                    .append('_').append(falseBlock.getName()).append('\n');
+        }
+        return content.toString();
     }
+
 }

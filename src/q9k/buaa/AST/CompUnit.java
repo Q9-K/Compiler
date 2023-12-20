@@ -65,16 +65,16 @@ public class CompUnit implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         IRGenerator.setGlobal(true);
         for (Syntax item : decls) {
-            item.generateIR();
+            item.genIR();
         }
         IRGenerator.setGlobal(false);
         for(Syntax item: func_defs){
-            item.generateIR();
+            item.genIR();
         }
-        main_func_def.generateIR();
+        main_func_def.genIR();
         return null;
     }
 }

@@ -65,8 +65,7 @@ public class IfStmt implements Stmt {
     }
 
     @Override
-    public Value generateIR() {
-
+    public Value genIR() {
         BasicBlock trueBasicBlock = new BasicBlock();
         BasicBlock falseBasicBlock = new BasicBlock();
         BasicBlock nextBasicBlock = new BasicBlock();
@@ -74,27 +73,29 @@ public class IfStmt implements Stmt {
 
         IRGenerator.setTrueBasicBlock(trueBasicBlock);
         IRGenerator.setFalseBasicBlock(falseBasicBlock);
-        cond.generateIR();
+        cond.genIR();
         IRGenerator.getCurFunction().addBasicBlock(trueBasicBlock);
 
 
         trueBasicBlock.setParent(IRGenerator.getCurFunction());
         IRGenerator.setCurBasicBlock(trueBasicBlock);
-        stmt1.generateIR();
-        BranchInst branchInst1 = new BranchInst();
-        branchInst1.addTargetBlock(nextBasicBlock);
-        IRGenerator.getCurBasicBlock().addInstruction(branchInst1);
-
+        stmt1.genIR();
+        if (!IRGenerator.getCurBasicBlock().isEnd()) {
+            BranchInst branchInst1 = new BranchInst();
+            branchInst1.addTargetBlock(nextBasicBlock);
+            IRGenerator.getCurBasicBlock().addInstruction(branchInst1);
+        }
         IRGenerator.getCurFunction().addBasicBlock(falseBasicBlock);
         falseBasicBlock.setParent(IRGenerator.getCurFunction());
         IRGenerator.setCurBasicBlock(falseBasicBlock);
         if (stmt2 != null) {
-            stmt2.generateIR();
+            stmt2.genIR();
         }
-        BranchInst branchInst2 = new BranchInst();
-        branchInst2.addTargetBlock(nextBasicBlock);
-        IRGenerator.getCurBasicBlock().addInstruction(branchInst2);
-
+        if (!IRGenerator.getCurBasicBlock().isEnd()) {
+            BranchInst branchInst2 = new BranchInst();
+            branchInst2.addTargetBlock(nextBasicBlock);
+            IRGenerator.getCurBasicBlock().addInstruction(branchInst2);
+        }
         nextBasicBlock.setParent(IRGenerator.getCurFunction());
         IRGenerator.setCurBasicBlock(nextBasicBlock);
         IRGenerator.getCurFunction().addBasicBlock(nextBasicBlock);

@@ -2,7 +2,6 @@ package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.Frontend.IRGenerator;
-import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Instructions.IcmpInst;
 import q9k.buaa.IR.Instructions.ResizeInst;
 import q9k.buaa.IR.Types.IntegerType;
@@ -56,11 +55,11 @@ public class RelExp implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (op_token != null) {
             Value left;
             if(this.pre_value == null){
-                left = add_exp.generateIR();
+                left = add_exp.genIR();
             }
             else{
                 left = pre_value;
@@ -72,7 +71,7 @@ public class RelExp implements Syntax {
             }
             RelExp temp = (RelExp) rel_exp;
             if(temp.op_token == null){
-                Value right = temp.generateIR();
+                Value right = temp.genIR();
                 if(right.getType().equals(IntegerType.i1)){
                     ResizeInst resizeInst = new ResizeInst(right, IntegerType.i32, "zext");
                     IRGenerator.getCurBasicBlock().addInstruction(resizeInst);
@@ -83,7 +82,7 @@ public class RelExp implements Syntax {
                 return icmpInst;
             }
             else{
-                Value right = temp.add_exp.generateIR();
+                Value right = temp.add_exp.genIR();
                 if(right.getType().equals(IntegerType.i1)){
                     ResizeInst resizeInst = new ResizeInst(right, IntegerType.i32, "zext");
                     IRGenerator.getCurBasicBlock().addInstruction(resizeInst);
@@ -92,11 +91,11 @@ public class RelExp implements Syntax {
                 IcmpInst icmpInst = new IcmpInst(left, right, op_token.getTokenType());
                 temp.pre_value = icmpInst;
                 IRGenerator.getCurBasicBlock().addInstruction(icmpInst);
-                return temp.generateIR();
+                return temp.genIR();
             }
 
         } else {
-            return add_exp.generateIR();
+            return add_exp.genIR();
         }
     }
 

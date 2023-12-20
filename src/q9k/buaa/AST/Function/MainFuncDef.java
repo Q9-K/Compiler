@@ -6,13 +6,12 @@ import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.BasicBlock;
 import q9k.buaa.IR.Function;
 import q9k.buaa.IR.Types.FunctionType;
-import q9k.buaa.IR.Types.LabelType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Symbol.SymbolType;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Symbol.SymbolTable;
-import q9k.buaa.Utils.IRModule;
+import q9k.buaa.IR.IRModule;
 
 import java.io.IOException;
 
@@ -64,7 +63,7 @@ public class MainFuncDef implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         Function function = new Function("@main", FunctionType.FunctionType);
         function.setReturnType(SymbolType.VAR);
         IRModule.getInstance().addFunction(function);
@@ -74,7 +73,7 @@ public class MainFuncDef implements Syntax {
         IRGenerator.getCurFunction().addBasicBlock(basicBlock);
         IRGenerator.setCurBasicBlock(basicBlock);
 
-        block.generateIR();
+        block.genIR();
         return function;
     }
 }

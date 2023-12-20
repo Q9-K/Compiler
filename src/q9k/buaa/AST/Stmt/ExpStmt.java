@@ -42,9 +42,9 @@ public class ExpStmt implements Stmt{
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if(exp!=null){
-            exp.generateIR();
+            exp.genIR();
         }
         return null;
     }

@@ -78,12 +78,12 @@ public class FuncFParam implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if(lbrack == null){
             Argument argument = new Argument(null, IntegerType.i32);
             IRGenerator.getCurFunction().addArgument(argument);
 
-            Instruction instruction = new AllocalInst(argument.getType());
+            Instruction instruction = new AllocalInst(argument.getType(), true);
             this.symbol.setIR(instruction);
             IRGenerator.getCurBasicBlock().addInstruction(instruction);
 
@@ -97,7 +97,7 @@ public class FuncFParam implements Syntax {
             Argument argument = new Argument(null, new PointerType(IntegerType.i32));
             IRGenerator.getCurFunction().addArgument(argument);
 
-            Instruction instruction = new AllocalInst(argument.getType());
+            Instruction instruction = new AllocalInst(argument.getType(), true);
             this.symbol.setIR(instruction);
             IRGenerator.getCurBasicBlock().addInstruction(instruction);
             Instruction storeInst = new StoreInst();
@@ -111,7 +111,7 @@ public class FuncFParam implements Syntax {
             Argument argument = new Argument(null, new PointerType((new ArrayType(IntegerType.i32, numElements))));
             IRGenerator.getCurFunction().addArgument(argument);
 
-            Instruction instruction = new AllocalInst(argument.getType());
+            Instruction instruction = new AllocalInst(argument.getType(), true);
             this.symbol.setIR(instruction);
             IRGenerator.getCurBasicBlock().addInstruction(instruction);
             Instruction storeInst = new StoreInst();

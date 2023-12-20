@@ -46,11 +46,11 @@ public class BlockItem implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (decl != null) {
-            return decl.generateIR();
+            return decl.genIR();
         } else {
-            return stmt.generateIR();
+            return stmt.genIR();
         }
     }
 

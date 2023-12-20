@@ -72,7 +72,20 @@ public class ConstantArray extends Constant {
 
 
     @Override
-    public void translate() {
+    public String genMips() {
+        StringBuilder content = new StringBuilder();
+        int index = constants.size() - 1;
+        for (; index > 0; index--) {
+            Constant constant = constants.get(index);
+            content.append(constant.genMips()).append(", ");
+        }
+        Constant constant = constants.get(index);
+        content.append(constant.genMips());
+        return content.toString();
+    }
+
+    @Override
+    public void optimize() {
 
     }
 }

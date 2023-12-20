@@ -33,8 +33,8 @@ public class Cond implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
-        return l_or_exp.generateIR();
+    public Value genIR() {
+        return l_or_exp.genIR();
     }
 
 

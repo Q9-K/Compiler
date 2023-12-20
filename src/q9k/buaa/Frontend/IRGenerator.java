@@ -4,15 +4,16 @@ import q9k.buaa.AST.Syntax;
 import q9k.buaa.INIT.Config;
 import q9k.buaa.IR.Argument;
 import q9k.buaa.IR.BasicBlock;
+import q9k.buaa.IR.Function;
+import q9k.buaa.IR.IRModule;
 import q9k.buaa.IR.Instructions.CallInst;
 import q9k.buaa.IR.Types.FunctionType;
 import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Types.PointerType;
-import q9k.buaa.Symbol.SymbolType;
-import q9k.buaa.Utils.IRModule;
 import q9k.buaa.IR.Types.Type;
-import q9k.buaa.IR.Function;
+import q9k.buaa.Symbol.SymbolType;
 import q9k.buaa.Utils.Output;
+
 import java.io.IOException;
 
 public class IRGenerator {
@@ -30,18 +31,20 @@ public class IRGenerator {
     private static boolean global;
 
 
-    private IRGenerator(Syntax ast){
+    private IRGenerator(Syntax ast) {
         this.ast = ast;
     }
-    public static synchronized IRGenerator getInstance(){
-        if(irGenerator==null){
+
+    public static synchronized IRGenerator getInstance() {
+        if (irGenerator == null) {
             System.out.println("Something wrong happened at irgenerator init!");
             System.exit(-1);
         }
         return irGenerator;
     }
-    public static synchronized IRGenerator getInstance(Syntax ast){
-        if(irGenerator==null||!irGenerator.ast.equals(ast)){
+
+    public static synchronized IRGenerator getInstance(Syntax ast) {
+        if (irGenerator == null || !irGenerator.ast.equals(ast)) {
             irGenerator = new IRGenerator(ast);
         }
         return irGenerator;
@@ -49,42 +52,51 @@ public class IRGenerator {
 
     public void run() throws IOException {
         IRModule irModule = IRModule.getInstance();
-//        loadExternalFunction();
-        ast.generateIR();
-        System.out.println("IRModule generate finished!");
-        if(Config.llvm_ir_output_open){
+        ast.genIR();
+        if (Config.llvm_ir_output_open) {
             Output output = Output.getInstance(Config.getLlvm_ir_path());
             output.write("declare i32 @getint()\n");
             output.write("declare void @putint(i32)\n");
             output.write("declare void @putch(i32)\n");
             output.write("declare void @putstr(i8*)\n");
-            irModule.print();
+            irModule.print(Config.getLlvm_ir_path());
+            System.out.println("LLVM_IR generate finished!");
+            irModule.optimize();
+            output = Output.getInstance(Config.getLlvm_ir_optimized_path());
+            output.write("declare i32 @getint()\n");
+            output.write("declare void @putint(i32)\n");
+            output.write("declare void @putch(i32)\n");
+            output.write("declare void @putstr(i8*)\n");
+            irModule.print(Config.getLlvm_ir_optimized_path());
+            System.out.println("LLVM_IR optimize finished!");
         }
     }
 
-    public static void setCurBasicBlock(BasicBlock basicBlock){
+    public static void setCurBasicBlock(BasicBlock basicBlock) {
         IRGenerator.cur_basicblock = basicBlock;
     }
 
-    public static BasicBlock getCurBasicBlock(){
+    public static BasicBlock getCurBasicBlock() {
         return IRGenerator.cur_basicblock;
     }
 
-    public static void setCurFunction(Function function){
+    public static void setCurFunction(Function function) {
         IRGenerator.cur_function = function;
     }
-    public static Function getCurFunction(){
+
+    public static Function getCurFunction() {
         return IRGenerator.cur_function;
     }
 
-    public static Type getCur_type(){
+    public static Type getCur_type() {
         return IRGenerator.cur_type;
     }
+
     public static void setCur_type(Type cur_type) {
         IRGenerator.cur_type = cur_type;
     }
 
-    private void loadExternalFunction(){
+    private void loadExternalFunction() {
         IRModule irModule = IRModule.getInstance();
         Function function = new Function("getint", FunctionType.FunctionType, true);
         function.setReturnType(SymbolType.VAR);
@@ -100,7 +112,7 @@ public class IRGenerator {
         function.addArgument(new Argument(null, IntegerType.i32));
         irModule.addFunction(function);
 
-        function = new Function("putstr",FunctionType.FunctionType, true);
+        function = new Function("putstr", FunctionType.FunctionType, true);
         function.setReturnType(SymbolType.VOID);
         function.addArgument(new Argument(null, new PointerType(IntegerType.i8)));
         irModule.addFunction(function);
@@ -114,10 +126,11 @@ public class IRGenerator {
         IRGenerator.global = global;
     }
 
-    public static void setCurCallInst(CallInst cur_callInst){
+    public static void setCurCallInst(CallInst cur_callInst) {
         IRGenerator.cur_callInst = cur_callInst;
     }
-    public static CallInst getCurCallInst(){
+
+    public static CallInst getCurCallInst() {
         return IRGenerator.cur_callInst;
     }
 

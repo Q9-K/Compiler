@@ -1,6 +1,7 @@
 package q9k.buaa.IR;
 
 import q9k.buaa.Frontend.IRGenerator;
+import q9k.buaa.IR.Instructions.*;
 import q9k.buaa.IR.Types.Type;
 import q9k.buaa.IR.Types.VoidType;
 import q9k.buaa.Token.TokenType;
@@ -8,6 +9,7 @@ import q9k.buaa.Token.TokenType;
 public abstract class Instruction extends User {
     private BasicBlock parent;
     private TokenType opcode;
+
 
     public Instruction() {
         super();
@@ -34,9 +36,14 @@ public abstract class Instruction extends User {
         this.parent = parent;
     }
 
+    public BasicBlock getParent() {
+        return parent;
+    }
+
+
     @Override
     public String getName() {
-        if(getType().equals(VoidType.VoidType)){
+        if (getType().equals(VoidType.VoidType)) {
             return null;
         }
         if (super.getName() == null) {
@@ -83,8 +90,27 @@ public abstract class Instruction extends User {
         } else if (tokenType.equals(TokenType.NOT)) {
             code = "ne";
         }
-
         return code;
     }
 
+    public boolean isEnd() {
+        if (this instanceof BranchInst && ((BranchInst) this).isUnConditional()) {
+            return true;
+        } else if (this instanceof ReturnInst) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void optimize() {
+//        System.out.println(this.getClass());
+//        System.out.println(this.getUses().size());
+        if (this.getUses().isEmpty()) {
+            if (this instanceof AllocalInst || this instanceof GEPInst ||
+                    this instanceof BinaryOperator || this instanceof LoadInst) {
+                this.setLive(false);
+            }
+        }
+    }
 }

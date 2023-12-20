@@ -3,7 +3,6 @@ package q9k.buaa.AST.Exp;
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.BasicBlock;
-import q9k.buaa.IR.Types.LabelType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Symbol.SymbolTableFactory;
@@ -52,23 +51,25 @@ public class LOrExp implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if(or_token!=null){
             BasicBlock newBasicBlock = new BasicBlock();
-            IRGenerator.getCurFunction().addBasicBlock(newBasicBlock);
 
             BasicBlock cur_falseBlock = IRGenerator.getFalseBasicBlock();
+//            IRGenerator.getCurFunction().addBasicBlock(IRGenerator.getTrueBasicBlock());
             IRGenerator.setFalseBasicBlock(newBasicBlock);
-            l_and_exp.generateIR();
+            l_and_exp.genIR();
+            IRGenerator.getCurFunction().addBasicBlock(newBasicBlock);
             IRGenerator.setFalseBasicBlock(cur_falseBlock);
 
             BasicBlock curBasicBlock = IRGenerator.getCurBasicBlock();
             IRGenerator.setCurBasicBlock(newBasicBlock);
-            l_or_exp.generateIR();
+            l_or_exp.genIR();
             IRGenerator.setCurBasicBlock(curBasicBlock);
         }
         else{
-            l_and_exp.generateIR();
+            l_and_exp.genIR();
+//            IRGenerator.getCurFunction().addBasicBlock(IRGenerator.getTrueBasicBlock());
         }
         return null;
     }

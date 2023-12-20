@@ -20,7 +20,7 @@ import q9k.buaa.Token.Token;
 
 import java.io.IOException;
 
-public class AssignStmt implements Stmt{
+public class AssignStmt implements Stmt {
     private Syntax l_val;
     private Token assign_token;
     private Syntax exp;
@@ -28,7 +28,7 @@ public class AssignStmt implements Stmt{
     private Token lparent_token;
     private Token rparent_token;
     private Token semicn_token;
-    
+
     private Symbol symbol;
     private SymbolTable symbolTable;
 
@@ -46,11 +46,10 @@ public class AssignStmt implements Stmt{
     public void print() throws IOException {
         l_val.print();
         assign_token.print();
-        if(exp!=null){
+        if (exp != null) {
             exp.print();
             semicn_token.print();
-        }
-        else{
+        } else {
             getint_token.print();
             lparent_token.print();
             rparent_token.print();
@@ -64,40 +63,40 @@ public class AssignStmt implements Stmt{
         this.symbolTable = SymbolTableFactory.getInstance().getCurrent();
         l_val.visit();
         this.symbol = SymbolTableFactory.getInstance().getCurrent().getSymbol(l_val);
-        if(symbol!=null){
-            if(symbol.isConst()){
+        if (symbol != null) {
+            if (symbol.isConst()) {
                 ErrorHandler.getInstance().addError(new Error(ErrorType.CHANGECONST, l_val.getLineNumber()));
             }
         }
-        if(exp!=null){
+        if (exp != null) {
             exp.visit();
         }
     }
 
     @Override
     public int getLineNumber() {
-        if(exp!=null){
+        if (exp != null) {
             return exp.getLineNumber();
-        }
-        else{
+        } else {
             return rparent_token.getLineNumber();
         }
     }
 
     @Override
-    public Value generateIR() {
-        if(exp!=null){
+    public Value genIR() {
+        if (exp != null) {
             Instruction instruction = new StoreInst();
-            instruction.addOperand(((LVal)l_val).getAddress());
-            instruction.addOperand(exp.generateIR());
+            Value value = exp.genIR();
+            Value address = ((LVal)l_val).getAddress();
+            instruction.addOperand(address);
+            instruction.addOperand(value);
             IRGenerator.getCurBasicBlock().addInstruction(instruction);
-        }
-        else{
+        } else {
             Instruction instruction = new CallInst(IntegerType.i32);
             instruction.addOperand(new Function("@getint", FunctionType.FunctionType));
             IRGenerator.getCurBasicBlock().addInstruction(instruction);
             Instruction storeInst = new StoreInst();
-            storeInst.addOperand(((LVal)l_val).getAddress());
+            storeInst.addOperand(((LVal) l_val).getAddress());
             storeInst.addOperand(instruction);
             IRGenerator.getCurBasicBlock().addInstruction(storeInst);
         }
@@ -108,10 +107,9 @@ public class AssignStmt implements Stmt{
     public String toString() {
         StringBuilder content = new StringBuilder();
         content.append(l_val.toString()).append(assign_token.toString());
-        if(exp!=null){
+        if (exp != null) {
             content.append(exp.toString()).append(semicn_token.toString());
-        }
-        else{
+        } else {
             content.append(getint_token.toString()).append(lparent_token.toString())
                     .append(rparent_token.toString()).append(semicn_token.toString());
         }

@@ -57,10 +57,8 @@ public class LVal implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
-        System.out.println(this.symbolTable);
+    public Value genIR() {
         if (list.isEmpty()) {
-            //
             PointerType pointerType = (PointerType) this.symbol.getIR().getType();
             if (pointerType.getSourceType() instanceof ArrayType) {
                 //数组
@@ -82,7 +80,7 @@ public class LVal implements Syntax {
                 Type elementType = ((ArrayType) pointerType.getSourceType()).getElementType();
                 GEPInst gepInst = new GEPInst(this.symbol.getIR());
                 gepInst.setPos1(ConstantInt.ZERO);
-                gepInst.setPos2(list.get(0).second().generateIR());
+                gepInst.setPos2(list.get(0).second().genIR());
                 IRGenerator.getCurBasicBlock().addInstruction(gepInst);
                 if (elementType instanceof IntegerType) {
                     //一维数组
@@ -106,7 +104,7 @@ public class LVal implements Syntax {
                 //二维数组
                 if (instruction.getType().getLevel() == 2) {
                     GEPInst gepInst = new GEPInst(instruction);
-                    gepInst.setPos1(list.get(0).second().generateIR());
+                    gepInst.setPos1(list.get(0).second().genIR());
                     gepInst.setPos2(ConstantInt.ZERO);
                     IRGenerator.getCurBasicBlock().addInstruction(gepInst);
 //                LoadInst loadInst = new LoadInst(gepInst);
@@ -116,7 +114,7 @@ public class LVal implements Syntax {
                 //一维数组
                 else {
                     GEPInst gepInst = new GEPInst(instruction);
-                    gepInst.setPos1(list.get(0).second().generateIR());
+                    gepInst.setPos1(list.get(0).second().genIR());
                     IRGenerator.getCurBasicBlock().addInstruction(gepInst);
                     LoadInst loadInst = new LoadInst(gepInst);
                     IRGenerator.getCurBasicBlock().addInstruction(loadInst);
@@ -129,8 +127,8 @@ public class LVal implements Syntax {
                 //数组
                 GEPInst gepInst = new GEPInst(this.symbol.getIR());
                 gepInst.setPos1(ConstantInt.ZERO);
-                gepInst.setPos2(list.get(0).second().generateIR());
-                gepInst.setPos3(list.get(1).second().generateIR());
+                gepInst.setPos2(list.get(0).second().genIR());
+                gepInst.setPos3(list.get(1).second().genIR());
                 IRGenerator.getCurBasicBlock().addInstruction(gepInst);
 
                 LoadInst loadInst = new LoadInst(gepInst);
@@ -142,8 +140,8 @@ public class LVal implements Syntax {
                 IRGenerator.getCurBasicBlock().addInstruction(instruction);
 
                 GEPInst gepInst = new GEPInst(instruction);
-                gepInst.setPos1(list.get(0).second().generateIR());
-                gepInst.setPos2(list.get(1).second().generateIR());
+                gepInst.setPos1(list.get(0).second().genIR());
+                gepInst.setPos2(list.get(1).second().genIR());
                 IRGenerator.getCurBasicBlock().addInstruction(gepInst);
 
                 LoadInst loadInst = new LoadInst(gepInst);
@@ -175,6 +173,7 @@ public class LVal implements Syntax {
                 GEPInst gepInst = new GEPInst(value);
                 gepInst.setPos1(ConstantInt.ZERO);
                 gepInst.setPos2(ConstantInt.ZERO);
+                IRGenerator.getCurBasicBlock().addInstruction(gepInst);
                 return gepInst;
             }
         } else if (list.size() == 1) {
@@ -183,15 +182,14 @@ public class LVal implements Syntax {
             if (pointerType.getSourceType() instanceof ArrayType) {
                 GEPInst gepInst = new GEPInst(this.symbol.getIR());
                 gepInst.setPos1(ConstantInt.ZERO);
-                gepInst.setPos2(list.get(0).second().generateIR());
+                gepInst.setPos2(list.get(0).second().genIR());
                 IRGenerator.getCurBasicBlock().addInstruction(gepInst);
                 return gepInst;
             } else {
                 LoadInst loadInst = new LoadInst(value);
                 IRGenerator.getCurBasicBlock().addInstruction(loadInst);
-
                 GEPInst gepInst = new GEPInst(loadInst);
-                gepInst.setPos1(list.get(0).second().generateIR());
+                gepInst.setPos1(list.get(0).second().genIR());
                 IRGenerator.getCurBasicBlock().addInstruction(gepInst);
                 return gepInst;
             }
@@ -201,17 +199,16 @@ public class LVal implements Syntax {
             if (pointerType.getSourceType() instanceof ArrayType) {
                 GEPInst gepInst = new GEPInst(this.symbol.getIR());
                 gepInst.setPos1(ConstantInt.ZERO);
-                gepInst.setPos2(list.get(0).second().generateIR());
-                gepInst.setPos3(list.get(1).second().generateIR());
+                gepInst.setPos2(list.get(0).second().genIR());
+                gepInst.setPos3(list.get(1).second().genIR());
                 IRGenerator.getCurBasicBlock().addInstruction(gepInst);
                 return gepInst;
             } else {
                 Instruction instruction = new LoadInst(value);
                 IRGenerator.getCurBasicBlock().addInstruction(instruction);
-
                 GEPInst gepInst = new GEPInst(instruction);
-                gepInst.setPos1(list.get(0).second().generateIR());
-                gepInst.setPos2(list.get(1).second().generateIR());
+                gepInst.setPos1(list.get(0).second().genIR());
+                gepInst.setPos2(list.get(1).second().genIR());
                 IRGenerator.getCurBasicBlock().addInstruction(gepInst);
                 return gepInst;
             }

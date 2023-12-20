@@ -13,7 +13,7 @@ import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Symbol.SymbolType;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Token.TokenType;
-import q9k.buaa.Utils.IRModule;
+import q9k.buaa.IR.IRModule;
 
 import java.io.IOException;
 
@@ -96,7 +96,7 @@ public class FuncDef implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         Function function = new Function("@" + ident.toString(), FunctionType.FunctionType);
         function.setReturnType(returnType);
         IRModule.getInstance().addFunction(function);
@@ -106,10 +106,10 @@ public class FuncDef implements Syntax {
         IRGenerator.getCurFunction().addBasicBlock(basicBlock);
         IRGenerator.setCurBasicBlock(basicBlock);
         if (func_f_params != null) {
-            func_f_params.generateIR();
+            func_f_params.genIR();
         }
 
-        block.generateIR();
+        block.genIR();
 
         return function;
     }

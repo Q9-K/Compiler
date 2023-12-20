@@ -55,26 +55,26 @@ public class AddExp implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (op_token == null) {
-            return mul_exp.generateIR();
+            return mul_exp.genIR();
         } else {
             Value left;
             if (this.pre_value == null) {
-                left = mul_exp.generateIR();
+                left = mul_exp.genIR();
             } else {
                 left = pre_value;
             }
             AddExp temp = (AddExp) add_exp;
             if (temp.op_token == null) {
-                BinaryOperator binaryOperator = new BinaryOperator(left, temp.generateIR(), op_token.getTokenType());
+                BinaryOperator binaryOperator = new BinaryOperator(left, temp.genIR(), op_token.getTokenType());
                 IRGenerator.getCurBasicBlock().addInstruction(binaryOperator);
                 return binaryOperator;
             } else {
-                BinaryOperator binaryOperator = new BinaryOperator(left, temp.mul_exp.generateIR(), op_token.getTokenType());
+                BinaryOperator binaryOperator = new BinaryOperator(left, temp.mul_exp.genIR(), op_token.getTokenType());
                 temp.pre_value = binaryOperator;
                 IRGenerator.getCurBasicBlock().addInstruction(binaryOperator);
-                return temp.generateIR();
+                return temp.genIR();
             }
         }
     }

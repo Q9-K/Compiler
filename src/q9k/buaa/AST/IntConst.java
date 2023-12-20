@@ -34,7 +34,7 @@ public class IntConst implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         return new ConstantInt(Integer.valueOf(intcon_token.toString()));
     }
 

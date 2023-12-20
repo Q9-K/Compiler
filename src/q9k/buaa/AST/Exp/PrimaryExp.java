@@ -2,7 +2,6 @@ package q9k.buaa.AST.Exp;
 
 import q9k.buaa.AST.Syntax;
 import q9k.buaa.IR.Value;
-import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
@@ -65,13 +64,13 @@ public class PrimaryExp implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (exp != null) {
-            return exp.generateIR();
+            return exp.genIR();
         } else if (l_val != null) {
-            return l_val.generateIR();
+            return l_val.genIR();
         } else {
-            return number.generateIR();
+            return number.genIR();
         }
     }
 

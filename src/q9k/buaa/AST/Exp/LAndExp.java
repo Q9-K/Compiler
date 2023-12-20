@@ -6,7 +6,6 @@ import q9k.buaa.IR.BasicBlock;
 import q9k.buaa.IR.ConstantInt;
 import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Instructions.IcmpInst;
-import q9k.buaa.IR.Types.LabelType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Symbol.SymbolTableFactory;
@@ -57,14 +56,14 @@ public class LAndExp implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (and_token != null) {
             BasicBlock newBasicBlock = new BasicBlock();
             IRGenerator.getCurFunction().addBasicBlock(newBasicBlock);
 
             BasicBlock cur_trueBlock = IRGenerator.getTrueBasicBlock();
             IRGenerator.setTrueBasicBlock(newBasicBlock);
-            Value value = eq_exp.generateIR();
+            Value value = eq_exp.genIR();
             IcmpInst icmpInst;
             if (!(value instanceof IcmpInst)) {
                 icmpInst = new IcmpInst(value, ConstantInt.ZERO, TokenType.NEQ);
@@ -82,10 +81,10 @@ public class LAndExp implements Syntax {
 
             BasicBlock curBasicBlock = IRGenerator.getCurBasicBlock();
             IRGenerator.setCurBasicBlock(newBasicBlock);
-            l_and_exp.generateIR();
+            l_and_exp.genIR();
             IRGenerator.setCurBasicBlock(curBasicBlock);
         } else {
-            Value value = eq_exp.generateIR();
+            Value value = eq_exp.genIR();
             IcmpInst icmpInst;
             if (!(value instanceof IcmpInst)) {
                 icmpInst = new IcmpInst(value, ConstantInt.ZERO, TokenType.NEQ);

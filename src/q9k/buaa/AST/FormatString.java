@@ -32,7 +32,7 @@ public class FormatString implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         return null;
     }
 

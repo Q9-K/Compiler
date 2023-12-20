@@ -1,6 +1,5 @@
 package q9k.buaa.AST;
 
-import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Symbol.SymbolTableFactory;
@@ -34,8 +33,8 @@ public class Number implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
-        return int_const.generateIR();
+    public Value genIR() {
+        return int_const.genIR();
     }
 
     @Override

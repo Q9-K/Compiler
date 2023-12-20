@@ -76,10 +76,10 @@ public class ConstDecl implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
-        const_def.generateIR();
+    public Value genIR() {
+        const_def.genIR();
         for (Tuple<Token, Syntax> item : list) {
-            item.second().generateIR();
+            item.second().genIR();
         }
         return null;
     }

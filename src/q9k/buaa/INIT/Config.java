@@ -1,7 +1,6 @@
 package q9k.buaa.INIT;
+
 import q9k.buaa.Error.ErrorHandler;
-import q9k.buaa.Symbol.Symbol;
-import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Utils.Input;
 import q9k.buaa.Utils.Output;
 
@@ -9,11 +8,14 @@ import java.io.IOException;
 
 public class Config {
     public static boolean DEBUG = true;
-    private static String input_path="testfile.txt";
-    private static String output_path="output.txt";
-    private static String error_path="error.txt";
-    private static String llvm_ir_path="llvm_ir.txt";
-    private static String mips_path = "mips.txt";
+    public static boolean OPTIMIZED = false;
+    private static String input_path = "testfile.txt";
+    private static String output_path = "output.txt";
+    private static String error_path = "error.txt";
+    private static String llvm_ir_path = "llvm_ir_optimized_before.txt";
+    private static String llvm_ir_optimized_path = "llvm_ir.txt";
+    private static String mips_path = "mips_optimized_before.txt";
+    private static String mips_optimized_path = "mips.txt";
     public static boolean lexer_output_open = false;
     public static boolean parser_output_open = false;
     public static boolean error_output_open = false;
@@ -39,46 +41,82 @@ public class Config {
     public static void setError_path(String error_path) {
         Config.error_path = error_path;
     }
-    public static String getLlvm_ir_path(){
+
+    public static String getLlvm_ir_path() {
         return Config.llvm_ir_path;
     }
-    public static void setLlvm_ir_path(String llvm_ir_path){
+
+    public static void setLlvm_ir_path(String llvm_ir_path) {
         Config.llvm_ir_path = llvm_ir_path;
     }
-    public static String getMips_path(){
+
+    public static String getMips_path() {
         return Config.mips_path;
     }
-    public static void setMips_path(String mips_path){
+
+    public static void setMips_path(String mips_path) {
         Config.mips_path = mips_path;
     }
+
+    public static String getLlvm_ir_optimized_path() {
+        return llvm_ir_optimized_path;
+    }
+
+    public static void setLlvm_ir_optimized_path(String llvm_ir_optimized_path) {
+        Config.llvm_ir_optimized_path = llvm_ir_optimized_path;
+    }
+
+    public static String getMips_optimized_path() {
+        return mips_optimized_path;
+    }
+
+    public static void setMips_optimized_path(String mips_optimized_path) {
+        Config.mips_optimized_path = mips_optimized_path;
+    }
+
     public static void init() throws IOException {
         Input input = Input.getInstance(input_path);//input初始化
         Output output = Output.getInstance(output_path);//output初始化
         ErrorHandler errorHandler = ErrorHandler.getInstance(error_path);//错误处理初始化
     }
+
     public static void setLexer_output_open(boolean lexer_output_open) {
         Config.lexer_output_open = lexer_output_open;
     }
+
     public static void setParser_output_open(boolean parser_output_open) {
         Config.parser_output_open = parser_output_open;
     }
-    public static void setError_output_open(boolean error_output_open){
+
+    public static void setError_output_open(boolean error_output_open) {
         Config.error_output_open = error_output_open;
     }
-    public static void setLlvm_ir_output_open(boolean llvm_ir_output_open){
+
+    public static void setLlvm_ir_output_open(boolean llvm_ir_output_open) {
         Config.llvm_ir_output_open = llvm_ir_output_open;
     }
-    public static void setMips_output_open(boolean mips_output_open){
+
+    public static void setMips_output_open(boolean mips_output_open) {
         Config.mips_output_open = mips_output_open;
     }
 
-    public static void printInfo(){
+    public static void setDEBUG(boolean DEBUG) {
+        Config.DEBUG = DEBUG;
+    }
+
+    public static void setOPTIMIZED(boolean OPTIMIZED) {
+        Config.OPTIMIZED = OPTIMIZED;
+    }
+
+    public static void printInfo() {
         System.out.println("当前编译器配置:");
-        System.out.println("词法分析输出: "+(lexer_output_open?"开":"关")+(lexer_output_open?" >> "+getOutput_path():""));
-        System.out.println("语法分析输出: "+(parser_output_open?"开":"关")+(parser_output_open?" >> "+getOutput_path():""));
-        System.out.println("错误处理输出: "+(error_output_open?"开":"关")+(error_output_open?" >> "+getError_path():""));
-        System.out.println("llvm_ir输出: "+(llvm_ir_output_open?"开":"关")+(llvm_ir_output_open?" >> "+getLlvm_ir_path():""));
-        System.out.println("mips输出: "+(mips_output_open?"开":"关")+(mips_output_open?" >> "+getMips_path():""));
+        System.out.println("词法分析输出: " + (lexer_output_open ? "开" : "关") + (lexer_output_open ? " >> " + getOutput_path() : ""));
+        System.out.println("语法分析输出: " + (parser_output_open ? "开" : "关") + (parser_output_open ? " >> " + getOutput_path() : ""));
+        System.out.println("错误处理输出: " + (error_output_open ? "开" : "关") + (error_output_open ? " >> " + getError_path() : ""));
+        System.out.println("llvm_ir输出: " + (llvm_ir_output_open ? "开" : "关") + (llvm_ir_output_open ? " >> " + getLlvm_ir_path() : ""));
+        System.out.println("llvm_ir优化后: " + (llvm_ir_output_open ? "开" : "关") + (llvm_ir_output_open ? " >> " + getLlvm_ir_optimized_path() : ""));
+        System.out.println("mips输出: " + (mips_output_open ? "开" : "关") + (mips_output_open ? " >> " + getMips_path() : ""));
+        System.out.println("mips优化后输出: " + (mips_output_open ? "开" : "关") + (mips_output_open ? " >> " + getMips_optimized_path() : ""));
     }
 
 }

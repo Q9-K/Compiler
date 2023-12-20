@@ -7,7 +7,7 @@ import q9k.buaa.Frontend.Parser;
 import q9k.buaa.Frontend.Visitor;
 import q9k.buaa.INIT.Config;
 import q9k.buaa.Token.Token;
-import q9k.buaa.Utils.IRModule;
+import q9k.buaa.IR.IRModule;
 import q9k.buaa.Utils.Input;
 
 import java.io.IOException;

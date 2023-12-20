@@ -22,7 +22,9 @@ public class ResizeInst extends Instruction {
     }
 
     @Override
-    public void translate() {
-
+    public String genMips() {
+        setRegNumber(getFirst().getRegNumber());
+        return "";
     }
+
 }

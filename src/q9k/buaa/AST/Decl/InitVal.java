@@ -78,9 +78,9 @@ public class InitVal implements Syntax {
     public static int pos2 = 0;
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (exp != null) {
-            return exp.generateIR();
+            return exp.genIR();
         }
         return null;
     }

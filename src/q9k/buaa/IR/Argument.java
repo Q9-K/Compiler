@@ -30,7 +30,12 @@ public class Argument extends Value{
     }
 
     @Override
-    public void translate() {
+    public String genMips() {
+        return "";
+    }
+
+    @Override
+    public void optimize() {
 
     }
 }

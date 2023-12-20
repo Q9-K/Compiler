@@ -48,10 +48,10 @@ public class FuncRParams implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
-        IRGenerator.getCurCallInst().addParam(exp.generateIR());
+    public Value genIR() {
+        IRGenerator.getCurCallInst().addParam(exp.genIR());
         for(Tuple<Token, Syntax> item : list){
-            IRGenerator.getCurCallInst().addParam(item.second().generateIR());
+            IRGenerator.getCurCallInst().addParam(item.second().genIR());
         }
         return null;
     }

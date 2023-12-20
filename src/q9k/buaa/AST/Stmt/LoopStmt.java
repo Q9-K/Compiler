@@ -80,12 +80,10 @@ public class LoopStmt implements Stmt {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (for_stmt1 != null) {
-            for_stmt1.generateIR();
+            for_stmt1.genIR();
         }
-
-
         BasicBlock condBlock = new BasicBlock();
         BasicBlock trueBasicBlock = new BasicBlock();
         BasicBlock stepBlock = new BasicBlock();
@@ -103,29 +101,31 @@ public class LoopStmt implements Stmt {
 
         IRGenerator.setTrueBasicBlock(trueBasicBlock);
         IRGenerator.setFalseBasicBlock(nextBasicBlock);
-        IRGenerator.getCurFunction().addBasicBlock(condBlock);
         IRGenerator.setCurBasicBlock(condBlock);
         if (cond != null) {
-            cond.generateIR();
+            cond.genIR();
         }
         else{
             BranchInst branchInst1 = new BranchInst();
             branchInst1.addTargetBlock(trueBasicBlock);
             IRGenerator.getCurBasicBlock().addInstruction(branchInst1);
         }
+        IRGenerator.getCurFunction().addBasicBlock(condBlock);
 
 
         IRGenerator.getCurFunction().addBasicBlock(trueBasicBlock);
         IRGenerator.setCurBasicBlock(trueBasicBlock);
-        stmt.generateIR();
-        BranchInst branchInst1 = new BranchInst();
-        branchInst1.addTargetBlock(stepBlock);
-        IRGenerator.getCurBasicBlock().addInstruction(branchInst1);
+        stmt.genIR();
+        if(!IRGenerator.getCurBasicBlock().isEnd()){
+            BranchInst branchInst1 = new BranchInst();
+            branchInst1.addTargetBlock(stepBlock);
+            IRGenerator.getCurBasicBlock().addInstruction(branchInst1);
+        }
 
         IRGenerator.getCurFunction().addBasicBlock(stepBlock);
         IRGenerator.setCurBasicBlock(stepBlock);
         if (for_stmt2 != null) {
-            for_stmt2.generateIR();
+            for_stmt2.genIR();
         }
         BranchInst branchInst2 = new BranchInst();
         branchInst2.addTargetBlock(condBlock);

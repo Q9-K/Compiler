@@ -15,7 +15,7 @@ import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.*;
 import q9k.buaa.Token.Token;
 import q9k.buaa.Utils.Calculator;
-import q9k.buaa.Utils.IRModule;
+import q9k.buaa.IR.IRModule;
 import q9k.buaa.Utils.Triple;
 
 import java.io.IOException;
@@ -105,7 +105,7 @@ public class VarDef implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (IRGenerator.isGlobal()) {
             if (list.isEmpty()) {
                 //变量
@@ -150,7 +150,7 @@ public class VarDef implements Syntax {
                 if (init_val != null) {
                     Instruction storeInst = new StoreInst();
                     storeInst.addOperand(instruction);
-                    storeInst.addOperand(init_val.generateIR());
+                    storeInst.addOperand(init_val.genIR());
                     IRGenerator.getCurBasicBlock().addInstruction(storeInst);
                 }
             } else if (list.size() == 1) {
@@ -172,7 +172,7 @@ public class VarDef implements Syntax {
                         IRGenerator.getCurBasicBlock().addInstruction(gepInst);
                         Instruction storeInst = new StoreInst();
                         storeInst.addOperand(gepInst);
-                        storeInst.addOperand(init_val.generateIR());
+                        storeInst.addOperand(init_val.genIR());
                         IRGenerator.getCurBasicBlock().addInstruction(storeInst);
                         index++;
                     }
@@ -201,7 +201,7 @@ public class VarDef implements Syntax {
                             IRGenerator.getCurBasicBlock().addInstruction(gepInst);
                             Instruction storeInst = new StoreInst();
                             storeInst.addOperand(gepInst);
-                            storeInst.addOperand(init_val.generateIR());
+                            storeInst.addOperand(init_val.genIR());
                             IRGenerator.getCurBasicBlock().addInstruction(storeInst);
                             index2++;
                         }

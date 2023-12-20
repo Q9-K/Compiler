@@ -8,8 +8,8 @@ import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.ConstantInt;
 import q9k.buaa.IR.Function;
+import q9k.buaa.IR.IRModule;
 import q9k.buaa.IR.Instructions.BinaryOperator;
-import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Instructions.CallInst;
 import q9k.buaa.IR.Instructions.IcmpInst;
 import q9k.buaa.IR.Types.FunctionType;
@@ -116,9 +116,9 @@ public class UnaryExp implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (primary_exp != null) {
-            return primary_exp.generateIR();
+            return primary_exp.genIR();
         } else if (ident != null) {
             SymbolType symbolType = funcSymbol.getReturn_type();
             Type type;
@@ -128,30 +128,30 @@ public class UnaryExp implements Syntax {
                 type = IntegerType.i32;
             }
             CallInst callInst = new CallInst(type);
-            CallInst current = IRGenerator.getCurCallInst();
+            CallInst curCallInst = IRGenerator.getCurCallInst();
             IRGenerator.setCurCallInst(callInst);
             if (func_r_params != null) {
-                func_r_params.generateIR();
+                func_r_params.genIR();
             }
-            IRGenerator.setCurCallInst(current);
-            callInst.addOperand(new Function("@" + ident.toString(), FunctionType.FunctionType));
+//            callInst.addOperand(new Function("@" + ident.toString(), FunctionType.FunctionType));
+            callInst.addOperand(IRModule.getInstance().getFunctionMap().get("@"+ident.toString()));
             IRGenerator.getCurBasicBlock().addInstruction(callInst);
+            IRGenerator.setCurCallInst(curCallInst);
             return callInst;
         } else {
             Token op_token = ((UnaryOp) unary_op).getOp_token();
             if (op_token.getTokenType().equals(TokenType.PLUS)) {
-                return unary_exp.generateIR();
+                return unary_exp.genIR();
             } else if (op_token.getTokenType().equals(TokenType.MINU)) {
 
                 UnaryExp temp = (UnaryExp) unary_exp;
-                BinaryOperator binaryOperator = new BinaryOperator(ConstantInt.ZERO, temp.generateIR(), op_token.getTokenType());
+                BinaryOperator binaryOperator = new BinaryOperator(ConstantInt.ZERO, temp.genIR(), op_token.getTokenType());
 
                 IRGenerator.getCurBasicBlock().addInstruction(binaryOperator);
                 return binaryOperator;
             } else if (op_token.getTokenType().equals(TokenType.NOT)) {
-                IcmpInst icmpInst = new IcmpInst(unary_exp.generateIR(), ConstantInt.ZERO, TokenType.EQL);
+                IcmpInst icmpInst = new IcmpInst(unary_exp.genIR(), ConstantInt.ZERO, TokenType.EQL);
                 IRGenerator.getCurBasicBlock().addInstruction(icmpInst);
-
                 return icmpInst;
             }
             return null;

@@ -52,26 +52,26 @@ public class MulExp implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (op_token == null) {
-            return unary_exp.generateIR();
+            return unary_exp.genIR();
         } else {
             Value left;
             if (this.pre_value == null) {
-                left = unary_exp.generateIR();
+                left = unary_exp.genIR();
             } else {
                 left = pre_value;
             }
             MulExp temp = (MulExp) mul_exp;
             if (temp.op_token == null) {
-                BinaryOperator binaryOperator = new BinaryOperator(left, temp.generateIR(), op_token.getTokenType());
+                BinaryOperator binaryOperator = new BinaryOperator(left, temp.genIR(), op_token.getTokenType());
                 IRGenerator.getCurBasicBlock().addInstruction(binaryOperator);
                 return binaryOperator;
             } else {
-                BinaryOperator binaryOperator = new BinaryOperator(left, temp.unary_exp.generateIR(), op_token.getTokenType());
+                BinaryOperator binaryOperator = new BinaryOperator(left, temp.unary_exp.genIR(), op_token.getTokenType());
                 temp.pre_value = binaryOperator;
                 IRGenerator.getCurBasicBlock().addInstruction(binaryOperator);
-                return temp.generateIR();
+                return temp.genIR();
             }
         }
     }

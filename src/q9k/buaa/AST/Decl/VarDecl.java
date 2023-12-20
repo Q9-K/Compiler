@@ -72,13 +72,13 @@ public class VarDecl implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if(TokenType.getTokenType(b_type.toString()).equals(TokenType.INTCON)){
             IRGenerator.setCur_type(IntegerType.i32);
         }
-        var_def.generateIR();
+        var_def.genIR();
         for(Tuple<Token, Syntax> item:list){
-            item.second().generateIR();
+            item.second().genIR();
         }
         return null;
     }

@@ -37,7 +37,7 @@ public class BType implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         return null;
     }
 }

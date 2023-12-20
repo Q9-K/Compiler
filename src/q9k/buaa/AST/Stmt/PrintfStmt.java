@@ -5,15 +5,15 @@ import q9k.buaa.Error.Error;
 import q9k.buaa.Error.ErrorHandler;
 import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.IRGenerator;
-import q9k.buaa.IR.ConstantInt;
-import q9k.buaa.IR.Function;
+import q9k.buaa.IR.*;
 import q9k.buaa.IR.Instructions.CallInst;
-import q9k.buaa.IR.Types.FunctionType;
-import q9k.buaa.IR.Types.VoidType;
-import q9k.buaa.IR.Value;
+import q9k.buaa.IR.Instructions.GEPInst;
+import q9k.buaa.IR.Instructions.LoadInst;
+import q9k.buaa.IR.Types.*;
 import q9k.buaa.Symbol.SymbolTable;
 import q9k.buaa.Symbol.SymbolTableFactory;
 import q9k.buaa.Token.Token;
+import q9k.buaa.IR.IRModule;
 import q9k.buaa.Utils.Tuple;
 
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class PrintfStmt implements Stmt {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         String content = format_string.toString();
         int pos = 0;
         for (int index = 1; index < content.length() - 1; ++index) {
@@ -82,7 +82,7 @@ public class PrintfStmt implements Stmt {
             if (c == '%' && content.charAt(index + 1) == 'd') {
                 index++;
                 function = new Function("@putint", FunctionType.FunctionType);
-                value = list.get(pos++).second().generateIR();
+                value = list.get(pos++).second().genIR();
             } else if (c == '\\' && content.charAt(index + 1) == 'n') {
                 index++;
                 function = new Function("@putch", FunctionType.FunctionType);

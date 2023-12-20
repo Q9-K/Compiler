@@ -55,9 +55,9 @@ public class Block implements Syntax {
         return rbrace_token.getLineNumber();
     }
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         for (Syntax block_item : block_items) {
-            block_item.generateIR();
+            block_item.genIR();
         }
         return null;
     }

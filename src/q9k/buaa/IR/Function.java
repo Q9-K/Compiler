@@ -1,13 +1,12 @@
 package q9k.buaa.IR;
 
-import q9k.buaa.IR.Instructions.BinaryOperator;
+import q9k.buaa.Backend.MipsGenerator;
 import q9k.buaa.IR.Instructions.ReturnInst;
 import q9k.buaa.IR.Types.Type;
 import q9k.buaa.Symbol.SymbolType;
-import q9k.buaa.Token.Token;
-import q9k.buaa.Utils.IRModule;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Function extends GlobalValue {
@@ -22,7 +21,6 @@ public class Function extends GlobalValue {
         this.basicBlocks = new ArrayList<>();
         this.arguments = new ArrayList<>();
     }
-
 
 
     public Function(String name, Type type, boolean isExternal) {
@@ -52,56 +50,45 @@ public class Function extends GlobalValue {
     @Override
     public String toString() {
         StringBuilder content = new StringBuilder();
-        if (isExternal) {
-            content.append("declare ").append(returnType.toString()).
-                    append(" ").append(this.getName()).append("(");
-            if (!arguments.isEmpty()) {
-                int index = 0;
-                for (; index < arguments.size() - 1; ++index) {
-                    content.append(arguments.get(index).getType().toString()).append(", ");
-                }
-                content.append(arguments.get(index).getType().toString());
-            }
-            content.append(")");
-        } else {
-            content.append("define dso_local ").append(returnType.toString()).
-                    append(" ").append(this.getName()).append("(");
-            if (!arguments.isEmpty()) {
-                int index = 0;
-                for (; index < arguments.size() - 1; ++index) {
-                    content.append(arguments.get(index).getType().toString()).append(" ").append(arguments.get(index).getName()).append(", ");
-                }
-                content.append(arguments.get(index).getType().toString()).append(" ").append(arguments.get(index).getName());
-            }
-            content.append(")").append(" {").append("\n");
+
+        content.append("define dso_local ").append(returnType.toString()).
+                append(" ").append(this.getName()).append("(");
+        if (!arguments.isEmpty()) {
             int index = 0;
-            for(BasicBlock basicBlock : basicBlocks){
-                basicBlock.getName();
-                for(Instruction instruction: basicBlock.getInstructions()){
-                    instruction.getName();
-                }
+            for (; index < arguments.size() - 1; ++index) {
+                content.append(arguments.get(index).getType().toString()).append(" ").append(arguments.get(index).getName()).append(", ");
             }
-            for (; index < basicBlocks.size() - 1; index++) {
-                BasicBlock basicBlock = basicBlocks.get(index);
-//                content.append(";<label>:").append(this.number++).append("\n");
-                if (index > 0) {
-                    content.append(basicBlock.getName()).append(":").append("\n");
-                }
-                content.append(basicBlock.toString());
+            content.append(arguments.get(index).getType().toString()).append(" ").append(arguments.get(index).getName());
+        }
+        content.append(")").append(" {").append("\n");
+        int index = 0;
+        for (BasicBlock basicBlock : basicBlocks) {
+            basicBlock.getName();
+            for (Instruction instruction : basicBlock.getInstructions()) {
+                instruction.getName();
             }
+        }
+        for (; index < basicBlocks.size() - 1; index++) {
             BasicBlock basicBlock = basicBlocks.get(index);
-            Instruction instruction = basicBlock.getTerminator();
-//            System.out.println(instruction.getClass());
-            if (!(instruction instanceof ReturnInst)) {
-                ReturnInst returnInst = new ReturnInst();
-                basicBlock.addInstruction(returnInst);
-            }
+//                content.append(";<label>:").append(this.number++).append("\n");
             if (index > 0) {
                 content.append(basicBlock.getName()).append(":").append("\n");
             }
             content.append(basicBlock.toString());
-            content.append("}").append("\n");
         }
+        BasicBlock basicBlock = basicBlocks.get(index);
+        Instruction instruction = basicBlock.getTerminator();
+//            System.out.println(instruction.getClass());
+        if (!(instruction instanceof ReturnInst)) {
+            ReturnInst returnInst = new ReturnInst();
+            basicBlock.addInstruction(returnInst);
+        }
+        if (index > 0) {
+            content.append(basicBlock.getName()).append(":").append("\n");
+        }
+        content.append(basicBlock.toString());
+        content.append("}").append("\n");
+
 
         return content.toString();
     }
@@ -110,13 +97,32 @@ public class Function extends GlobalValue {
         this.returnType = returnType;
     }
 
-    public SymbolType getReturnType() {
-        return this.returnType;
+    @Override
+    public String genMips() {
+        MipsGenerator.resetNumber();
+        StringBuilder content = new StringBuilder();
+        content.append(this.getName().substring(1)).append(":\n");
+        BasicBlock basicBlock = basicBlocks.get(0);
+        content.append(basicBlock.genMips());
+        for (int index = 1; index < basicBlocks.size(); index++) {
+            BasicBlock basicBlock1 = basicBlocks.get(index);
+            content.append(this.getName().substring(1)).append('_')
+                    .append(basicBlock1.getName()).append(":").append('\n');
+            content.append(basicBlock1.genMips());
+        }
+        return content.toString();
     }
 
-
     @Override
-    public void translate() {
-
+    public void optimize() {
+        if (this.getUses().isEmpty()&&!this.getName().equals("@main")) {
+            setLive(false);
+        } else {
+            Iterator<BasicBlock> basicBlockIterator = basicBlocks.iterator();
+            while (basicBlockIterator.hasNext()) {
+                BasicBlock basicBlock = basicBlockIterator.next();
+                basicBlock.optimize();
+            }
+        }
     }
 }

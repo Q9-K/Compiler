@@ -1,10 +1,10 @@
 package q9k.buaa.IR;
 
 import q9k.buaa.Frontend.IRGenerator;
-import q9k.buaa.IR.Instructions.BranchInst;
 import q9k.buaa.IR.Types.LabelType;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class BasicBlock extends Value {
@@ -31,9 +31,8 @@ public class BasicBlock extends Value {
     public String toString() {
         StringBuilder content = new StringBuilder();
         for (Instruction instruction : instructions) {
-            content.append("\t").append(instruction.toString()).append("\n");
-            if (instruction instanceof BranchInst && ((BranchInst) instruction).isUnCOnditional()) {
-                break;
+            if(instruction.isLive()){
+                content.append("\t").append(instruction.toString()).append("\n");
             }
         }
         return content.toString();
@@ -67,7 +66,30 @@ public class BasicBlock extends Value {
     }
 
     @Override
-    public void translate() {
-        
+    public String genMips() {
+//        MipsGenerator.resetNumber();
+        StringBuilder content = new StringBuilder();
+        for (Instruction instruction : instructions) {
+            if(instruction.isLive()){
+                content.append(instruction.genMips());
+            }
+        }
+        return content.toString();
+    }
+
+    public boolean isEnd() {
+        Instruction terminator = getTerminator();
+        if (terminator == null) {
+            return false;
+        } else return terminator.isEnd();
+    }
+
+    @Override
+    public void optimize() {
+        Iterator<Instruction> instructionIterator = instructions.iterator();
+        while(instructionIterator.hasNext()){
+            Instruction instruction = instructionIterator.next();
+            instruction.optimize();
+        }
     }
 }

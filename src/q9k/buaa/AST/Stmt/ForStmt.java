@@ -7,7 +7,6 @@ import q9k.buaa.Error.ErrorType;
 import q9k.buaa.Frontend.IRGenerator;
 import q9k.buaa.IR.Instruction;
 import q9k.buaa.IR.Instructions.StoreInst;
-import q9k.buaa.IR.Types.IntegerType;
 import q9k.buaa.IR.Value;
 import q9k.buaa.Symbol.Symbol;
 import q9k.buaa.Symbol.SymbolTable;
@@ -57,10 +56,10 @@ public class ForStmt implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         Instruction instruction = new StoreInst();
         instruction.addOperand(this.symbol.getIR());
-        instruction.addOperand(exp.generateIR());
+        instruction.addOperand(exp.genIR());
         IRGenerator.getCurBasicBlock().addInstruction(instruction);
         return null;
     }

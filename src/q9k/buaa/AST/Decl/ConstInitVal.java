@@ -76,14 +76,14 @@ public class ConstInitVal implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if (const_exp != null) {
-            return const_exp.generateIR();
+            return const_exp.genIR();
         } else {
             if (const_init_val != null) {
-                const_init_val.generateIR();
+                const_init_val.genIR();
                 for (Tuple<Token, Syntax> item : list) {
-                    item.second().generateIR();
+                    item.second().genIR();
                 }
             }
 

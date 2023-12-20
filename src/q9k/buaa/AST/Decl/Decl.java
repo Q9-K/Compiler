@@ -59,12 +59,12 @@ public class Decl implements Syntax {
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         if(var_decl!=null){
-            return var_decl.generateIR();
+            return var_decl.genIR();
         }
         else{
-            return const_decl.generateIR();
+            return const_decl.genIR();
         }
     }
 

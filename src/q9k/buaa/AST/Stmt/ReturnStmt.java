@@ -63,10 +63,10 @@ public class ReturnStmt implements Stmt{
     }
 
     @Override
-    public Value generateIR() {
+    public Value genIR() {
         Instruction returnInstr = new ReturnInst();
         if(exp!=null){
-            returnInstr.addOperand(exp.generateIR());
+            returnInstr.addOperand(exp.genIR());
         }
         IRGenerator.getCurBasicBlock().addInstruction(returnInstr);
         return returnInstr;

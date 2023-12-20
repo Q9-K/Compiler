@@ -35,6 +35,7 @@ public abstract class User extends Value {
 
     public void addOperand(Value value) {
         this.operands.add(value);
+        value.getUses().add(new Use(this, value));
     }
 
     public List<Value> getOperands() {
